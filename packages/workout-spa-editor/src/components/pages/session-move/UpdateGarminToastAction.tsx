@@ -9,10 +9,8 @@ import type { PlacementResult } from "../../../application/garmin-placement/plac
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
-import {
-  UPDATE_GARMIN_REASON_KEY,
-  useUpdateGarminReason,
-} from "../../molecules/GarminDriftBadge/use-update-garmin-reason";
+import { useConnectionNotice } from "../../molecules/ConnectionNotice/use-connection-notice";
+import { useUpdateGarminReason } from "../../molecules/GarminDriftBadge/use-update-garmin-reason";
 import { useGarminPushTo } from "../../molecules/GarminPushButton/useGarminPush";
 import { readPushableWorkout } from "./read-pushable-workout";
 
@@ -39,11 +37,13 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 export const UpdateGarminToastAction = forwardRef<HTMLButtonElement, Props>(
   ({ workoutId, onClick, ...rest }, ref) => {
     const t = useTranslate("calendar");
-    const tDetail = useTranslate("workout-detail");
     const toast = useToastContext();
     const persistence = usePersistence();
     const pushTo = useGarminPushTo();
     const reason = useUpdateGarminReason();
+    // The toast has no room for the fix; it names the notice, and the
+    // detail page's own notice carries the fix.
+    const notice = useConnectionNotice(reason ?? null, "Garmin");
     const reasonId = useId();
     const update = async () => {
       let result: PlacementResult | undefined;
@@ -74,7 +74,7 @@ export const UpdateGarminToastAction = forwardRef<HTMLButtonElement, Props>(
             {t("garminDrift.update")}
           </button>
           <span id={reasonId} className="text-right text-xs opacity-90">
-            {tDetail(UPDATE_GARMIN_REASON_KEY[reason])}
+            {notice?.message}
           </span>
         </span>
       );

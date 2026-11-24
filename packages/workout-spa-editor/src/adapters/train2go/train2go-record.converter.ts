@@ -21,12 +21,12 @@
  * already-parsed; ideally bridge transport would carry strings end-to-end).
  */
 
-import type { Train2GoActivity } from "../../store/train2go-extension-transport";
 import type {
   CoachingActivityRecord,
   CoachingActivityStatus,
 } from "../../types/coaching-activity-record";
 import { buildCoachingActivityId } from "../../types/coaching-activity-record";
+import type { Train2GoActivity } from "./connector/train2go-extension-transport";
 
 export const TRAIN2GO_STATUS_MAP: Record<number, CoachingActivityStatus> = {
   0: "pending",

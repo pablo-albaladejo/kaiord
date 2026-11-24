@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -109,37 +110,75 @@ describe("TrainingPeaks popup", () => {
     );
   });
 
-  it("renders not-signed-in state with the value prop and TrainingPeaks as primary CTA", async () => {
+  it("should say the session is not checked yet, and record no outage, when the check asked nothing", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      sessionResponse: {
+        ok: true,
+        data: { session: "not-checked", authenticated: false },
+      },
+    });
+
+    // Act
+    const doc = await open(chromeMock);
+
+    // Assert
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Not checked yet"
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "mints no token"
+    );
+    expect(doc.body.textContent).not.toContain("Not signed in");
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
+  });
+
+  it("offers the sign-in when TrainingPeaks itself refused the sign-in", async () => {
     const doc = await open(
       buildChromeMock({
-        sessionResponse: { ok: true, data: { authenticated: false } },
+        sessionResponse: {
+          ok: true,
+          data: { authenticated: false, needsReauth: true },
+        },
       })
     );
 
     expect(doc.getElementById("status").className).toContain(
-      "status-block--muted"
+      "status-block--warn"
     );
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "no password stored"
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "You cannot use TrainingPeaks in Kaiord until you sign in to TrainingPeaks in this browser."
     );
-    expect(doc.getElementById("chips-region").textContent).toContain(
-      "Will feed Kaiord"
-    );
-    // Nothing flows in either direction yet: one dashed row covers both, and
-    // the future row is cleared so the caption is not repeated.
-    expect(doc.querySelectorAll(".chip--dashed").length).toBe(2);
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
+    // One notice, one fix: no chips, no consequence line, no second link.
+    expect(doc.getElementById("chips-region").children.length).toBe(0);
     expect(doc.getElementById("future-region").children.length).toBe(0);
-    expect(doc.getElementById("consequence-region").textContent).toBe(
-      "Weight currently comes from manual entry."
+    expect(doc.getElementById("consequence-region").children.length).toBe(0);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.children.length).toBe(1);
+    expect(footer.querySelector(".cta-primary").textContent).toBe(
+      "Sign in to TrainingPeaks"
     );
-    // The fix lives at TrainingPeaks, not in the editor.
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Open TrainingPeaks"
+    expect(footer.querySelector(".cta-primary").getAttribute("href")).toBe(
+      "https://app.trainingpeaks.com/"
     );
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Set up in Kaiord ↗"
+  });
+
+  it("offers Try again when TrainingPeaks did not say the sign-in is gone", async () => {
+    const doc = await open(
+      buildChromeMock({
+        sessionResponse: {
+          ok: true,
+          data: { authenticated: false, needsReauth: false },
+        },
+      })
     );
+
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "TrainingPeaks is not answering, so you cannot use it in Kaiord right now."
+    );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
+    expect(doc.body.textContent).not.toMatch(/signed out|not signed in/i);
   });
 
   it("dates the outage once an earlier open already recorded it", async () => {
@@ -150,10 +189,10 @@ describe("TrainingPeaks popup", () => {
       })
     );
 
-    expect(doc.getElementById("status-text").textContent).toBe("Session ended");
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "Nothing has reached Kaiord since 23 Apr."
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "TrainingPeaks is not answering, so you cannot use it in Kaiord right now."
     );
+    expect(doc.getElementById("status-sub").textContent).toBe("Since 23 Apr.");
     const mark = doc.querySelector("[data-status-mark]");
     expect(mark.tagName.toLowerCase()).toBe("svg");
     expect(mark.querySelector("use").getAttribute("href")).toBe("#i-attn");
@@ -166,7 +205,7 @@ describe("TrainingPeaks popup", () => {
 
     const doc = await open(chromeMock);
 
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "span"
     );
@@ -234,15 +273,15 @@ describe("TrainingPeaks popup", () => {
     );
   });
 
-  it("falls back to not-signed-in when the background answers with an error", async () => {
+  it("never says signed out when the background answers with an error", async () => {
     const doc = await open(
       buildChromeMock({ sessionResponse: { ok: false, error: "boom" } })
     );
 
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Open TrainingPeaks"
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "TrainingPeaks is not answering, so you cannot use it in Kaiord right now."
     );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
   });
 
   it("still renders when chrome.storage is unavailable", async () => {
@@ -253,7 +292,9 @@ describe("TrainingPeaks popup", () => {
 
     const doc = await open(chromeMock);
 
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "TrainingPeaks is not answering, so you cannot use it in Kaiord right now."
+    );
   });
 
   it("carries no provider hue in its markup", () => {

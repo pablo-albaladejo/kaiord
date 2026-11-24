@@ -1,19 +1,24 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { loadGarminWorkoutOperations } from "../adapters/garmin/connector/load-garmin-workout-operations";
+import type { ConnectionState } from "../application/connections/connection-state";
 import type { PushState } from "../contexts/garmin-bridge-types";
-import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
+import { msUntilDiscoverySettled } from "./garmin-discovery-window";
+import { runPush } from "./run-garmin-push";
 import {
   getGarminExtensionId,
   runDetect,
-  runPush,
 } from "./use-garmin-bridge-action-helpers";
+
+const INITIAL_PUSH_STATE: PushState = { status: "idle" };
 
 export const useGarminBridgeActions = () => {
   const [extensionInstalled, setExtensionInstalled] = useState(false);
   const [sessionActive, setSessionActive] = useState(false);
   const [features, setFeatures] = useState<readonly string[]>([]);
   const [pushing, setPushing] = useState<PushState>(INITIAL_PUSH_STATE);
-  const [lastError, setLastError] = useState<string | null>(null);
+  // Nothing has answered yet: "checking" until a ping or discovery's window.
+  const [connection, setConnection] = useState<ConnectionState>("checking");
 
   const detectExtension = useCallback(
     () =>
@@ -21,12 +26,22 @@ export const useGarminBridgeActions = () => {
         setExtensionInstalled,
         setSessionActive,
         setFeatures,
-        setLastError,
+        setConnection,
       }),
     []
   );
 
   const redetect = useCallback(() => detectExtension(), [detectExtension]);
+
+  // Re-detect once discovery's window closes, so an extension that never
+  // announced turns from "checking" into "not-installed" without a reload.
+  useEffect(() => {
+    const timer = setTimeout(
+      () => void detectExtension(),
+      msUntilDiscoverySettled()
+    );
+    return () => clearTimeout(timer);
+  }, [detectExtension]);
 
   const pushWorkout = useCallback(
     (gcn: unknown) => runPush(gcn, setPushing, redetect),
@@ -34,6 +49,7 @@ export const useGarminBridgeActions = () => {
   );
 
   const listWorkouts = useCallback(async (): Promise<unknown[]> => {
+    const { executeList } = await loadGarminWorkoutOperations();
     try {
       const { data } = await executeList(getGarminExtensionId());
       return data;
@@ -48,7 +64,7 @@ export const useGarminBridgeActions = () => {
     sessionActive,
     features,
     pushing,
-    lastError,
+    connection,
     detectExtension,
     pushWorkout,
     listWorkouts,

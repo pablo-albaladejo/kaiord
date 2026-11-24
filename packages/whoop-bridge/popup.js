@@ -6,11 +6,9 @@
  * the user's own session. All logic talks to background.js via internal
  * runtime messages.
  *
- * The primary CTA is whatever fixes the current state: signing back in at
- * WHOOP when the session is gone, opening the Kaiord editor when data flows.
- * A signed-out session names its consequence — the health types that stop
- * arriving — instead of only reporting the failure, and once Kaiord has seen
- * the outage on an earlier open it also names the date its intake stopped.
+ * A Connection that does not work shows one notice with one fix, worded by
+ * the vendored connection-notices.js — the same wording the Kaiord App shows
+ * — and, once an earlier open recorded the outage, since when.
  *
  * Three states, not two. A captured bearer is NOT the same as a readable
  * bridge: the token lives in chrome.storage.session and outlives the tab it
@@ -34,34 +32,30 @@
  * order).
  */
 
-/* global msg, $, relativeAgo, formatSinceDate, recordProbe, renderStatusBlock,
-   renderChips, renderConsequence, renderSkeleton, renderCtas */
+/* global msg, $, uiLocale, localizePage, relativeAgo, formatSinceDate, recordProbe, renderStatusBlock,
+   renderChips, renderConsequence, renderSkeleton, renderCtas, renderNotice, renderBrokenConnection,
+   KAIORD_CONNECTION_NOTICES */
 
 const OPEN_WHOOP_URL = "https://app.whoop.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "WHOOP";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for WHOOP",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
   connectedCause: "Reading your WHOOP data through your open session.",
   connectedCauseAgo:
     "Reading your WHOOP data through your open session. Captured $1.",
-  sessionSignedOut: "Session signed out",
-  sessionSignedOutCause:
-    "Kaiord is not holding a WHOOP session, so nothing is reaching it right now.",
-  sessionExpired: "Session expired",
-  sessionExpiredCause:
-    "Kaiord stopped receiving WHOOP data on $1 and has held no session since.",
-  noTab: "No WHOOP tab open",
-  noTabCause:
-    "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
+  outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord learns whether WHOOP works the first time an app.whoop.com tab sends a request.",
   keepsImported: "Everything already imported stays in Kaiord.",
-  resumeOpenTab:
-    "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
-  resumeSignIn:
-    "Sign in at app.whoop.com and leave the tab open; the bridge picks the session back up on its own.",
   readsNeedTab:
     "Kaiord reads through that open tab. Close every app.whoop.com tab and reads stop until you open one again.",
   captionFeeds: "Feeds Kaiord",
@@ -81,8 +75,6 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   dayAgo: "$1 day ago",
   daysAgo: "$1 days ago",
   openEditor: "Open Kaiord editor",
-  signInWhoop: "Sign in to WHOOP",
-  reviewInKaiord: "Review in Kaiord ↗",
   openWhoop: "Open WHOOP ↗",
   refresh: "Refresh",
 };
@@ -165,16 +157,13 @@ const renderConnected = (capturedAt) => {
   });
 };
 
-/* Bearer held, no tab to run the read in. The fix is opening WHOOP, so that
-   is the primary CTA — the same fix-first rule the signed-out state follows,
-   pointed at the other half of what a working bridge needs. The mark stays a
-   dot: the session is intact, so this is not an outage to raise an alert on. */
+/* Bearer held, no tab to run the read in: the shared no-tab notice, whose
+   one fix is opening WHOOP. The mark stays a dot: the session is intact, so
+   this is not an outage to raise an alert on. */
 const renderNoTab = () => {
   setMarkEstablished(true);
-  renderStatusBlock($, msg, {
-    tone: "muted",
-    verdictKey: "noTab",
-    causeKey: "noTabCause",
+  renderNotice($, KAIORD_CONNECTION_NOTICES.noTabNotice(PLATFORM, uiLocale()), {
+    href: OPEN_WHOOP_URL,
   });
   renderChips($, []);
   setPausedBox(true);
@@ -182,45 +171,80 @@ const renderNoTab = () => {
     caption: msg("captionMissing"),
     region: "paused-region",
   });
-  renderConsequence($, [msg("keepsImported"), msg("resumeOpenTab")]);
+  renderConsequence($, [msg("keepsImported")]);
+};
+
+/* A held bearer with no `custom:user_id`: every import path is built on that
+   id, so nothing can be read. One notice, the sign-in fix. */
+const renderNoAccountId = (since) => {
+  setMarkEstablished(since !== null);
+  renderNotice(
+    $,
+    KAIORD_CONNECTION_NOTICES.noticeForReason(
+      "no-account-id",
+      PLATFORM,
+      uiLocale()
+    ),
+    {
+      since:
+        since === null ? null : msg("outageSince", [formatSinceDate(since)]),
+      href: OPEN_WHOOP_URL,
+    }
+  );
+  renderChips($, []);
+  setPausedBox(false);
+  renderChips($, [], { region: "paused-region" });
+  renderConsequence($, [msg("keepsImported")]);
+};
+
+// The Connection's state, read as the Session check answers the Kaiord App:
+// a held bearer is "signed-in", none captured yet is "not-checked" (no WHOOP
+// request has passed since the worker started), never signed out. A worker
+// that did not answer is "not-answering".
+const connectionStateOf = (statusRes) => {
+  if (!statusRes.ok) return "not-answering";
+  return statusRes.data?.connected ? "working" : "not-checked";
+};
+
+/* Nothing captured yet: nothing was learned, so no notice, no outage. */
+const renderNotChecked = () => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  setPausedBox(false);
+  renderChips($, [], { region: "paused-region" });
+  renderConsequence($, []);
   renderCtas($, {
-    primaryLabel: msg("openWhoop"),
-    primaryHref: OPEN_WHOOP_URL,
-    secondaryLabel: msg("openEditor"),
-    secondaryHref: OPEN_EDITOR_URL,
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openWhoop"),
+    secondaryHref: OPEN_WHOOP_URL,
   });
 };
 
-/* The cause names Kaiord's own state, not the user's tab. This branch is
-   reached on `!connected` whatever the tab is doing, and its commonest trigger
-   is a browser restart emptying chrome.storage.session — after which there may
-   be no WHOOP tab at all, or one still signed in. "Your WHOOP tab is signed
-   out" was false in both. What `!connected` actually measures is that the
-   bridge holds no bearer, so that is what the sentence says — and once an
-   earlier open has already recorded the outage, from when. */
-const renderSignedOut = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderStatusBlock($, msg, {
-    tone: "warn",
-    mark: dated ? "alert" : "dot",
-    verdictKey: dated ? "sessionExpired" : "sessionSignedOut",
-    causeKey: dated ? "sessionExpiredCause" : "sessionSignedOutCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
-  });
+/* One notice, one fix. A held bearer with no tab open is not this branch:
+   the sign-in is intact, so renderNoTab says what the bridge needs instead. */
+const renderBroken = (state, since) => {
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_WHOOP_URL,
+      onRetry: () => refresh(),
+      formatSince: formatSinceDate,
+    }
+  );
   renderChips($, []);
-  setPausedBox(true);
-  renderChips($, feedChips("muted"), {
-    caption: msg("captionMissing"),
-    region: "paused-region",
-  });
-  renderConsequence($, [msg("keepsImported"), msg("resumeSignIn")]);
-  renderCtas($, {
-    primaryLabel: msg("signInWhoop"),
-    primaryHref: OPEN_WHOOP_URL,
-    secondaryLabel: msg("reviewInKaiord"),
-    secondaryHref: OPEN_EDITOR_URL,
-  });
+  setPausedBox(false);
+  renderChips($, [], { region: "paused-region" });
+  renderConsequence($, []);
 };
 
 const refresh = async () => {
@@ -235,26 +259,33 @@ const refresh = async () => {
   setPausedBox(false);
   renderChips($, [], { region: "paused-region" });
   const [statusRes, tabRes] = await Promise.all([
-    sendMessage({ action: "status" }),
+    sendMessage({ action: "popup-status" }),
     sendMessage({ action: "tab-open" }),
   ]);
-  const status = statusRes.ok ? (statusRes.data ?? {}) : {};
+  const state = connectionStateOf(statusRes);
   // A failed tab probe is treated as "no tab": the read it stands for would
   // fail too, so the cautious state is also the accurate one.
   const tabOpen = tabRes.ok && tabRes.data?.open === true;
-  // The health record tracks the SESSION, which is what `connected` reports.
-  // A missing tab is not a lapsed session and must not clear or start an
-  // outage, so the probe outcome folded in here is `status.connected` alone.
-  const health = await recordProbe(!!status.connected);
-  if (!status.connected) renderSignedOut(health.since);
-  else if (!tabOpen) renderNoTab();
-  else renderConnected(status.capturedAt);
+  // The health record tracks the SESSION. A worker that did not answer says
+  // nothing about it, and a missing tab is not a lapsed session, so neither
+  // starts nor clears an outage.
+  // A bearer without an account id is held but serves no import.
+  const usable = state === "working" && statusRes.data.userId != null;
+  if (state === "not-answering") renderBroken(state, null);
+  else if (state === "not-checked") renderNotChecked();
+  else {
+    const health = await recordProbe(usable);
+    if (state !== "working") renderBroken(state, health.since);
+    else if (!usable) renderNoAccountId(health.since);
+    else if (!tabOpen) renderNoTab();
+    else renderConnected(statusRes.data.capturedAt);
+  }
   showRefresh(true);
 };
 
 $("refresh-btn").addEventListener("click", () => refresh());
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   refresh();
 });

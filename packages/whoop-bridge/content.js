@@ -8,8 +8,10 @@
  *      relay it to the background.
  *   2. Secondary capture: scan the Cognito localStorage entry for the access
  *      token in case the interceptor missed the live request.
- *   3. Execute background-relayed `whoop-fetch` reads against the internal API
- *      from this tab's origin, enforcing a read-only GET allowlist.
+ *   3. Execute the reads the service worker relays (`whoop-fetch`) against
+ *      the internal API from this tab's origin, and hand the answer back
+ *      unread, and only a read on its own copy of the service worker's
+ *      closed list.
  */
 
 // Capture pristine fetch before page scripts can monkey-patch it.
@@ -19,35 +21,29 @@ const WHOOP_ORIGIN = "https://app.whoop.com";
 const API_BASE = "https://api.prod.whoop.com";
 const FETCH_TIMEOUT_MS = 30000;
 
-// Read-only allowlist of internal-API prefixes (design D3). Every WHOOP path
-// kaiord reads is a GET under one of these. Prefixes ending in "/" match any
-// sub-path; the others match the exact path or an explicit sub-path segment so
-// a look-alike like ".../detailsX" cannot slip through.
-const ALLOWED_PREFIXES = [
-  "/core-details-bff/v0/cycles/details",
-  "/metrics-service/v1/metrics/user/",
-  "/activities-service/v1/sports/history",
-  "/advanced-labs-service/v1/biomarker-tests",
-  "/health-service/v2/stress-bff",
+// A second closed list, equal entry for entry to the service worker's
+// `ALLOWED` (pinned by test/content.test.js), so a read the worker did not
+// list never leaves this tab even if the relay were reached another way.
+// One entry per physical line, as in background.js.
+const ALLOWED = [
+  // prettier-ignore
+  { method: "GET", pattern: /^\/core-details-bff\/v0\/cycles\/details\?id=\d+&startTime=[\w%.-]+&endTime=[\w%.-]+$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/metrics-service\/v1\/metrics\/user\/\d+\?name=heart_rate&start=[\w%.-]+&end=[\w%.-]+&step=\d+$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/activities-service\/v1\/sports\/history\?countryCode=[A-Z]{2}$/ },
+  { method: "GET", pattern: /^\/advanced-labs-service\/v1\/biomarker-tests$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/advanced-labs-service\/v1\/biomarker-tests\/[\w-]+\/summary$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/health-service\/v2\/stress-bff\/\d{4}-\d{2}-\d{2}$/ },
 ];
 
-const matchesPrefix = (pathname, prefix) =>
-  prefix.endsWith("/")
-    ? pathname.startsWith(prefix)
-    : pathname === prefix || pathname.startsWith(`${prefix}/`);
-
-const isAllowed = (method, path) => {
-  if ((method || "GET").toUpperCase() !== "GET") return false;
-  let pathname;
-  try {
-    // Parse against a dummy base so `..` segments are collapsed the same way
-    // fetch will and the query string is dropped before the prefix check.
-    pathname = new URL(path, "https://x").pathname;
-  } catch {
-    return false;
-  }
-  return ALLOWED_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix));
-};
+const isAllowed = (method, path) =>
+  typeof path === "string" &&
+  ALLOWED.some(
+    (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
+  );
 
 const handleWhoopFetch = async (msg) => {
   const { path, method, token } = msg;
@@ -67,14 +63,9 @@ const handleWhoopFetch = async (msg) => {
       credentials: "include",
       signal: controller.signal,
     });
-    const text = await r.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text.slice(0, 500);
-    }
-    return { ok: r.ok, status: r.status, data };
+    const contentType = r.headers?.get?.("content-type") || "";
+    const body = r.ok ? await r.text() : "";
+    return { ok: r.ok, status: r.status, contentType, body };
   } catch (e) {
     return {
       ok: false,
@@ -131,10 +122,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    ALLOWED,
     isAllowed,
     handleWhoopFetch,
     onWindowMessage,
     scanCognitoStorage,
-    ALLOWED_PREFIXES,
   };
 }

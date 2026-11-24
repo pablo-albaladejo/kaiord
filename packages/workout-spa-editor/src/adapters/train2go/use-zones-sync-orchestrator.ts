@@ -22,6 +22,7 @@ import { useCallback, useState } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import type { useToast } from "../../hooks/use-toast";
+import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { useTranslate } from "../../i18n/use-translate";
 import { lazyImport } from "../../lib/lazy-import";
 import { useUnsavedWork } from "../../lib/use-unsaved-work";
@@ -56,6 +57,7 @@ export const useZonesSyncOrchestrator = (
 ): ZonesSyncOrchestrator => {
   const [pending, setPending] = useState<Pending | null>(null);
   const t = useTranslate("coaching");
+  const locale = useActiveLocale();
   useUnsavedWork(pending !== null);
 
   const runSync = useCallback(
@@ -64,19 +66,19 @@ export const useZonesSyncOrchestrator = (
         () => import("../../application/coaching/sync-zones")
       ).catch(() => null);
       if (!loaded) {
-        handleFailure("transport-error", toasts, t);
+        await handleFailure("transport-error", toasts, t, locale);
         return;
       }
       const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) {
-        handleFailure(r.reason, toasts, t);
+        await handleFailure(r.reason, toasts, t, locale);
         return;
       }
       if (r.conflicts.length > 0) {
         setPending({ profileId, conflicts: r.conflicts, payload: r.payload });
       }
     },
-    [transport, persistence, toasts, t]
+    [transport, persistence, toasts, t, locale]
   );
 
   const confirmDecisions = useCallback(
@@ -86,7 +88,7 @@ export const useZonesSyncOrchestrator = (
         () => import("../../application/coaching/commit-conflict-resolution")
       ).catch(() => null);
       if (!loaded) {
-        handleFailure("transport-error", toasts, t);
+        await handleFailure("transport-error", toasts, t, locale);
         return;
       }
       await loaded.commitConflictResolution(
@@ -97,7 +99,7 @@ export const useZonesSyncOrchestrator = (
       );
       setPending(null);
     },
-    [pending, persistence, toasts, t]
+    [pending, persistence, toasts, t, locale]
   );
 
   const cancel = useCallback(() => setPending(null), []);

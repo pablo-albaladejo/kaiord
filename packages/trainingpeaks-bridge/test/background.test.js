@@ -4,12 +4,8 @@ const {
   PROTOCOL_VERSION,
   BRIDGE_MANIFEST,
   isAllowed,
-  tpFetch,
   checkSession,
-  readMetrics,
-  pushWeight,
-  pushWorkout,
-  readWorkout,
+  request,
   handleAction,
   EXTERNAL_ACTIONS,
 } = require("../background.js");
@@ -19,7 +15,7 @@ const pkg = require("../package.json");
 // positive paths use an allowed SPA origin, the negative paths a foreign one.
 const FOREIGN_ORIGIN = "https://attacker.example";
 
-const EXPECTED_PROTOCOL_VERSION = 1;
+const EXPECTED_PROTOCOL_VERSION = 2;
 const HTTP_OK = 200;
 const HTTP_UNAUTHORIZED = 401;
 const OPAQUE_REDIRECT_STATUS = 0;
@@ -32,9 +28,10 @@ const START_DATE = "2026-07-01";
 const END_DATE = "2026-07-07";
 const TOKEN_URL = "https://tpapi.trainingpeaks.com/users/v3/token";
 const METRICS_URL = `https://tpapi.trainingpeaks.com/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/${START_DATE}/${END_DATE}`;
-const METRIC_WRITE_URL = `https://tpapi.trainingpeaks.com/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`;
+const METRICS_PATH = `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/${START_DATE}/${END_DATE}`;
+const readMetrics = () =>
+  request({ action: "request", method: "GET", path: METRICS_PATH });
 const WORKOUT_WRITE_URL = `https://tpapi.trainingpeaks.com/fitness/v6/athletes/${ATHLETE_ID}/workouts`;
-const HTTP_PAYMENT_REQUIRED = 402;
 
 // A distinctive token value asserted to never reach a console sink.
 const SECRET_TOKEN = "SECRET-ACCESS-TOKEN-9f0a1c";
@@ -49,7 +46,6 @@ const METRICS_BODY = [
 // mock call log in beforeEach, so grab them once at module scope.
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
-const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 // Cookie-only token-exchange Response double (read by cookieSessionFetch:
 // .type/.redirected/.status/.ok/.headers.get/.text()).
@@ -104,7 +100,7 @@ describe("background.js", () => {
   });
 
   describe("PROTOCOL_VERSION", () => {
-    it("should be 1", () => {
+    it("should be 2", () => {
       // Arrange
       const expected = EXPECTED_PROTOCOL_VERSION;
 
@@ -147,15 +143,13 @@ describe("background.js", () => {
   });
 
   describe("EXTERNAL_ACTIONS origin pinning", () => {
-    it("should expose exactly the probe + read + write surface", () => {
+    it("should expose exactly the probe, the request and the athlete id read", () => {
       // Arrange
       const expected = [
         "ping",
         "checkSession",
-        "read-metrics",
-        "push-weight",
-        "push-workout",
-        "read-workout",
+        "request",
+        "read-athlete-id",
         "open-trainingpeaks",
         "set-theme",
       ];
@@ -183,7 +177,7 @@ describe("background.js", () => {
 
       // Act
       const keepsChannelOpen = externalCb(
-        { action: "read-metrics", start: START_DATE, end: END_DATE },
+        { action: "request", method: "GET", path: METRICS_PATH },
         sender,
         sendResponse
       );
@@ -197,25 +191,24 @@ describe("background.js", () => {
   });
 
   describe("isAllowed", () => {
-    it("should allow the cookie-only token endpoint", () => {
+    it("should never list the token endpoint, whose answer is the token", () => {
       // Arrange
       const path = "/users/v3/token";
 
       // Act
-      const allowed = isAllowed("GET", path);
+      const allowed = ["GET", "POST"].map((m) => isAllowed(m, path));
 
       // Assert
-      expect(allowed).toBe(true);
+      expect(allowed).toEqual([false, false]);
     });
 
     it("should allow the metrics range read and single-metric write", () => {
       // Arrange
-      const readPath = `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/${START_DATE}/${END_DATE}`;
       const writePath = `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`;
 
       // Act
       const results = [
-        isAllowed("GET", readPath),
+        isAllowed("GET", METRICS_PATH),
         isAllowed("POST", writePath),
       ];
 
@@ -223,10 +216,25 @@ describe("background.js", () => {
       expect(results).toEqual([true, true]);
     });
 
+    it("should allow only the single-workout read, not a range or a delete", () => {
+      // Arrange
+      const base = `/fitness/v6/athletes/${ATHLETE_ID}/workouts`;
+
+      // Act
+      const results = [
+        isAllowed("GET", `${base}/4242`),
+        isAllowed("GET", `${base}/2026-11-01/2026-11-30`),
+        isAllowed("DELETE", `${base}/4242`),
+        isAllowed("PUT", `${base}/4242`),
+      ];
+
+      // Assert
+      expect(results).toEqual([true, false, false, false]);
+    });
+
     it("should deny method mismatches and look-alike paths", () => {
       // Arrange
       const probes = [
-        ["POST", "/users/v3/token"],
         ["GET", "/metrics/v3/athletes/abc/consolidatedtimedmetrics/x/y"],
         ["GET", `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`],
         ["POST", "/metrics/v3/athletes/1/consolidatedtimedmetric/extra"],
@@ -237,28 +245,17 @@ describe("background.js", () => {
       const results = probes.map(([method, path]) => isAllowed(method, path));
 
       // Assert
-      expect(results).toEqual([false, false, false, false, false]);
+      expect(results).toEqual([false, false, false, false]);
     });
   });
 
-  describe("tpFetch", () => {
-    it("should block a disallowed path before hitting the network", async () => {
-      // Arrange
-      const path = "/users/v3/user";
-
-      // Act
-      const res = await tpFetch(path, "GET");
-
-      // Assert
-      expect(res).toEqual({
-        ok: false,
-        error: "Blocked: disallowed path or method",
-      });
-      expect(fetch).not.toHaveBeenCalled();
+  describe("request token-exchange → Bearer flow", () => {
+    const raw = (body) => ({
+      status: HTTP_OK,
+      contentType: "",
+      body: JSON.stringify(body),
     });
-  });
 
-  describe("read-metrics token-exchange → Bearer flow", () => {
     it("should exchange the cookie for a token then call the metrics API with the Bearer", async () => {
       // Arrange
       fetch
@@ -266,13 +263,10 @@ describe("background.js", () => {
         .mockResolvedValueOnce(jsonResp(METRICS_BODY));
 
       // Act
-      const result = await readMetrics(
-        { start: START_DATE, end: END_DATE },
-        { minIntervalMs: 0 }
-      );
+      const result = await readMetrics();
 
       // Assert
-      expect(result).toEqual(METRICS_BODY);
+      expect(result).toEqual(raw(METRICS_BODY));
       const [tokenCall, dataCall] = fetch.mock.calls;
       expect(tokenCall[0]).toBe(TOKEN_URL);
       expect(tokenCall[1].credentials).toBe("include");
@@ -288,13 +282,10 @@ describe("background.js", () => {
       fetch.mockResolvedValueOnce(jsonResp(METRICS_BODY));
 
       // Act
-      const result = await readMetrics(
-        { start: START_DATE, end: END_DATE },
-        { minIntervalMs: 0 }
-      );
+      const result = await readMetrics();
 
       // Assert
-      expect(result).toEqual(METRICS_BODY);
+      expect(result).toEqual(raw(METRICS_BODY));
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch.mock.calls[0][0]).toBe(METRICS_URL);
       expect(fetch.mock.calls[0][1].headers.Authorization).toBe("Bearer bear");
@@ -309,13 +300,10 @@ describe("background.js", () => {
         .mockResolvedValueOnce(jsonResp(METRICS_BODY));
 
       // Act
-      const result = await readMetrics(
-        { start: START_DATE, end: END_DATE },
-        { minIntervalMs: 0 }
-      );
+      const result = await readMetrics();
 
       // Assert
-      expect(result).toEqual(METRICS_BODY);
+      expect(result).toEqual(raw(METRICS_BODY));
       const authHeaders = fetch.mock.calls.map(
         (call) => call[1]?.headers?.Authorization
       );
@@ -328,117 +316,10 @@ describe("background.js", () => {
       fetch.mockResolvedValueOnce(opaqueRedirectResponse());
 
       // Act
-      const attempt = readMetrics(
-        { start: START_DATE, end: END_DATE },
-        { minIntervalMs: 0 }
-      );
+      const attempt = readMetrics();
 
       // Assert
       await expect(attempt).rejects.toMatchObject({ needsReauth: true });
-    });
-
-    it("should reject when the date range is missing", async () => {
-      // Arrange
-      const message = { start: START_DATE };
-
-      // Act
-      const attempt = readMetrics(message, { minIntervalMs: 0 });
-
-      // Assert
-      await expect(attempt).rejects.toThrow("Missing start/end date range");
-    });
-  });
-
-  describe("push-weight", () => {
-    it("should POST the weight metric to the write endpoint with a Bearer header", async () => {
-      // Arrange
-      await seedToken("bear");
-      const metric = {
-        athleteId: ATHLETE_ID,
-        timeStamp: "2026-07-01T07:30:00.000Z",
-        id: null,
-        details: [{ type: WEIGHT_TYPE, value: WEIGHT_KG, units: "kg" }],
-      };
-      fetch.mockResolvedValueOnce(jsonResp({ id: 555 }));
-
-      // Act
-      const result = await pushWeight({ metric });
-
-      // Assert
-      expect(result).toEqual({ id: 555 });
-      const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(METRIC_WRITE_URL);
-      expect(init.method).toBe("POST");
-      expect(init.credentials).toBe("omit");
-      expect(init.headers.Authorization).toBe("Bearer bear");
-      expect(init.body).toBe(JSON.stringify(metric));
-    });
-
-    it("should reject a push without a metric payload", async () => {
-      // Arrange
-      const message = { action: "push-weight" };
-
-      // Act
-      const attempt = pushWeight(message);
-
-      // Assert
-      await expect(attempt).rejects.toThrow("Missing metric payload");
-    });
-  });
-
-  describe("push-workout", () => {
-    const workoutPayload = () => ({
-      athleteId: ATHLETE_ID,
-      workoutId: 0,
-      workoutDay: "2026-09-07",
-      title: "Threshold",
-      structure: '{"structure":[]}',
-    });
-
-    it("should POST the workout to the v6 endpoint with a Bearer header", async () => {
-      // Arrange
-      await seedToken("bear");
-      const workout = workoutPayload();
-      fetch.mockResolvedValueOnce(jsonResp({ workoutId: 4242 }));
-
-      // Act
-      const result = await pushWorkout({ workout });
-
-      // Assert
-      expect(result).toEqual({ workoutId: 4242 });
-      const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(WORKOUT_WRITE_URL);
-      expect(init.method).toBe("POST");
-      expect(init.credentials).toBe("omit");
-      expect(init.headers.Authorization).toBe("Bearer bear");
-      expect(init.body).toBe(JSON.stringify(workout));
-    });
-
-    it("should relay structure as the string it was given, never re-encoded", async () => {
-      // Arrange
-      await seedToken("bear");
-      const workout = workoutPayload();
-      fetch.mockResolvedValueOnce(jsonResp({ workoutId: 1 }));
-
-      // Act
-      await pushWorkout({ workout });
-
-      // Assert
-      const body = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(typeof body.structure).toBe("string");
-      expect(body.structure).toBe('{"structure":[]}');
-    });
-
-    it("should explain a 402 as a planning-horizon limit, not a payload error", async () => {
-      // Arrange
-      await seedToken("bear");
-      fetch.mockResolvedValueOnce(jsonResp({}, false, HTTP_PAYMENT_REQUIRED));
-
-      // Act
-      const attempt = pushWorkout({ workout: workoutPayload() });
-
-      // Assert
-      await expect(attempt).rejects.toThrow(/paid account/);
     });
 
     it("should not report a server error on the token exchange as a revoked sign-in", async () => {
@@ -446,9 +327,7 @@ describe("background.js", () => {
       fetch.mockResolvedValueOnce(tokenResponse({}, { status: 500 }));
 
       // Act
-      const error = await pushWorkout({ workout: workoutPayload() }).catch(
-        (e) => e
-      );
+      const error = await readMetrics().catch((e) => e);
 
       // Assert
       expect(error.needsReauth).toBeUndefined();
@@ -456,133 +335,51 @@ describe("background.js", () => {
       expect(fetch).toHaveBeenCalledTimes(1);
     });
 
-    it("should still ask to sign in when a redirect kills the token exchange", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
-
-      // Act
-      const error = await pushWorkout({ workout: workoutPayload() }).catch(
-        (e) => e
-      );
-
-      // Assert
-      expect(error.needsReauth).toBe(true);
-    });
-
-    it("should reject a push without a workout payload", async () => {
-      // Arrange
-      const message = { action: "push-workout" };
-
-      // Act
-      const attempt = pushWorkout(message);
-
-      // Assert
-      await expect(attempt).rejects.toThrow("Missing workout payload");
-    });
-  });
-
-  describe("read-workout", () => {
-    const WORKOUT_ID = 4242;
-    const WORKOUT_READ_URL = `${WORKOUT_WRITE_URL}/${WORKOUT_ID}`;
-
-    it("should GET the one workout by its id with a Bearer header", async () => {
+    it("should relay a workout's structure as the string it was given, never re-encoded", async () => {
       // Arrange
       await seedToken("bear");
-      fetch.mockResolvedValueOnce(jsonResp({ workoutId: WORKOUT_ID }));
+      const workout = {
+        athleteId: ATHLETE_ID,
+        workoutId: 0,
+        workoutDay: "2026-09-07",
+        title: "Threshold",
+        description: null,
+        workoutTypeValueId: 2,
+        totalTimePlanned: 1,
+        publicSettingValue: 0,
+        structure: '{"structure":[]}',
+      };
+      fetch.mockResolvedValueOnce(jsonResp({ workoutId: 1 }));
 
       // Act
-      const result = await readWorkout({ workoutId: String(WORKOUT_ID) });
-
-      // Assert
-      expect(result).toEqual({ workoutId: WORKOUT_ID, workoutDay: undefined });
-      const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(WORKOUT_READ_URL);
-      expect(init.method).toBe("GET");
-      expect(init.credentials).toBe("omit");
-      expect(init.headers.Authorization).toBe("Bearer bear");
-    });
-
-    it("should pass the Kaiord App only the workout's id and day", async () => {
-      // Arrange
-      await seedToken("bear");
-      fetch.mockResolvedValueOnce(
-        jsonResp({
-          workoutId: WORKOUT_ID,
-          workoutDay: "2026-11-24T00:00:00",
-          title: "Easy run",
-          heartRateAverage: 151,
-          description: "felt good",
-        })
-      );
-
-      // Act
-      const result = await readWorkout({ workoutId: String(WORKOUT_ID) });
-
-      // Assert
-      expect(result).toEqual({
-        workoutId: WORKOUT_ID,
-        workoutDay: "2026-11-24T00:00:00",
+      await request({
+        action: "request",
+        method: "POST",
+        path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts`,
+        body: workout,
       });
-    });
-
-    it("should carry TrainingPeaks' 404 when the workout is not there", async () => {
-      // Arrange
-      await seedToken("bear");
-      fetch.mockResolvedValueOnce(jsonResp({}, false, 404));
-
-      // Act
-      const error = await readWorkout({ workoutId: String(WORKOUT_ID) }).catch(
-        (e) => e
-      );
 
       // Assert
-      expect(error.status).toBe(404);
-      expect(error.needsReauth).toBeUndefined();
-    });
-
-    it.each([
-      { label: "no id", message: {} },
-      { label: "an id that is not a number", message: { workoutId: "1/x" } },
-    ])("should refuse $label before any request", async ({ message }) => {
-      // Arrange
-      await seedToken("bear");
-
-      // Act
-      const attempt = readWorkout(message);
-
-      // Assert
-      await expect(attempt).rejects.toThrow("Missing workout id");
-      expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it("should allow only the single-workout read, not a range or a delete", () => {
-      // Arrange
-      const base = `/fitness/v6/athletes/${ATHLETE_ID}/workouts`;
-
-      // Act
-      const results = [
-        isAllowed("GET", `${base}/${WORKOUT_ID}`),
-        isAllowed("GET", `${base}/2026-11-01/2026-11-30`),
-        isAllowed("DELETE", `${base}/${WORKOUT_ID}`),
-        isAllowed("PUT", `${base}/${WORKOUT_ID}`),
-      ];
-
-      // Assert
-      expect(results).toEqual([true, false, false, false]);
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(WORKOUT_WRITE_URL);
+      expect(init.method).toBe("POST");
+      const body = JSON.parse(init.body);
+      expect(body.structure).toBe('{"structure":[]}');
     });
   });
 
   describe("checkSession", () => {
-    it("should report authenticated and the athlete id on a live session", async () => {
+    it("should report not-checked and make no request when no token is held", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(tokenResponse(tokenPayload("tok")));
+      const before = fetch.mock.calls.length;
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.authenticated).toBe(true);
-      expect(result.athleteId).toBe(ATHLETE_ID);
+      expect(result.session).toBe("not-checked");
+      expect(result.authenticated).toBe(false);
+      expect(fetch.mock.calls.length).toBe(before);
       expect(result).toMatchObject({
         id: "trainingpeaks-bridge",
         name: "TrainingPeaks",
@@ -592,49 +389,65 @@ describe("background.js", () => {
       });
     });
 
-    it("should report not-authenticated when the session is dead", async () => {
+    it("should report signed-in while a token a real request minted is still valid", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+      await chrome.storage.local.set({
+        tpAccessToken: {
+          accessToken: SECRET_TOKEN,
+          expiresAt: Math.floor(Date.now() / 1000) + 3600,
+          athleteId: ATHLETE_ID,
+        },
+      });
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.authenticated).toBe(false);
+      expect(result.session).toBe("signed-in");
+      expect(result.authenticated).toBe(true);
+      expect(result.athleteId).toBeUndefined();
+      expect(JSON.stringify(result)).not.toContain(SECRET_TOKEN);
     });
 
-    it("should say the session is dead only when TrainingPeaks said so", async () => {
+    it("should report not-checked once the held token has expired", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+      await chrome.storage.local.set({
+        tpAccessToken: {
+          accessToken: SECRET_TOKEN,
+          expiresAt: Math.floor(Date.now() / 1000) - 1,
+          athleteId: ATHLETE_ID,
+        },
+      });
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.needsReauth).toBe(true);
+      expect(result.session).toBe("not-checked");
     });
+  });
 
-    it("should not call a server error on the token exchange a dead session", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(tokenResponse({}, { status: 500 }));
-
-      // Act
-      const result = await checkSession();
-
-      // Assert
-      expect(result.authenticated).toBe(false);
-      expect(result.needsReauth).toBe(false);
-    });
-
-    it("should never expose the access token in the probe response", async () => {
+  describe("readAthleteId", () => {
+    it("should mint the token and answer only the athlete id", async () => {
       // Arrange
       fetch.mockResolvedValueOnce(tokenResponse(tokenPayload(SECRET_TOKEN)));
 
       // Act
-      const result = await checkSession();
+      const result = await handleAction({ action: "read-athlete-id" });
 
       // Assert
-      expect(JSON.stringify(result)).not.toContain(SECRET_TOKEN);
+      expect(result).toEqual({ athleteId: ATHLETE_ID });
+    });
+
+    it("should carry needsReauth when TrainingPeaks says the session is dead", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+
+      // Act
+      const attempt = handleAction({ action: "read-athlete-id" });
+
+      // Assert
+      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
     });
   });
 
@@ -678,10 +491,7 @@ describe("background.js", () => {
         .mockResolvedValueOnce(jsonResp(METRICS_BODY));
 
       // Act
-      await readMetrics(
-        { start: START_DATE, end: END_DATE },
-        { minIntervalMs: 0 }
-      );
+      await readMetrics();
 
       // Assert
       const logged = [
@@ -695,19 +505,6 @@ describe("background.js", () => {
       logSpy.mockRestore();
       errorSpy.mockRestore();
       warnSpy.mockRestore();
-    });
-  });
-
-  describe("onMessage listener", () => {
-    it("should return true to keep the internal response channel open", () => {
-      // Arrange
-      const sendResponse = vi.fn();
-
-      // Act
-      const result = internalCb({ action: "ping" }, {}, sendResponse);
-
-      // Assert
-      expect(result).toBe(true);
     });
   });
 });

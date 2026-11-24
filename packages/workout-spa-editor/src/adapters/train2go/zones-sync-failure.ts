@@ -1,14 +1,31 @@
+import type { Locale } from "@kaiord/i18n";
+
 import type { useToast } from "../../hooks/use-toast";
+import { loadConnectionNotices } from "../../i18n/connection-notices";
 import type { Translate } from "../../i18n/use-translate";
 
-/** The toast a failed zones sync shows, by failure reason, in the athlete's language. */
-export const handleFailure = (
+/** Train2Go not answering, worded by its Connection's own notice. The shared
+    notices load here, on the first failure, not with the app-wide provider
+    that mounts the orchestrator; if they cannot load, the title says it. */
+const notAnsweringNotice = async (
+  locale: Locale
+): Promise<string | undefined> => {
+  const notices = await loadConnectionNotices().catch(() => null);
+  return notices?.connectionNotice("not-answering", "Train2Go", locale)
+    ?.message;
+};
+
+/** The toast a failed zones sync shows, by failure reason, in the athlete's
+    language. Train2Go not answering is its Connection's own notice. */
+export const handleFailure = async (
   reason: string,
   toasts: ReturnType<typeof useToast>,
-  t: Translate
-): void => {
-  if (reason === "transport-error") toasts.error(t("zonesSync.fetchFailed"));
-  else if (reason === "shape-mismatch")
+  t: Translate,
+  locale: Locale
+): Promise<void> => {
+  if (reason === "transport-error") {
+    toasts.error(t("zonesSync.notSynced"), await notAnsweringNotice(locale));
+  } else if (reason === "shape-mismatch")
     toasts.warning(t("zonesSync.shapeMismatch"));
   else if (reason === "unsupported") toasts.info(t("zonesSync.unsupported"));
 };

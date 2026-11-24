@@ -8,9 +8,7 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 **Why**: Keep the Garmin tokens across service-worker restarts, so Chrome stopping the worker does not mean signing in again.
 
-**Stored in `chrome.storage.local`**: the OAuth1 token and the OAuth2 access token minted from your Garmin sign-in; the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Garmin; a log of the last 25 errors the extension handled without failing; and a switch that turns the activity read off.
-
-**Stored in `chrome.storage.session`** (memory only): the time of the last activity read, so reads are at least 30 seconds apart.
+**Stored in `chrome.storage.local`**: the OAuth1 token and the OAuth2 access token minted from your Garmin sign-in; the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Garmin; and a log of the last 25 errors the extension handled without failing.
 
 **Sent anywhere**: only the tokens, and only to Garmin. Nothing stored by the extension is sent to Kaiord.
 
@@ -22,11 +20,11 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 ### `https://connectapi.garmin.com/*`
 
-**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent.
+**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent, and a write is sent only with a body of the one shape declared for its path: a workout in the shape the Kaiord App builds (named fields of Garmin's own step, target and condition types, at most 100 steps), a body-composition FIT file (file type weight with one weight measurement, at most 4 KB; an activity or any other FIT file is refused) or a date.
 
 **Calendar write and delete**: When you place workouts on your Garmin Connect calendar from the Kaiord App, the extension calls two calendar endpoints on this host. `POST /workout-service/schedule/{workoutId}` places a library workout on a date, sending only that date. `DELETE /workout-service/schedule/{workoutScheduleId}` removes one calendar entry. The allowlist accepts both paths only with a numeric id, and neither path can delete a library workout.
 
-**Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension keeps only the entries of that one workout, and passes back only each entry's id and date. Every other calendar item is discarded inside the extension and never reaches the Kaiord App.
+**Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension hands that answer to the Kaiord App unread, and the Kaiord App keeps only the entries of that one workout, each entry's id and date. Every other calendar item is dropped in the Kaiord App, in your browser, and is never stored or sent.
 
 ### `https://connect.garmin.com/*`
 
@@ -52,5 +50,6 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 - **No password**: The extension never reads, stores, or transmits your Garmin password. It reuses the browser's existing Garmin sign-in to mint a token.
 - **Tokens stay in your browser**: The tokens live in `chrome.storage.local` and are sent only to Garmin. No answer the extension gives the Kaiord App contains a token.
+- **Sign-in secrets removed from answers**: Before the extension hands the Kaiord App an answer, it removes anything in it tied to your Garmin sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Garmin's answers carry none today.
 - **Requests to Garmin only**: Every request the extension makes goes to `sso.garmin.com` or `connectapi.garmin.com`.
 - **No analytics or tracking**: Its error log stays in `chrome.storage.local` and is never sent.

@@ -8,11 +8,13 @@
  */
 
 import type { BridgeManifest } from "../../types/bridge-schemas";
+import { register } from "./bridge-discovery-register";
 import {
   type BridgeAnnouncement,
   type BridgeDiscovery,
   type DiscoveryListener,
   isAnnouncement,
+  type VerifiedBridge,
 } from "./bridge-discovery-types";
 import { verifyAnnouncement } from "./bridge-discovery-verify";
 
@@ -34,6 +36,8 @@ export function createBridgeDiscovery(
   const discoverDelayMs = options.discoverDelayMs ?? DISCOVER_REQUEST_DELAY_MS;
   const ids = new Map<string, string>();
   const caps = new Map<string, readonly string[]>();
+  const outdated = new Set<string>();
+  const verified = new Map<string, VerifiedBridge>();
   const listeners = new Set<DiscoveryListener>();
   let handler: ((event: MessageEvent) => void) | null = null;
   let discoverTimer: ReturnType<typeof setTimeout> | null = null;
@@ -43,10 +47,8 @@ export function createBridgeDiscovery(
   async function handleAnnouncement(ann: BridgeAnnouncement): Promise<void> {
     if (ids.get(ann.bridgeId) === ann.extensionId) return;
     const manifest = await verify(ann);
-    if (!manifest) return;
-    ids.set(ann.bridgeId, ann.extensionId);
-    caps.set(ann.bridgeId, manifest.capabilities);
-    notify();
+    if (manifest && register({ ids, caps, outdated, verified }, ann, manifest))
+      notify();
   }
 
   function onMessage(event: MessageEvent): void {
@@ -78,6 +80,8 @@ export function createBridgeDiscovery(
     stop,
     getExtensionId: (id) => ids.get(id) ?? null,
     getCapabilities: (id) => caps.get(id) ?? null,
+    isOutdated: (id) => outdated.has(id),
+    getVerified: (id) => verified.get(id) ?? null,
     subscribe: (listener) => {
       listeners.add(listener);
       return () => {

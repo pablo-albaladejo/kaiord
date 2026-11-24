@@ -154,7 +154,6 @@ export { ConnectionSummaryRow } from "./src/components/organisms/Connections/Con
 export { ConnectionSummaryTile } from "./src/components/organisms/Connections/ConnectionSummaryTile";
 export { ConnectionSyncButton } from "./src/components/organisms/Connections/ConnectionSyncButton";
 export { ConnectionsBanner } from "./src/components/organisms/Connections/ConnectionsBanner";
-export { ConnectionsExtensionBanner } from "./src/components/organisms/Connections/ConnectionsExtensionBanner";
 export { ConnectionsHealth } from "./src/components/organisms/Connections/ConnectionsHealth";
 export { ConnectionsScope } from "./src/components/organisms/Connections/ConnectionsScope";
 export { ConnectionsTab } from "./src/components/organisms/Connections/ConnectionsTab";
@@ -163,7 +162,6 @@ export { DataTypeRoutingGroup } from "./src/components/organisms/Connections/Dat
 export { DataTypeRoutingRow } from "./src/components/organisms/Connections/DataTypeRoutingRow";
 export { DataTypeRoutingSection } from "./src/components/organisms/Connections/DataTypeRoutingSection";
 export { DisconnectConfirmation } from "./src/components/organisms/Connections/DisconnectConfirmation";
-export { ExtensionInstallLink } from "./src/components/organisms/Connections/ExtensionInstallLink";
 export { RoutingChoiceButton } from "./src/components/organisms/Connections/RoutingChoiceButton";
 export { RoutingExportTargets } from "./src/components/organisms/Connections/RoutingExportTargets";
 export { RoutingFreshness } from "./src/components/organisms/Connections/RoutingFreshness";

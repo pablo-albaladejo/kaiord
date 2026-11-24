@@ -13,9 +13,20 @@ import { gzipSync } from "node:zlib";
 // into the entry graph fails CI instead of silently costing Lighthouse
 // points. Lazy route chunks are not counted: they load on navigation.
 //
-// Budget: 286.2 kB measured after the leave-tracking fix for lazy imports
-// cancelled by a navigation (#1362), x 1.05. The previous budget was
-// 272.1 kB measured after the perf-app-initial-js change, x 1.05.
+// Budget: 278.8 kB across 7 files measured on the Bridges block once every
+// startup module joins one chunk (the `startup` code-splitting group in the
+// App's vite.config.ts, beside the vendor groups) and Garmin's send and list
+// load on first use (#1670), x 1.05. Nothing was added to first load: the
+// same startup code took 301.2 kB across 63 files, its per-chunk wrappers
+// and cross-chunk imports included. Lighthouse mobile median for /app/
+// (3 runs, Lighthouse 13.6 over a gzip static server): 70 before, 78 after.
+// The budget before it was 316.2 kB: 301.2 kB measured on the Bridges block
+// after its first-load seams (shared Connection notices, update prompt and
+// service-worker update watch loaded on demand), x 1.05, with a Lighthouse
+// median of 50 before and 50 after. The one before that was 286.2 kB
+// measured after the leave-tracking fix for lazy imports cancelled by a
+// navigation (#1362), x 1.05, and before
+// it 272.1 kB measured after the perf-app-initial-js change, x 1.05.
 // Raise it only with evidence (docs/seo-observatory.md, "SPA initial-JS
 // budget").
 //
@@ -51,13 +62,28 @@ import { gzipSync } from "node:zlib";
 //   stale boot) and `src/components/organisms/StaleSchemaDialog/
 //   StaleSchemaMidSession.tsx` (behind `StaleSchemaGate`; it reads the
 //   editor store, which would otherwise join the entry graph)
+// - `src/adapters/train2go/connector/read-train2go-answers.ts` (Train2Go's
+//   HTML parsers, loaded by `loadTrain2GoAnswers` on the first read; the
+//   coaching transport built at boot would otherwise carry them)
+// The first-load size seams of the Bridges block keep what only runs once
+// something needs the athlete out of the entry graph:
+// - `i18n/dist/connection-notices.js` (the shared Connection notices, behind
+//   `@kaiord/i18n/connection-notices`: the header pill and the zones toast
+//   load them through `src/i18n/connection-notices.ts` once they word one)
+// - `src/components/organisms/UpdatePrompt/UpdatePrompt.tsx` and
+//   `src/lib/service-worker/{watch-registration,apply-update}.ts` (behind
+//   `UpdatePromptGate` and the service worker's registration, after load)
+// - `src/adapters/garmin/connector/garmin-workout-operations.ts` (Garmin's
+//   send and list, behind `loadGarminWorkoutOperations`: the Garmin provider
+//   mounts at boot; a send whose code cannot load says so and asks Garmin
+//   nothing)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
 // script, a forbidden lazy-seam source shows up in an initial file, or the
 // total is over budget.
 
-export const SPA_INITIAL_JS_BUDGET_KB = 300.5;
+export const SPA_INITIAL_JS_BUDGET_KB = 292.7;
 
 export const FORBIDDEN_LAZY_SOURCES = [
   "src/adapters/cloud-sync/create-app-cloud-sync.ts",
@@ -74,6 +100,12 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/lib/week-dominant-zone.ts",
   "src/boot/render-stale-boot.tsx",
   "src/components/organisms/StaleSchemaDialog/StaleSchemaMidSession.tsx",
+  "src/adapters/train2go/connector/read-train2go-answers.ts",
+  "i18n/dist/connection-notices.js",
+  "src/components/organisms/UpdatePrompt/UpdatePrompt.tsx",
+  "src/lib/service-worker/watch-registration.ts",
+  "src/lib/service-worker/apply-update.ts",
+  "src/adapters/garmin/connector/garmin-workout-operations.ts",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets

@@ -24,6 +24,14 @@ const DEV_MANIFEST = manifest({
   announce: [APP, ...DEV],
 });
 
+const INTERNAL_BACKGROUND = [
+  'const APP_ORIGIN = "https://kaiord.com";',
+  "chrome.runtime.onMessage.addListener(",
+  "  bridgeEnvelope.createInternalDispatch({ dispatch })",
+  ");",
+  "",
+].join("\n");
+
 const withRepo = (files, run) => {
   const root = mkdtempSync(join(tmpdir(), "bridge-exact-origin-"));
   try {
@@ -41,8 +49,7 @@ const withRepo = (files, run) => {
 const bridge = (overrides = {}) => ({
   "packages/x-bridge/manifest.json": DEV_MANIFEST,
   "packages/x-bridge/manifest.prod.json": manifest(),
-  "packages/x-bridge/background.js":
-    'const APP_ORIGIN = "https://kaiord.com";\n',
+  "packages/x-bridge/background.js": INTERNAL_BACKGROUND,
   ...overrides,
 });
 
@@ -145,7 +152,8 @@ test("(i) flags runtime code that matches the App origin by pattern", () => {
   withRepo(
     bridge({
       "packages/x-bridge/background.js":
-        "const RE = /^https:\\/\\/([a-z0-9-]+\\.)?kaiord\\.com$/;\n",
+        "const RE = /^https:\\/\\/([a-z0-9-]+\\.)?kaiord\\.com$/;\n" +
+        INTERNAL_BACKGROUND,
       "packages/_shared/bridge-core/envelope.js":
         'const ORIGINS = ["https://*.kaiord.com"];\n',
     }),
@@ -162,7 +170,8 @@ test("(j) ignores comments and test files", () => {
   withRepo(
     bridge({
       "packages/x-bridge/background.js":
-        "// once matched *.kaiord.com\n/* kaiord\\.com */\nconst A = 1;\n",
+        "// once matched *.kaiord.com\n/* kaiord\\.com */\nconst A = 1;\n" +
+        INTERNAL_BACKGROUND,
       "packages/x-bridge/test/background.test.js":
         'const sender = { origin: "https://*.kaiord.com" };\n',
     }),
@@ -179,7 +188,7 @@ test("(k) treats finding no bridge as a fault, not a pass", () => {
 
 test("(l) treats a bridge without a manifest as a fault", () => {
   withRepo(
-    bridge({ "packages/y-bridge/background.js": "const A = 1;\n" }),
+    bridge({ "packages/y-bridge/background.js": INTERNAL_BACKGROUND }),
     (found) => {
       assert.equal(found.length, 1);
       assert.equal(found[0].file, "packages/y-bridge/manifest.json");
@@ -221,7 +230,9 @@ const PARTIAL_MATCHES = {
 test("(n) flags every suffix, substring or prefix match of the App origin", () => {
   for (const [label, code] of Object.entries(PARTIAL_MATCHES)) {
     withRepo(
-      bridge({ "packages/x-bridge/background.js": `${code}\n` }),
+      bridge({
+        "packages/x-bridge/background.js": `${code}\n${INTERNAL_BACKGROUND}`,
+      }),
       (found) => {
         assert.deepEqual(
           found.map((v) => v.file),
@@ -283,8 +294,65 @@ test("(q) follows a bound name holding `$` signs, and only that name", () => {
     ["x$app$", false],
   ]) {
     withRepo(
-      bridge({ "packages/x-bridge/background.js": code(use) }),
+      bridge({
+        "packages/x-bridge/background.js": code(use) + INTERNAL_BACKGROUND,
+      }),
       (found) => assert.equal(found.length, flagged ? 1 : 0, use)
     );
   }
+});
+
+test("(r) flags a bridge whose popup channel skips createInternalDispatch", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/background.js": [
+        "chrome.runtime.onMessage.addListener((message, _sender, respond) =>",
+        "  dispatch(message, respond)",
+        ");",
+        "",
+      ].join("\n"),
+    }),
+    (found) => {
+      const internal = found.filter(
+        (v) => v.rule === "R-BridgeInternalDispatch"
+      );
+      assert.equal(internal.length, 2);
+      assert.equal(internal[0].file, "packages/x-bridge/background.js");
+      assert.match(internal[0].detail, /without createInternalDispatch/);
+      assert.match(internal[1].detail, /content script reaches the dispatch/);
+    }
+  );
+});
+
+test("(s) flags a second onMessage listener that can answer", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/background.js": [
+        INTERNAL_BACKGROUND,
+        "const relay = (message, sender, sendResponse) => sendResponse(1);",
+        "chrome.runtime.onMessage.addListener(relay);",
+        "",
+      ].join("\n"),
+    }),
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => v.rule),
+        ["R-BridgeInternalDispatch"]
+      );
+    }
+  );
+});
+
+test("(t) passes a second onMessage listener that cannot answer", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/background.js": [
+        INTERNAL_BACKGROUND,
+        "const captureTokenListener = (message, sender) => false;",
+        "chrome.runtime.onMessage.addListener(captureTokenListener);",
+        "",
+      ].join("\n"),
+    }),
+    (found) => assert.deepEqual(details(found), [])
+  );
 });

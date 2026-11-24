@@ -13,7 +13,9 @@
  *   - drop ambient cookies (`credentials:"omit"`) — the Bearer token is the
  *     only credential,
  *   - normalize any response into an envelope
- *     (`{ ok, status, data }` | `{ ok:false, status, body }`),
+ *     (`{ ok, status, data }` | `{ ok:false, status, body }`), or, with
+ *     `raw: true`, hand the answer over unread
+ *     (`{ ok, status, contentType, body }` | `{ ok:false, status }`),
  *   - retry ONCE on a 401 by re-minting the token, and flag `needsReauth`
  *     when the retry is also rejected so the caller can prompt a re-login.
  *
@@ -25,91 +27,122 @@
  * scripts/check-bridge-core-parity.test.mjs).
  */
 
-const NO_CONTENT_STATUS = 204;
-const UNAUTHORIZED_STATUS = 401;
-const ERROR_BODY_MAX_CHARS = 300;
+// Wrapped so its names never meet another master's or the worker's own
+// top-level declarations: importScripts shares one global lexical scope.
+const bearerFetchMaster = (() => {
+  const NO_CONTENT_STATUS = 204;
+  const UNAUTHORIZED_STATUS = 401;
+  const ERROR_BODY_MAX_CHARS = 300;
 
-// Build the fetch init for a Bearer request. A `FormData` body is passed
-// through untouched so the runtime attaches the multipart boundary; any other
-// non-empty body is JSON-encoded.
-const buildInit = (method, body, accessToken) => {
-  const headers = { Authorization: `Bearer ${accessToken}` };
-  const init = {
-    method: method || "GET",
-    headers,
-    credentials: "omit",
+  // Build the fetch init for a Bearer request. A `FormData` body is passed
+  // through untouched so the runtime attaches the multipart boundary; any other
+  // non-empty body is JSON-encoded.
+  const buildInit = (method, body, accessToken) => {
+    const headers = { Authorization: `Bearer ${accessToken}` };
+    const init = {
+      method: method || "GET",
+      headers,
+      credentials: "omit",
+    };
+    if (typeof FormData !== "undefined" && body instanceof FormData) {
+      init.body = body;
+    } else if (body !== undefined && body !== null) {
+      headers["Content-Type"] = "application/json";
+      init.body = JSON.stringify(body);
+    }
+    return init;
   };
-  if (typeof FormData !== "undefined" && body instanceof FormData) {
-    init.body = body;
-  } else if (body !== undefined && body !== null) {
-    headers["Content-Type"] = "application/json";
-    init.body = JSON.stringify(body);
-  }
-  return init;
-};
 
-// One Bearer call against `${baseUrl}${path}`, normalized to an envelope.
-const bearerFetch = async ({
-  baseUrl,
-  path,
-  method,
-  body,
-  accessToken,
-  fetchImpl,
-}) => {
-  const r = await fetchImpl(`${baseUrl}${path}`, buildInit(method, body, accessToken));
-  if (r.status === NO_CONTENT_STATUS) {
-    return { ok: true, status: NO_CONTENT_STATUS, data: null };
-  }
-  if (r.ok) return { ok: true, status: r.status, data: await r.json() };
-  const text = await r.text().catch(() => "");
-  return { ok: false, status: r.status, body: text.slice(0, ERROR_BODY_MAX_CHARS) };
-};
+  // A raw answer is handed over unread: the caller's App reads it. A refusal
+  // keeps only its status, so no error page travels with it.
+  const rawEnvelope = async (r) => {
+    if (!r.ok) return { ok: false, status: r.status };
+    const contentType =
+      r.headers && typeof r.headers.get === "function"
+        ? r.headers.get("content-type") || ""
+        : "";
+    const body = r.status === NO_CONTENT_STATUS ? "" : await r.text();
+    return { ok: true, status: r.status, contentType, body };
+  };
 
-/**
- * Bearer request with a single 401→re-mint retry. `getToken(fetchImpl)` and
- * `refreshToken(fetchImpl)` are injected hooks that each resolve to an
- * access-token string; the bridge owns the token store and mint flow. A 401
- * that survives the retry sets `needsReauth: true` on the envelope.
- */
-const bearerRequest = async ({
-  baseUrl,
-  path,
-  method,
-  body,
-  getToken,
-  refreshToken,
-  fetchImpl,
-}) => {
-  const accessToken = await getToken(fetchImpl);
-  let res = await bearerFetch({
+  // One Bearer call against `${baseUrl}${path}`, normalized to an envelope.
+  const bearerFetch = async ({
     baseUrl,
     path,
     method,
     body,
     accessToken,
     fetchImpl,
-  });
-  if (res.status === UNAUTHORIZED_STATUS) {
-    const reminted = await refreshToken(fetchImpl);
-    res = await bearerFetch({
+    raw = false,
+  }) => {
+    const r = await fetchImpl(
+      `${baseUrl}${path}`,
+      buildInit(method, body, accessToken)
+    );
+    if (raw) return rawEnvelope(r);
+    if (r.status === NO_CONTENT_STATUS) {
+      return { ok: true, status: NO_CONTENT_STATUS, data: null };
+    }
+    if (r.ok) return { ok: true, status: r.status, data: await r.json() };
+    const text = await r.text().catch(() => "");
+    return {
+      ok: false,
+      status: r.status,
+      body: text.slice(0, ERROR_BODY_MAX_CHARS),
+    };
+  };
+
+  /**
+   * Bearer request with a single 401→re-mint retry. `getToken(fetchImpl)` and
+   * `refreshToken(fetchImpl)` are injected hooks that each resolve to an
+   * access-token string; the bridge owns the token store and mint flow. A 401
+   * that survives the retry sets `needsReauth: true` on the envelope.
+   */
+  const bearerRequest = async ({
+    baseUrl,
+    path,
+    method,
+    body,
+    getToken,
+    refreshToken,
+    fetchImpl,
+    raw = false,
+  }) => {
+    const accessToken = await getToken(fetchImpl);
+    let res = await bearerFetch({
       baseUrl,
       path,
       method,
       body,
-      accessToken: reminted,
+      accessToken,
       fetchImpl,
+      raw,
     });
-    if (res.status === UNAUTHORIZED_STATUS) res = { ...res, needsReauth: true };
-  }
-  return res;
-};
+    if (res.status === UNAUTHORIZED_STATUS) {
+      const reminted = await refreshToken(fetchImpl);
+      res = await bearerFetch({
+        baseUrl,
+        path,
+        method,
+        body,
+        accessToken: reminted,
+        fetchImpl,
+        raw,
+      });
+      if (res.status === UNAUTHORIZED_STATUS)
+        res = { ...res, needsReauth: true };
+    }
+    return res;
+  };
+
+  return { bearerFetch, bearerRequest };
+})();
 
 if (typeof module !== "undefined") {
-  module.exports = { bearerFetch, bearerRequest };
+  module.exports = bearerFetchMaster;
 }
 
 if (typeof self !== "undefined" && typeof module === "undefined") {
-  self.bearerFetch = bearerFetch;
-  self.bearerRequest = bearerRequest;
+  self.bearerFetch = bearerFetchMaster.bearerFetch;
+  self.bearerRequest = bearerFetchMaster.bearerRequest;
 }

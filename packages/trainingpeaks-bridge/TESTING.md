@@ -23,7 +23,7 @@
 
 - [ ] Open the browser console on `http://localhost:5173` (Kaiord SPA)
 - [ ] Run:
-      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "read-metrics", start: "2026-07-01", end: "2026-07-31" }, console.log)`
+      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "request", method: "GET", path: "/metrics/v3/athletes/ATHLETE_ID/consolidatedtimedmetrics/2026-07-01/2026-07-31" }, console.log)`
 - [ ] Verify: response is `{ ok: true, protocolVersion: 1, data: [...] }`
       and `data` is the raw `consolidatedtimedmetrics` array
 
@@ -32,7 +32,7 @@
 - [ ] Sign out of TrainingPeaks (or use a fresh profile)
 - [ ] Open the extension popup
 - [ ] Verify: status shows "No TrainingPeaks session"
-- [ ] Via SPA console, `read-metrics` returns an error envelope with
+- [ ] Via SPA console, `request` returns an error envelope with
       `needsReauth: true`
 
 ## Test: SPA Communication (ping)
@@ -45,6 +45,6 @@
 ## Test: Origin Pinning
 
 - [ ] From a non-Kaiord origin (e.g. `https://example.com` console), send
-      `read-metrics` to the extension ID
+      `request` to the extension ID
 - [ ] Verify: response is
       `{ ok: false, error: "Origin or action not permitted" }`

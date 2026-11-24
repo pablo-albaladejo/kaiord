@@ -53,8 +53,7 @@ const source = (over: Partial<ConnectionSource> = {}): ConnectionSource => ({
   status: "connected",
   bridgeDetected: true,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: "working",
   lastSyncAt: undefined,
   sessionVerifiable: true,
   importTypes: ["activity"],
@@ -121,35 +120,42 @@ describe("ConnectionsTab", () => {
     expect(status).toHaveTextContent(/no access/i);
   });
 
-  it("should keep telling the reader to sign in again beside the failed read", () => {
+  it("should name the outage on a card whose check could not tell why, with no sign-in", () => {
     // Arrange
-    // Garmin has no fix link — `sourceFixUrl` only carries whoop — so the
-    // instruction IS the wording, and this asserts the wording on purpose. The
-    // instruction was never the wrong part: re-signing in genuinely re-mints
-    // Garmin's access, so removing the false diagnosis must not take it too.
-    // The card's actionable element is covered separately, for the one source
-    // that has one.
-    setSources([source({ id: "garmin", name: "Garmin", status: "attention" })]);
+    // Garmin's reads outlive signing out (#1100), so a failed read is no
+    // evidence about the sign-in: the card shows the Try again notice only.
+    setSources([
+      source({
+        id: "garmin",
+        name: "Garmin",
+        status: "attention",
+        connection: "not-answering",
+      }),
+    ]);
 
     // Act
     render(<ConnectionsTab />);
 
     // Assert
     const card = screen.getByTestId("connection-card-garmin");
-    expect(card).toHaveTextContent(/sign(?:ing)?\s+in\b/i);
-    expect(card).toHaveTextContent(/unavailable/i);
+    expect(card).toHaveTextContent(
+      "Garmin is not answering, so you cannot use it in Kaiord right now."
+    );
+    expect(card).not.toHaveTextContent(/sign(?:ed|ing)?\s+(in|out)\b/i);
+    expect(
+      within(card).getByRole("button", { name: "Try again" })
+    ).toBeInTheDocument();
   });
 
-  it("should render the fix link as a real link for a source that has one", () => {
+  it("should render the sign-in fix as a real link to the Platform's own page", () => {
     // Arrange
-    // Asserting copy cannot distinguish a removed link, so the one source with
-    // an actionable fix is queried by role and destination instead.
     setSources([
       source({
         id: "whoop",
         name: "WHOOP",
         bridgeId: "whoop-bridge",
         status: "attention",
+        connection: "signed-out",
       }),
     ]);
 
@@ -158,7 +164,7 @@ describe("ConnectionsTab", () => {
 
     // Assert
     const card = screen.getByTestId("connection-card-whoop");
-    const link = within(card).getByRole("link");
+    const link = within(card).getByRole("link", { name: "Sign in to WHOOP" });
     expect(link).toHaveAttribute("href", "https://app.whoop.com/");
   });
 
@@ -235,6 +241,7 @@ describe("ConnectionsTab", () => {
         status: "available",
         disconnected: true,
         bridgeDetected: false,
+        connection: "not-installed",
       }),
     ]);
 
@@ -242,8 +249,8 @@ describe("ConnectionsTab", () => {
     render(<ConnectionsTab />);
 
     // Assert
-    expect(screen.getByTestId("connection-bridge-garmin")).toHaveTextContent(
-      "Requires the Kaiord extension"
+    expect(screen.getByTestId("connection-notice-garmin")).toHaveTextContent(
+      "Install Kaiord for Garmin"
     );
     expect(
       screen.queryByTestId("connection-reconnect-garmin")
@@ -251,10 +258,10 @@ describe("ConnectionsTab", () => {
   });
   it("should not assert an unverifiable extension is still present", () => {
     // Arrange
-    // Tanita has no prober AND cannot be pinged — its background script routes
-    // `ping` into the whole-CSV `checkSession` — so after the initial
-    // announcement the SPA has no way to learn it was uninstalled. Present
-    // tense would be a claim it cannot support.
+    // A Tanita extension one protocol behind is asked nothing — its `ping`
+    // is the whole-CSV `checkSession` — so after the initial announcement
+    // the SPA has no way to learn it was uninstalled. Present tense would be
+    // a claim it cannot support.
     setSources([
       source({
         id: "tanita",
@@ -274,9 +281,7 @@ describe("ConnectionsTab", () => {
     expect(screen.getByTestId("connection-bridge-tanita")).toHaveTextContent(
       /detected on load/i
     );
-    expect(
-      screen.getByText(/may have been removed since/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/may have been removed/i)).toBeInTheDocument();
   });
 
   it("should claim no counts while discovery is still in its opening window", () => {
@@ -319,14 +324,21 @@ describe("ConnectionsTab", () => {
 
   it("should state the consequence of a source needing attention", () => {
     // Arrange
-    setSources([source({ id: "whoop", name: "WHOOP", status: "attention" })]);
+    setSources([
+      source({
+        id: "whoop",
+        name: "WHOOP",
+        status: "attention",
+        connection: "not-answering",
+      }),
+    ]);
 
     // Act
     render(<ConnectionsTab />);
 
     // Assert
     expect(screen.getByTestId("connections-banner-title")).toHaveTextContent(
-      "Kaiord cannot read from WHOOP"
+      "WHOOP is not answering, so you cannot use it in Kaiord right now."
     );
   });
 

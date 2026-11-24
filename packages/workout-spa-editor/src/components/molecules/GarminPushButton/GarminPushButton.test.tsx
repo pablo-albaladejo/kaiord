@@ -149,9 +149,12 @@ describe("GarminPushButton", () => {
     // Assert
     expect(
       screen.getByText(
-        "Sign in to Garmin Connect in this browser, then try again."
+        "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser."
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Sign in to Garmin" })
+    ).toHaveAttribute("href", "https://connect.garmin.com/modern/");
   });
 
   it("should say Garmin is not answering when no cause is known", () => {
@@ -163,8 +166,50 @@ describe("GarminPushButton", () => {
 
     // Assert
     expect(
-      screen.getByText("Garmin is not answering. Try again.")
+      screen.getByText(
+        "Garmin is not answering, so you cannot use it in Kaiord right now."
+      )
     ).toBeInTheDocument();
+  });
+
+  it("should say the App did not load the send, offer Reload and stay ready to send", () => {
+    // Arrange
+    mockState.pushing = { status: "error", reason: "not-loaded" };
+
+    // Act
+    render(<GarminPushButton notice={NO_NOTICE} />);
+
+    // Assert
+    expect(
+      screen.getByText(
+        "Part of the Kaiord App did not load, so nothing was sent to Garmin. Reload the App to load it again."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reload" })).toBeVisible();
+    expect(screen.queryByText(/Garmin is not answering/)).toBeNull();
+    expect(screen.getByTestId("send-to-garmin-button")).toBeEnabled();
+  });
+
+  it("should return the button to idle with Reload when the send's code did not load", async () => {
+    // Arrange
+    const notLoaded = failed("app-part-not-loaded", true);
+    push.mockResolvedValue(notLoaded);
+    const setLastRun = vi.fn();
+    const notice: GarminPlacementNotice = {
+      removable: [],
+      setLastRun,
+      result: notLoaded,
+    };
+    render(<GarminPushButton notice={notice} />);
+
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-garmin-button"));
+
+    // Assert
+    expect(setLastRun).toHaveBeenCalledWith(notLoaded, "2026-10-12");
+    expect(screen.getByRole("button", { name: "Reload" })).toBeVisible();
+    expect(screen.queryByText(/Garmin is not answering/)).toBeNull();
+    expect(screen.getByTestId("send-to-garmin-button")).toBeEnabled();
   });
 
   it("should keep the send disabled until the workout record has loaded", () => {

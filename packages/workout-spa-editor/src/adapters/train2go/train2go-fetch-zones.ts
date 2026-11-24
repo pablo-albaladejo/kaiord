@@ -8,12 +8,12 @@
  * field allowlist, re-validating here keeps the use case decoupled from
  * the bridge's hand-written parser.
  */
-import { readZones } from "../../store/train2go-extension-transport";
 import {
   type ZonesPayload,
   zonesPayloadSchema,
 } from "../../types/coaching-zones";
 import { BRIDGE_QUEUE } from "../bridge/shared-operation-queue";
+import { readZones } from "./connector/train2go-extension-transport";
 
 const buildErr = (error: string | undefined): Error => {
   if (error === "Session expired") return new Error("Session expired");

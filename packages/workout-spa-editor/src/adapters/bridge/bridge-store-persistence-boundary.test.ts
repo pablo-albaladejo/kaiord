@@ -29,7 +29,7 @@ const SRC_ROOT = resolve(__dirname, "..", "..");
 const BRIDGE_RUNTIME_STORES = [
   "store/train2go-store.ts",
   "store/train2go-store-actions.ts",
-  "store/train2go-extension-transport.ts",
+  "adapters/train2go/connector/train2go-extension-transport.ts",
   "adapters/bridge/bridge-connection-store.ts",
   "adapters/bridge/bridge-connection-entries.ts",
   "adapters/bridge/bridge-connection-refresh.ts",

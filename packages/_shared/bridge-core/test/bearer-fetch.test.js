@@ -199,4 +199,91 @@ describe("bridge-core bearer-fetch (vendored)", () => {
       expect(res.needsReauth).toBe(true);
     });
   });
+
+  describe("raw answers", () => {
+    const rawResp = (
+      body,
+      status = OK_STATUS,
+      contentType = "application/json"
+    ) => ({
+      ok: status >= 200 && status < 300,
+      status,
+      headers: {
+        get: (name) => (name === "content-type" ? contentType : null),
+      },
+      json: () => Promise.reject(new Error("a raw answer is never parsed")),
+      text: () => Promise.resolve(body),
+    });
+
+    it("should hand over the body unread with its status and content type", async () => {
+      // Arrange
+      const fetchImpl = vi.fn().mockResolvedValue(rawResp('{"id":1}'));
+
+      // Act
+      const res = await bearerRequest({
+        baseUrl: BASE_URL,
+        path: "/resource",
+        method: "GET",
+        getToken: async () => "bear",
+        refreshToken: async () => "reminted",
+        fetchImpl,
+        raw: true,
+      });
+
+      // Assert
+      expect(res).toEqual({
+        ok: true,
+        status: OK_STATUS,
+        contentType: "application/json",
+        body: '{"id":1}',
+      });
+    });
+
+    it("should answer an empty body for a 204 without reading it", async () => {
+      // Arrange
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValue(rawResp("", NO_CONTENT_STATUS, ""));
+
+      // Act
+      const res = await bearerRequest({
+        baseUrl: BASE_URL,
+        path: "/resource",
+        method: "DELETE",
+        getToken: async () => "bear",
+        refreshToken: async () => "reminted",
+        fetchImpl,
+        raw: true,
+      });
+
+      // Assert
+      expect(res).toEqual({
+        ok: true,
+        status: NO_CONTENT_STATUS,
+        contentType: "",
+        body: "",
+      });
+    });
+
+    it("should keep the status of a refused raw request and no body", async () => {
+      // Arrange
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValue(rawResp("secret page", FORBIDDEN_STATUS));
+
+      // Act
+      const res = await bearerRequest({
+        baseUrl: BASE_URL,
+        path: "/resource",
+        method: "GET",
+        getToken: async () => "bear",
+        refreshToken: async () => "reminted",
+        fetchImpl,
+        raw: true,
+      });
+
+      // Assert
+      expect(res).toEqual({ ok: false, status: FORBIDDEN_STATUS });
+    });
+  });
 });

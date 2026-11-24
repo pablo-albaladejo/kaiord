@@ -11,15 +11,20 @@ Store workflow (`cws-publish.yml`) packages and uploads it.
 
 ## Purpose
 
-- Fetch the current user's training-plan endpoints on
-  `https://app.train2go.com/*` directly from the service worker with
+- Fetch `https://app.train2go.com/*` directly from the service worker with
   `credentials:"include"` (SW-direct) — the site's HttpOnly session cookie
-  travels automatically, with no content script on `app.train2go.com` — and
-  parse activities into a normalized shape (see `parser.js`).
-- Expose a small message-passing surface (`ping`, `read-week`, `read-day`,
-  `read-details`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
+  travels automatically, with no content script on `app.train2go.com` — only
+  for requests on its closed list (`ALLOWED` in `background.js`), handing
+  Train2Go's answer to the App unread but for its Session secrets (the `_token`
+  anti-forgery field), which it removes. The App's Train2Go Connector reads it
+  (`packages/workout-spa-editor/src/adapters/train2go/connector/`).
+- Expose a small message-passing surface (`ping`, `request`,
+  `open-train2go`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
   once it has discovered the extension ID at runtime through the
   `kaiord-announce.js` content script.
+- Answer the connection check (`ping`) with yes or no only. The connect
+  flow reads the profile ping through `request`; the popup reads it through
+  the internal `read-profile` to show the coach's name and notes.
 - Restrict communication to Kaiord-controlled origins
   (exactly `https://kaiord.com/*`, no subdomain, plus `http://localhost:5173/*` and `http://localhost:5174/*`
   in dev builds only) so other websites cannot drive the bridge.

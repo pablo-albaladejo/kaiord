@@ -1,0 +1,310 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { loadTrain2GoAnswers } from "./load-train2go-answers";
+import {
+  openTrain2Go,
+  ping,
+  readDay,
+  readWeek,
+} from "./train2go-extension-transport";
+
+const TRANSPORT_TIMEOUT_TICK_MS = 2000;
+const TRANSPORT_LONG_TICK_MS = 35_000;
+
+describe("train2go-extension-transport", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: {
+        lastError: null as { message: string } | null,
+        sendMessage: vi.fn(),
+      },
+    };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    delete (globalThis as Record<string, unknown>).chrome;
+  });
+
+  describe("ping (Train2GoPingResult)", () => {
+    it("should return sessionActive on first success", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+          });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(true);
+      expect(result.sessionActive).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(1);
+    });
+
+    it("should stringify userId at the boundary (lossless capture)", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+          });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.externalUserId).toBe("28035");
+      expect(typeof result.externalUserId).toBe("string");
+      expect(result.externalUserName).toBe("Pablo");
+    });
+
+    it("should pass through string userIds verbatim (no double-stringify)", async () => {
+      // Arrange
+      const giant = "9999999999999999";
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { sessionActive: true, userId: giant, userName: "Pablo" },
+          });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.externalUserId).toBe(giant);
+    });
+
+    it("should retry on timeout", async () => {
+      // Arrange
+      let callCount = 0;
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          callCount++;
+          if (callCount === 2) {
+            cb({ ok: true, data: { sessionActive: true } });
+          }
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+      const promise = ping("ext-id");
+      vi.advanceTimersByTime(TRANSPORT_TIMEOUT_TICK_MS);
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Act
+      const result = await promise;
+
+      // Assert
+      expect(result.ok).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(2);
+    });
+
+    it("should return ok:false with error when chrome is unavailable", async () => {
+      // Arrange
+      delete (globalThis as Record<string, unknown>).chrome;
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("Chrome runtime not available");
+      expect(result.sessionActive).toBe(false);
+      expect(result.externalUserId).toBeNull();
+    });
+
+    it("should not retry on lastError", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          (
+            globalThis as unknown as {
+              chrome: { runtime: { lastError: { message: string } | null } };
+            }
+          ).chrome.runtime.lastError = { message: "Not found" };
+          cb(undefined);
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(false);
+      expect(mockSend).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("readWeek", () => {
+    it("should send read-week with stringified userId to an extension on the previous protocol", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { activities: [{ id: 1 }] },
+          });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await readWeek("ext-id", "2026-04-13", "28035");
+
+      // Assert
+      expect(result.ok).toBe(true);
+      expect(mockSend).toHaveBeenLastCalledWith(
+        "ext-id",
+        { action: "read-week", date: "2026-04-13", userId: "28035" },
+        expect.any(Function)
+      );
+    });
+
+    it("should resolve with timeout on no response", async () => {
+      // Arrange
+      const mockSend = vi.fn();
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+      // The parsers load before the message is sent: load them first, so
+      // the timeout is armed once the pending microtasks run.
+      await loadTrain2GoAnswers();
+      const promise = readWeek("ext-id", "2026-04-13", "42");
+      await vi.advanceTimersByTimeAsync(TRANSPORT_LONG_TICK_MS);
+
+      // Act
+      const result = await promise;
+
+      // Assert
+      expect(result).toEqual({
+        ok: false,
+        delivered: false,
+        error: "Extension did not respond",
+      });
+    });
+  });
+
+  describe("readDay", () => {
+    it("should send read-day with stringified userId to an extension on the previous protocol", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { activities: [{ id: 2 }] },
+          });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await readDay("ext-id", "2026-04-13", "42");
+
+      // Assert
+      expect(result.ok).toBe(true);
+      expect(mockSend).toHaveBeenLastCalledWith(
+        "ext-id",
+        { action: "read-day", date: "2026-04-13", userId: "42" },
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe("openTrain2Go", () => {
+    it("should send open-train2go action", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb({ ok: true });
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await openTrain2Go("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(true);
+      expect(mockSend).toHaveBeenCalledWith(
+        "ext-id",
+        { action: "open-train2go" },
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe("sendMessage edge cases", () => {
+    it("should resolve ping with ok:false when sendMessage throws", async () => {
+      // Arrange
+      const mockSend = vi.fn(() => {
+        throw new Error("fail");
+      });
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("Extension not available");
+    });
+
+    it("should resolve ping with No response when callback gets null", async () => {
+      // Arrange
+      const mockSend = vi.fn(
+        (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+          cb(null);
+        }
+      );
+      (globalThis as Record<string, unknown>).chrome = {
+        runtime: { lastError: null, sendMessage: mockSend },
+      };
+
+      // Act
+      const result = await ping("ext-id");
+
+      // Assert
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("No response");
+    });
+  });
+});

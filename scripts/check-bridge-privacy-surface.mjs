@@ -6,9 +6,10 @@
  * Inputs (per bridge, discovered from packages/*-bridge):
  *   - manifest.json + manifest.prod.json: `permissions`, `host_permissions`,
  *     `content_scripts.matches`, `externally_connectable.matches`.
- *   - content.js (or background.js): the read allowlist, in either of the
- *     two shapes in use — `ALLOWED` (method + regex pattern) or
- *     `ALLOWED_PREFIXES` (GET-only string path prefixes).
+ *   - background.js (or content.js): the closed list, in either of the two
+ *     shapes — `ALLOWED` (method + regex pattern, and for a thin Bridge's
+ *     write entry the `body` schema name) or `ALLOWED_PREFIXES` (GET-only
+ *     string path prefixes).
  *   - popup.js: every `fetch(...)` / `XMLHttpRequest` URL argument MUST
  *     be a relative path (no `http(s)://` literal).
  *   - any root .js file: `AUTH_ENDPOINTS`, the credential-handshake
@@ -388,8 +389,12 @@ export const extractPatternAllowlist = (
     // narrow or widen what the entry actually permits, invisibly. That is
     // the exact shape of hole this guard exists to close, so adding one has
     // to be a decision: extend the golden, or drop the field.
+    //
+    // `body` is the one recognised addition: the name of the schema a thin
+    // Bridge's write entry validates its body against. It IS recorded, so an
+    // entry gaining or losing a body (or switching schema) is golden drift.
     const unknown = fields.filter(
-      (f) => f.key !== "method" && f.key !== "pattern"
+      (f) => f.key !== "method" && f.key !== "pattern" && f.key !== "body"
     );
     if (unknown.length > 0) {
       throw new Error(
@@ -407,7 +412,20 @@ export const extractPatternAllowlist = (
         `unreadable allowlist entry (needs \`method: "<VERB>"\` and \`pattern: /…/\`): ${object.trim()}`
       );
     }
-    return { method: method.value, pattern: pattern.value };
+    const body = fields.find((f) => f.key === "body");
+    if (
+      body &&
+      (body.kind !== "string" || !/^[a-z][a-z-]*$/.test(body.value))
+    ) {
+      throw new Error(
+        `allowlist entry \`body\` must name a schema as a string literal: ${object.trim()}`
+      );
+    }
+    return {
+      method: method.value,
+      pattern: pattern.value,
+      ...(body ? { body: body.value } : {}),
+    };
   });
 };
 
@@ -432,14 +450,31 @@ export const extractPrefixAllowlist = (
   return strings.map((prefix) => ({ method: "GET", prefix }));
 };
 
-export const extractAllowed = (bridge) => {
-  // The path allowlist lives in content.js for relay-based bridges, or
-  // background.js for token-based bridges that call the API directly from
-  // the service worker. content.js wins when both exist.
-  const dir = join(REPO_ROOT, "packages", bridge);
-  const path = [join(dir, "content.js"), join(dir, "background.js")].find((p) =>
-    existsSync(p)
+const PATTERN_DECLARATION = "const ALLOWED = [";
+const PREFIX_DECLARATION = "const ALLOWED_PREFIXES = [";
+
+// The path allowlist lives in background.js (every thin Bridge's service
+// worker gates its `request` action there) or, for a relay-based bridge, in
+// content.js. The first of the two that declares one is read; with neither
+// declaring one the first existing file is reported as unreadable below.
+export const allowlistSource = (dir) => {
+  const candidates = [
+    join(dir, "background.js"),
+    join(dir, "content.js"),
+  ].filter((p) => existsSync(p));
+  return (
+    candidates.find((p) => {
+      const src = readFileSync(p, "utf8");
+      return (
+        src.includes(PATTERN_DECLARATION) || src.includes(PREFIX_DECLARATION)
+      );
+    }) ?? candidates[0]
   );
+};
+
+export const extractAllowed = (bridge) => {
+  const dir = join(REPO_ROOT, "packages", bridge);
+  const path = allowlistSource(dir);
   if (!path) return [];
   const src = readFileSync(path, "utf8");
 

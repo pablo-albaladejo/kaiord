@@ -3,11 +3,9 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 const {
   PROTOCOL_VERSION,
   BRIDGE_MANIFEST,
-  TANITA_ORIGIN,
   EXPORT_CSV_PATH,
   isAllowed,
-  looksLikeHtml,
-  readExportCsv,
+  request,
   checkSession,
   handleAction,
   EXTERNAL_ACTIONS,
@@ -21,21 +19,18 @@ const SPA_ORIGIN = "https://kaiord.com";
 const FOREIGN_ORIGIN = "https://attacker.example";
 const SPA_SENDER = { origin: SPA_ORIGIN };
 
-const EXPECTED_PROTOCOL_VERSION = 1;
+const EXPECTED_PROTOCOL_VERSION = 2;
 const HTTP_OK = 200;
-const HTTP_FOUND = 302;
 const OPAQUE_REDIRECT_STATUS = 0;
 
 const SAMPLE_CSV = '"Date","Weight (kg)"\n"2026-07-01","70.5"';
 // A distinctive body used to assert it is never written to any console sink.
 const SECRET_CSV = "SUPER-SECRET-EXPORT-BODY-0f9a1c";
-const LOGIN_HTML = "<!doctype html><html><body>please sign in</body></html>";
 
 // Listener callbacks are captured at import time; __resetChromeMock clears
 // the mock call log in beforeEach, so grab them once at module scope.
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
-const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 // Minimal Response doubles for the SW `fetch(url, init)` call. cookieSessionFetch
 // reads .type/.redirected/.status/.ok/.headers.get/.text().
@@ -47,26 +42,10 @@ const csvResponse = (body, status = HTTP_OK) => ({
   headers: { get: () => "text/csv" },
   text: () => Promise.resolve(body),
 });
-const htmlResponse = (body) => ({
-  ok: true,
-  status: HTTP_OK,
-  type: "basic",
-  redirected: false,
-  headers: { get: () => "text/html" },
-  text: () => Promise.resolve(body),
-});
 const opaqueRedirectResponse = () => ({
   ok: false,
   status: OPAQUE_REDIRECT_STATUS,
   type: "opaqueredirect",
-  redirected: false,
-  headers: { get: () => "" },
-  text: () => Promise.resolve(""),
-});
-const redirectResponse = (status) => ({
-  ok: false,
-  status,
-  type: "basic",
   redirected: false,
   headers: { get: () => "" },
   text: () => Promise.resolve(""),
@@ -78,7 +57,7 @@ describe("background.js", () => {
   });
 
   describe("PROTOCOL_VERSION", () => {
-    it("should be 1", () => {
+    it("should be 2", () => {
       // Arrange
       const expected = EXPECTED_PROTOCOL_VERSION;
 
@@ -121,9 +100,9 @@ describe("background.js", () => {
   });
 
   describe("EXTERNAL_ACTIONS origin pinning", () => {
-    it("should expose exactly the read + session probe surface", () => {
+    it("should expose exactly the request and the session probe", () => {
       // Arrange
-      const expected = ["ping", "checkSession", "read-export-csv", "set-theme"];
+      const expected = ["ping", "checkSession", "request", "set-theme"];
 
       // Act
       const actual = [...EXTERNAL_ACTIONS];
@@ -233,71 +212,6 @@ describe("background.js", () => {
     });
   });
 
-  describe("read-export-csv", () => {
-    it("should return the raw csv on a 200 text/csv response", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(csvResponse(SAMPLE_CSV));
-
-      // Act
-      const result = await readExportCsv();
-
-      // Assert
-      expect(result).toEqual({ csv: SAMPLE_CSV });
-      const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(`${TANITA_ORIGIN}${EXPORT_CSV_PATH}`);
-      expect(init.credentials).toBe("include");
-      expect(init.redirect).toBe("manual");
-    });
-
-    it("should throw needsReauth on an opaqueredirect (dead session)", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
-
-      // Act
-      const attempt = readExportCsv();
-
-      // Assert
-      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
-    });
-
-    it("should throw needsReauth on a 3xx redirect", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(redirectResponse(HTTP_FOUND));
-
-      // Act
-      const attempt = readExportCsv();
-
-      // Assert
-      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
-    });
-
-    it("should throw needsReauth when a 200 body is a login page", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(htmlResponse(LOGIN_HTML));
-
-      // Act
-      const attempt = readExportCsv();
-
-      // Assert
-      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
-    });
-  });
-
-  describe("looksLikeHtml", () => {
-    it("should flag an html content-type or a leading html tag", () => {
-      // Arrange
-      const byContentType = looksLikeHtml("text/html; charset=utf-8", "x");
-      const byBody = looksLikeHtml("", "<!doctype html><html></html>");
-      const csv = looksLikeHtml("text/csv", '"Date","Weight"');
-
-      // Act
-      const results = [byContentType, byBody, csv];
-
-      // Assert
-      expect(results).toEqual([true, true, false]);
-    });
-  });
-
   describe("checkSession", () => {
     it("should report authenticated true on a reachable export", async () => {
       // Arrange
@@ -365,7 +279,11 @@ describe("background.js", () => {
       fetch.mockResolvedValueOnce(csvResponse(SECRET_CSV));
 
       // Act
-      await readExportCsv();
+      await request({
+        action: "request",
+        method: "GET",
+        path: EXPORT_CSV_PATH,
+      });
 
       // Assert
       const logged = [
@@ -379,19 +297,6 @@ describe("background.js", () => {
       logSpy.mockRestore();
       errorSpy.mockRestore();
       warnSpy.mockRestore();
-    });
-  });
-
-  describe("onMessage listener", () => {
-    it("should return true to keep the internal response channel open", () => {
-      // Arrange
-      const sendResponse = vi.fn();
-
-      // Act
-      const result = internalCb({ action: "ping" }, {}, sendResponse);
-
-      // Assert
-      expect(result).toBe(true);
     });
   });
 });

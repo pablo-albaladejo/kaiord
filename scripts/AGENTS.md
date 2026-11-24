@@ -18,46 +18,47 @@ notes.
 
 ### Mechanical guards (run via `pnpm lint`)
 
-| File                                           | Invariant                                                                                     |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `check-architecture.mjs`                       | Hexagonal layering (domain doesn't import outer libs)                                         |
-| `check-archive-dates.mjs`                      | Archive folder date prefix ⇄ `> Completed:` marker                                            |
-| `check-archive-index.mjs`                      | `archive/README.md` ⇄ filesystem                                                              |
-| `check-archive-followups.mjs`                  | `> Deferred to: #N` markers + ratio invariant                                                 |
-| `check-spec-format.mjs`                        | `SPEC_TEMPLATE.md` placeholders + structure                                                   |
-| `check-mapper-no-tests.mjs`                    | `*.mapper.ts` files have NO co-located tests                                                  |
-| `check-converter-has-tests.mjs`                | `*.converter.ts` files MUST have co-located tests                                             |
-| `check-package-deps.mjs`                       | Cross-package deps use `workspace:*` and match the dep graph                                  |
-| `check-no-unconditional-skip.mjs`              | No unconditional `it.skip()` / `describe.skip()`                                              |
-| `check-no-library-dual-mount.mjs`              | R-LibraryNoDualMount (SPA editor)                                                             |
-| `check-no-pii-leakage.mjs`                     | R-PIIInterpolation (toast/console first args are literals)                                    |
-| `check-no-zustand-writethrough.mjs`            | R-DexieImport / R-PersistStateImport / R-AppDexieImport                                       |
-| `check-session-match-id-shape.mjs`             | R-SessionMatchIdShape (id construction via canonical helpers)                                 |
-| `check-no-perf-marks-in-prod.mjs`              | No `performance.mark()` in production builds                                                  |
-| `check-bridge-privacy-surface.mjs`             | Extension privacy surface matches `fixtures/bridge-privacy-surface.json`                      |
-| `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin: bridges answer `https://kaiord.com` only (manifests and shipped source)  |
-| `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                           |
-| `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                             |
-| `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof holds            |
-| `check-method-figures.mjs`                     | Every figure on the method note equals its command's output at the pinned commit, no shell    |
-| `check-retired-terms.mjs`                      | No public text uses a retired or withdrawn GLOSSARY.md term (`retired-terms.vocab.mjs`)       |
-| `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)               |
-| `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
-| `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |
-| `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                           |
-| `check-build-portable.mjs`                     | Build artifacts are portable (no absolute paths)                                              |
-| `check-ci-fanout-invariants.mjs`               | CI fan-out matrix invariants                                                                  |
-| `check-scripts-orphans.mjs`                    | Every `scripts/*` and `.github/scripts/*` file is wired (tests and Markdown are not wiring)   |
-| `check-workflow-timeouts.mjs`                  | `.github/workflows/*.yml` declare per-job timeouts                                            |
-| `check-overrides-stale.mjs`                    | `pnpm.overrides` entries match installed versions                                             |
-| `check-husky-no-bypass-hint.mjs`               | Husky hook content doesn't hint `--no-verify`                                                 |
-| `check-hook-collection-map-naming.mjs`         | Hook-collection map naming conventions                                                        |
-| `check-test-aaa.mjs`                           | `R-ItBodyAAA` — `// Arrange`/`// Act`/`// Assert` in `it()` bodies                            |
-| `check-test-title-should.mjs`                  | `R-ItTitleShould` — `it()` titles start with `"should "`                                      |
-| `check-privacy-policy.mjs`                     | Privacy-policy parity (also wired into `packages/docs`)                                       |
-| `check-bridge-core-parity.test.mjs`            | Vendored bridge-core copies ⇄ `_shared/bridge-core` masters (byte, purity, identity↔manifest) |
-| `check-changeset-config.test.mjs`              | `.changeset/config.json` invariants                                                           |
-| `check-commitlint-config.test.mjs`             | `commitlint.config.mjs` invariants                                                            |
+| File                                           | Invariant                                                                                                                                                                     |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check-architecture.mjs`                       | Hexagonal layering (domain doesn't import outer libs)                                                                                                                         |
+| `check-archive-dates.mjs`                      | Archive folder date prefix ⇄ `> Completed:` marker                                                                                                                            |
+| `check-archive-index.mjs`                      | `archive/README.md` ⇄ filesystem                                                                                                                                              |
+| `check-archive-followups.mjs`                  | `> Deferred to: #N` markers + ratio invariant                                                                                                                                 |
+| `check-spec-format.mjs`                        | `SPEC_TEMPLATE.md` placeholders + structure                                                                                                                                   |
+| `check-mapper-no-tests.mjs`                    | `*.mapper.ts` files have NO co-located tests                                                                                                                                  |
+| `check-converter-has-tests.mjs`                | `*.converter.ts` files MUST have co-located tests                                                                                                                             |
+| `check-package-deps.mjs`                       | Cross-package deps use `workspace:*` and match the dep graph                                                                                                                  |
+| `check-no-unconditional-skip.mjs`              | No unconditional `it.skip()` / `describe.skip()`                                                                                                                              |
+| `check-no-library-dual-mount.mjs`              | R-LibraryNoDualMount (SPA editor)                                                                                                                                             |
+| `check-no-pii-leakage.mjs`                     | R-PIIInterpolation (toast/console first args are literals)                                                                                                                    |
+| `check-no-zustand-writethrough.mjs`            | R-DexieImport / R-PersistStateImport / R-AppDexieImport                                                                                                                       |
+| `check-session-match-id-shape.mjs`             | R-SessionMatchIdShape (id construction via canonical helpers)                                                                                                                 |
+| `check-no-perf-marks-in-prod.mjs`              | No `performance.mark()` in production builds                                                                                                                                  |
+| `check-bridge-privacy-surface.mjs`             | Extension privacy surface matches `fixtures/bridge-privacy-surface.json`                                                                                                      |
+| `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin + R-BridgeInternalDispatch: exact App origin; popup-only internal channel                                                                                 |
+| `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                                                                                                           |
+| `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                                                                                                             |
+| `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof holds                                                                                            |
+| `check-method-figures.mjs`                     | Every figure on the method note equals its command's output at the pinned commit, no shell                                                                                    |
+| `check-retired-terms.mjs`                      | No public text uses a retired or withdrawn GLOSSARY.md term (`retired-terms.vocab.mjs`)                                                                                       |
+| `check-connection-notices.mjs`                 | Four Connection fixes, one wording each, read only from `_shared/bridge-core`; beside them only reasons resolved by one, not-checked wordings, and the one exception `NO_TAB` |
+| `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)                                                                                               |
+| `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                                                                                                     |
+| `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                                                                                                    |
+| `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                                                                                                           |
+| `check-build-portable.mjs`                     | Build artifacts are portable (no absolute paths)                                                                                                                              |
+| `check-ci-fanout-invariants.mjs`               | CI fan-out matrix invariants                                                                                                                                                  |
+| `check-scripts-orphans.mjs`                    | Every `scripts/*` and `.github/scripts/*` file is wired (tests and Markdown are not wiring)                                                                                   |
+| `check-workflow-timeouts.mjs`                  | `.github/workflows/*.yml` declare per-job timeouts                                                                                                                            |
+| `check-overrides-stale.mjs`                    | `pnpm.overrides` entries match installed versions                                                                                                                             |
+| `check-husky-no-bypass-hint.mjs`               | Husky hook content doesn't hint `--no-verify`                                                                                                                                 |
+| `check-hook-collection-map-naming.mjs`         | Hook-collection map naming conventions                                                                                                                                        |
+| `check-test-aaa.mjs`                           | `R-ItBodyAAA` — `// Arrange`/`// Act`/`// Assert` in `it()` bodies                                                                                                            |
+| `check-test-title-should.mjs`                  | `R-ItTitleShould` — `it()` titles start with `"should "`                                                                                                                      |
+| `check-privacy-policy.mjs`                     | Privacy-policy parity (also wired into `packages/docs`)                                                                                                                       |
+| `check-bridge-core-parity.test.mjs`            | Vendored bridge-core copies ⇄ `_shared/bridge-core` masters (byte, purity, identity↔manifest)                                                                                 |
+| `check-changeset-config.test.mjs`              | `.changeset/config.json` invariants                                                                                                                                           |
+| `check-commitlint-config.test.mjs`             | `commitlint.config.mjs` invariants                                                                                                                                            |
 
 ### Build / generator scripts
 

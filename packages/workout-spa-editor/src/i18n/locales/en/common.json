@@ -53,9 +53,7 @@
     "since": "since {{date}}"
   },
   "sourceHealth": {
-    "noNewDataSince": "No new data since {{date}}",
-    "noAccess": "Kaiord cannot read from a source — signing in again may restore it",
-    "extensionOutdated": "An extension is out of date — update it to resume"
+    "several": "Each one shows its fix on Connections."
   },
   "verbs": {
     "send": "Send to Garmin",

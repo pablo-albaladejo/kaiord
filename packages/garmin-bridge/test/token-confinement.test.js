@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 // The privacy promise behind the store listing and the policy: the Garmin
@@ -50,15 +53,43 @@ const fakeGarmin = (dataStatus = 200) =>
     return response(dataStatus, [{ workoutId: 1, workoutName: "Easy run" }]);
   });
 
+// The GCN the App's writer builds (@kaiord/garmin), see test/fixtures.
+const WORKOUT = JSON.parse(
+  readFileSync(
+    join(import.meta.dirname, "fixtures/workout-repeat-steps.gcn.json"),
+    "utf8"
+  )
+);
+
+const req = (method, path, body) => ({
+  action: "request",
+  method,
+  path,
+  ...(body === undefined ? {} : { body }),
+});
+
+// Every entry of the closed list, the token endpoints the App may never
+// reach, and the actions an older App still sends.
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
+  req("GET", "/workout-service/workouts?start=0&limit=20"),
+  req(
+    "GET",
+    "/activitylist-service/activities/search/activities?start=0&limit=20"
+  ),
+  req("POST", "/workout-service/workout", WORKOUT),
+  req(
+    "POST",
+    "/upload-service/upload/.fit",
+    [14, 0, 0, 0, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0]
+  ),
+  req("POST", "/workout-service/schedule/1", { date: "2026-11-23" }),
+  req("GET", "/calendar-service/year/2026/month/10"),
+  req("DELETE", "/workout-service/schedule/2"),
+  req("GET", "/oauth-service/oauth/preauthorized"),
+  req("POST", "/oauth-service/oauth/exchange/user/2.0"),
   { action: "list" },
-  { action: "activities" },
-  { action: "push", gcn: { workoutName: "Easy run" } },
-  { action: "push-body-composition", fit: "AAAA" },
   { action: "schedule", workoutId: "1", date: "2026-11-23" },
-  { action: "calendar-find", workoutId: "1", date: "2026-11-23" },
-  { action: "unschedule", scheduleId: "2" },
   { action: "profile-snapshot", snapshot: { profile: { name: "A" } } },
   { action: "profile-snapshot-clear" },
   { action: "set-theme", theme: "dark" },
@@ -74,6 +105,18 @@ const answersToEveryAction = async () => {
   return answers;
 };
 
+const CHECK_KEYS = [
+  "authenticated",
+  "capabilities",
+  "features",
+  "gcApi",
+  "id",
+  "name",
+  "protocolVersion",
+  "session",
+  "version",
+];
+
 const leaked = (value) =>
   SECRETS.filter((secret) => JSON.stringify(value).includes(secret));
 
@@ -86,12 +129,12 @@ describe("token confinement", () => {
     vi.restoreAllMocks();
   });
 
-  it("should keep the minted tokens in chrome.storage.local", async () => {
+  it("should keep the tokens a real request minted in chrome.storage.local", async () => {
     // Arrange
     fakeGarmin();
 
     // Act
-    await send({ action: "ping" });
+    await send(req("GET", "/workout-service/workouts?start=0&limit=20"));
     const stored = await chrome.storage.local.get([
       "garminOAuth1",
       "garminOAuth2",
@@ -99,6 +142,40 @@ describe("token confinement", () => {
 
     // Assert
     expect(leaked(stored)).toEqual(SECRETS);
+  });
+
+  it("should check a session with no request, minting nothing and storing nothing, when no token is held", async () => {
+    // Arrange
+    fakeGarmin();
+
+    // Act
+    const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(fetch).not.toHaveBeenCalled();
+    expect(chrome.storage.local.set).not.toHaveBeenCalled();
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data.session).toBe("not-checked");
+    expect(answer.data.gcApi).toEqual({ ok: false });
+  });
+
+  it("should report signed in from a token a real request minted while it is still valid, and hand over no workout", async () => {
+    // Arrange
+    fakeGarmin();
+    await send(req("GET", "/workout-service/workouts?start=0&limit=20"));
+    fetch.mockClear();
+    chrome.storage.local.set.mockClear();
+
+    // Act
+    const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(fetch).not.toHaveBeenCalled();
+    expect(chrome.storage.local.set).not.toHaveBeenCalled();
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data.session).toBe("signed-in");
+    expect(answer.data.gcApi).toEqual({ ok: true });
+    expect(JSON.stringify(answer)).not.toContain("Easy run");
   });
 
   it("should answer no external action with a token, when Garmin answers", async () => {

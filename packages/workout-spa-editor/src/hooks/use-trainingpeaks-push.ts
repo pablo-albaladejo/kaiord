@@ -1,14 +1,13 @@
 import { useCallback } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { checkTrainingPeaksSession } from "../adapters/trainingpeaks/trainingpeaks-transport";
+import { readTrainingPeaksAthleteId } from "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport";
 import { executeWorkoutPush } from "../application/export/execute-workout-push";
 import type { RepushVerdict } from "../application/trainingpeaks/trainingpeaks-repush-guard";
 import { useAnalytics } from "../contexts";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { buildTrainingPeaksPayload } from "./trainingpeaks-payload";
 import {
-  athleteIdOrRefusal,
   toTrainingPeaksPushFailure,
   type TrainingPeaksPushFailureOutcome,
 } from "./trainingpeaks-push-failure";
@@ -42,8 +41,11 @@ export type TrainingPeaksPushOptions = { allowCopy?: boolean };
  * absent or disabled export route fails closed with a visible cause, and
  * leaves the `pushed` state transition to `useEditorActions`.
  *
- * The athlete id comes from a live session probe rather than storage, because
- * it is the id the bridge will actually write against. Intensity thresholds
+ * The athlete id is read from the extension just before the write rather
+ * than from storage, because it is the id the bridge will actually write
+ * against; that read is where the extension mints its token. A verified
+ * sign-out on it asks the athlete to sign in, any other failure says
+ * TrainingPeaks is not answering. Intensity thresholds
  * come from the active profile's zones for the workout's sport; without them
  * the converter still produces a workout, warning for each target it had to
  * drop.
@@ -65,13 +67,10 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
       }
 
       try {
-        const probed = athleteIdOrRefusal(
-          await checkTrainingPeaksSession(extensionId)
-        );
-        if ("ok" in probed) return probed;
+        const athleteId = await readTrainingPeaksAthleteId(extensionId);
         const payload = buildTrainingPeaksPayload(
           { ...workout, krd: workout.krd },
-          probed.athleteId,
+          athleteId,
           profile
         );
         const verdict = await checkBeforeTrainingPeaksSend(

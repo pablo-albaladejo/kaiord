@@ -12,7 +12,7 @@ import { ledgerRepo } from "./trainingpeaks-push-fn";
 import { useTrainingPeaksPush } from "./use-trainingpeaks-push";
 
 const mocks = vi.hoisted(() => ({
-  checkSession: vi.fn(),
+  readAthleteId: vi.fn(),
   pushWorkout: vi.fn(),
 }));
 
@@ -20,9 +20,12 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: () => "tp-extension" },
 }));
 
-vi.mock("../adapters/trainingpeaks/trainingpeaks-transport", () => ({
-  checkTrainingPeaksSession: mocks.checkSession,
-}));
+vi.mock(
+  "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport",
+  () => ({
+    readTrainingPeaksAthleteId: mocks.readAthleteId,
+  })
+);
 
 vi.mock("@kaiord/trainingpeaks", () => ({
   krdToTrainingPeaksWorkout: (
@@ -80,24 +83,20 @@ const tpRow = async () =>
     destinationBridgeId: "trainingpeaks-bridge",
   }) as Promise<ExportLedgerEntry | undefined>;
 
+const ATHLETE_ID = 4242;
+
 describe("useTrainingPeaksPush re-push guard", () => {
   beforeEach(async () => {
     store.clear();
-    mocks.checkSession.mockResolvedValue({
-      authenticated: true,
-      athleteId: 4242,
-    });
+    mocks.readAthleteId.mockResolvedValue(ATHLETE_ID);
     mocks.pushWorkout.mockResolvedValue(FIRST_TP_ID);
     await pushOnce(record(TUESDAY));
     vi.clearAllMocks();
-    mocks.checkSession.mockResolvedValue({
-      authenticated: true,
-      athleteId: 4242,
-    });
+    mocks.readAthleteId.mockResolvedValue(ATHLETE_ID);
     mocks.pushWorkout.mockResolvedValue(COPY_TP_ID);
   });
 
-  it("should block a moved workout after the probe and send no workout write", async () => {
+  it("should block a moved workout after the athlete read and send no workout write", async () => {
     // Arrange
     const moved = record(THURSDAY);
 
@@ -109,7 +108,7 @@ describe("useTrainingPeaksPush re-push guard", () => {
       ok: false,
       block: { blocked: true, reason: "moved", recordedDate: TUESDAY },
     });
-    expect(mocks.checkSession).toHaveBeenCalledTimes(1);
+    expect(mocks.readAthleteId).toHaveBeenCalledTimes(1);
     expect(mocks.pushWorkout).not.toHaveBeenCalled();
   });
 

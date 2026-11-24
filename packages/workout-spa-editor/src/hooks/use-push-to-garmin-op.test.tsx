@@ -8,7 +8,11 @@ const doPush = vi.fn();
 
 vi.mock("../contexts", () => ({
   useAnalytics: () => ({ event: vi.fn(), pageView: vi.fn() }),
-  useGarminBridge: () => ({ pushWorkout: vi.fn(), features: {} }),
+  useGarminBridge: () => ({
+    pushWorkout: vi.fn(),
+    features: {},
+    connection: "not-answering",
+  }),
 }));
 vi.mock("../contexts/persistence-context", () => ({
   usePersistence: () => ({}),
@@ -54,8 +58,10 @@ describe("usePushToGarminOp", () => {
 
     // Assert
     expect(output).toEqual({ error: "push_failed" });
+    // The Garmin Connection does not work, so the toast carries its notice.
     expect(toast.error).toHaveBeenCalledWith(
-      "Couldn't send the workout to Garmin Connect"
+      "Couldn't send the workout to Garmin Connect",
+      "Garmin is not answering, so you cannot use it in Kaiord right now."
     );
     expect(toast.success).not.toHaveBeenCalled();
   });

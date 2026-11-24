@@ -9,10 +9,12 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ping } from "../adapters/train2go/connector/train2go-extension-transport";
 import { createDetectAction } from "./train2go-detect";
-import { ping } from "./train2go-extension-transport";
 
-vi.mock("./train2go-extension-transport", () => ({ ping: vi.fn() }));
+vi.mock("../adapters/train2go/connector/train2go-extension-transport", () => ({
+  ping: vi.fn(),
+}));
 const mockPing = vi.mocked(ping);
 
 const CACHE_TTL_EXPIRED_OFFSET_MS = 31_000;
@@ -112,6 +114,27 @@ describe("createDetectAction", () => {
     expect(state.sessionActive).toBe(false);
     expect(state.lastError).toBe("outdated");
   });
+
+  it.each([1, 2])(
+    "should read the session from an extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      mockPing.mockResolvedValue({
+        ok: true,
+        protocolVersion: version,
+        sessionActive: true,
+        externalUserId: null,
+        externalUserName: null,
+      });
+
+      // Act
+      await detect();
+
+      // Assert
+      expect(state.sessionActive).toBe(true);
+      expect(state.lastError).toBeNull();
+    }
+  );
 
   it("should use detection cache within 30s", async () => {
     // Arrange

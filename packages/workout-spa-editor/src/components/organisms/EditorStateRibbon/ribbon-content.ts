@@ -10,6 +10,12 @@
 import type { WorkoutState } from "../../../types/calendar-enums";
 import type { GarminGate } from "./use-garmin-gate";
 
+/** A Connection state the ribbon words through `connectionNotice`. */
+export type RibbonConnection = Exclude<
+  GarminGate,
+  "ready" | "export-disabled" | "checking"
+>;
+
 export type RibbonContent = {
   headlineKey: string;
   detailKey: string;
@@ -20,27 +26,21 @@ export type RibbonContent = {
   /** Present only when the fix is elsewhere. When it is absent the send
       button is the CTA, because nothing is in its way. */
   fixLabelKey?: string;
+  connection?: undefined;
 };
 
-const GATE_CONTENT: Record<Exclude<GarminGate, "ready">, RibbonContent> = {
-  "no-extension": {
-    headlineKey: "ribbon.noBridgeHeadline",
-    detailKey: "ribbon.noBridgeDetail",
-    fixLabelKey: "ribbon.noBridgeAction",
-    tone: "quiet",
-  },
-  "export-disabled": {
-    headlineKey: "ribbon.exportOffHeadline",
-    detailKey: "ribbon.exportOffDetail",
-    fixLabelKey: "ribbon.exportOffAction",
-    tone: "quiet",
-  },
-  "no-session": {
-    headlineKey: "ribbon.noSessionHeadline",
-    detailKey: "ribbon.noSessionDetail",
-    fixLabelKey: "ribbon.noSessionAction",
-    tone: "attention",
-  },
+/** The Connection's own notice: its message is the headline, its fix the
+    button, so the ribbon reads exactly like the Garmin card and popup. */
+export type RibbonNotice = {
+  connection: RibbonConnection;
+  tone: "quiet";
+};
+
+const EXPORT_OFF: RibbonContent = {
+  headlineKey: "ribbon.exportOffHeadline",
+  detailKey: "ribbon.exportOffDetail",
+  fixLabelKey: "ribbon.exportOffAction",
+  tone: "quiet",
 };
 
 /** States where a send is the thing the person came for. `pushed` is absent
@@ -74,10 +74,13 @@ export function resolveRibbonContent(
   gate: GarminGate,
   state: WorkoutState,
   placementNeedsAthlete = false
-): RibbonContent | null {
+): RibbonContent | RibbonNotice | null {
   const sendable =
     SENDABLE[state] ?? (placementNeedsAthlete ? PLACEMENT : undefined);
   if (!sendable) return null;
   if (gate === "ready") return sendable;
-  return GATE_CONTENT[gate];
+  if (gate === "export-disabled") return EXPORT_OFF;
+  // Nothing is worded before the first ping answers.
+  if (gate === "checking") return null;
+  return { connection: gate, tone: "quiet" };
 }

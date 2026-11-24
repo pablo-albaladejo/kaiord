@@ -11,17 +11,17 @@ import type {
   CoachingPingResult,
   CoachingTransport,
 } from "../../application/coaching/coaching-transport-port";
+import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type {
   Train2GoActivity,
   Train2GoComment,
-} from "../../store/train2go-extension-transport";
+} from "./connector/train2go-extension-transport";
 import {
   openTrain2Go,
-  ping,
   readDay,
   readWeek,
-} from "../../store/train2go-extension-transport";
-import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+} from "./connector/train2go-extension-transport";
+import { readProfile } from "./connector/train2go-read-profile";
 import { fetchZones } from "./train2go-fetch-zones";
 import { toCoachingActivityRecord } from "./train2go-record.converter";
 
@@ -55,8 +55,10 @@ export const createTrain2GoCoachingTransport = (
 ): CoachingTransport => ({
   source: TRAIN2GO,
 
+  // The connect flow links with this, so it is the explicit profile read,
+  // not the yes-or-no connection check.
   ping: async (): Promise<CoachingPingResult> => {
-    const res = await ping(getExtensionId());
+    const res = await readProfile(getExtensionId());
     return {
       sessionActive: res.sessionActive,
       externalUserId: res.externalUserId,

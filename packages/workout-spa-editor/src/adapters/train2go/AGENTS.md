@@ -9,6 +9,7 @@ Train2Go-specific adapter code: scrape the Train2Go coaching plan via the extens
 
 ## Key Files
 
+- `connector/` — the Train2Go Connector's reading (ADR 0004): `train2go-paths.ts` (what it asks for, each path on the extension's closed list), `train2go-extension-transport.ts`, `train2go-read-zones.ts` and `train2go-read-profile.ts` (each read through `adapters/bridge/connector-call.ts`: `request` answered raw, or the protocol-1 legacy action), `read-train2go-answers.ts` and the `parse-*` / `extract-comments` parsers (weekly, daily, comments, profile page kept to zones and weight), loaded on the first read through `load-train2go-answers.ts` so they stay out of the initial JS. Fixtures are Train2Go's bytes and are prettier-ignored. Contract test: `connector/train2go-connector-contract.test.ts`.
 - `train2go-record.converter.ts` / `.converter.test.ts` — raw Train2Go record → intermediate shape.
 - `coaching-record-to-activity.converter.ts` / `.converter.test.ts` — intermediate → `CoachingActivityRecord` (uses `buildCoachingActivityId` for the composite id).
 - `train2go-coaching-transport.ts` / `.test.ts` — request/response over the bridge transport for coaching scrape calls.

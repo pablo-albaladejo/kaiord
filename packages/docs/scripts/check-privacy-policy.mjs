@@ -60,7 +60,7 @@ const GARMIN_SECTION = "Kaiord for Garmin Extension";
 const TRAIN2GO_SECTION = "Kaiord for Train2Go Extension";
 const TANITA_SECTION = "Kaiord for Tanita Extension";
 const TRAININGPEAKS_SECTION = "Kaiord for TrainingPeaks Extension";
-const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
+const WHOOP_SECTION = "Kaiord for WHOOP Extension";
 
 // Bridge package -> its policy section and the hosts the policy claims the
 // extension may contact.
@@ -109,11 +109,11 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 14,
-  [TRAIN2GO_SECTION]: 11,
+  [GARMIN_SECTION]: 15,
+  [TRAIN2GO_SECTION]: 12,
   [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 16,
-  [WHOOP_SECTION]: 8,
+  [TRAININGPEAKS_SECTION]: 18,
+  [WHOOP_SECTION]: 9,
 };
 
 // A section with no recorded floor is a bridge being onboarded. It has to
@@ -246,7 +246,12 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar read filtered on the device",
     section: GARMIN_SECTION,
-    re: /filtered inside the extension's service worker[\s\S]*?nothing is sent to a Kaiord-operated server/i,
+    re: /filtered in the Kaiord App, in your browser[\s\S]*?nothing is sent to a Kaiord-operated server/i,
+  },
+  {
+    label: "Garmin answers handed to the App unread (thin Bridge)",
+    section: GARMIN_SECTION,
+    re: /hands the Kaiord App Garmin's answer as it came, without reading it/i,
   },
   {
     label: "Garmin calendar read purposes named",
@@ -312,9 +317,14 @@ export const REQUIRED_RULES = [
     re: /your coach's name and the notes your coach keeps about you/i,
   },
   {
-    label: "Train2Go profile-page read limited to zones and weight",
+    label: "Train2Go profile page kept by the App to zones and weight only",
     section: TRAIN2GO_SECTION,
-    re: /passes on only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight/i,
+    re: /which keeps only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight/i,
+  },
+  {
+    label: "Train2Go answers handed to the App unread (thin Bridge)",
+    section: TRAIN2GO_SECTION,
+    re: /hands it Train2Go's answer as it came, without reading it/i,
   },
   {
     label: "Train2Go no-third-party-sharing stated",
@@ -369,9 +379,9 @@ export const REQUIRED_RULES = [
     re: /injects no content script/i,
   },
   {
-    label: "Tanita single fixed read-only GET disclosed",
+    label: "Tanita read-only requests to one fixed export address disclosed",
     section: TANITA_SECTION,
-    re: /single, fixed, read-only `GET`/i,
+    re: /read-only requests to one fixed address, `[^`]+`: a `GET` that downloads the export and a `HEAD` that checks the connection/i,
   },
   {
     label: "Tanita no-third-party-sharing stated",
@@ -384,9 +394,9 @@ export const REQUIRED_RULES = [
     re: NO_TELEMETRY,
   },
   {
-    label: "Tanita session check downloading the whole export disclosed",
+    label: "Tanita session check by HEAD, downloading nothing, disclosed",
     section: TANITA_SECTION,
-    re: /Checking the Connection Downloads the Export/,
+    re: /Checking the Connection Downloads Nothing\*\*: .*it sends a `HEAD` request for the export, which returns no measurement/,
   },
   {
     label: "Tanita chrome.storage.local contents disclosed",
@@ -451,9 +461,19 @@ export const REQUIRED_RULES = [
     re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
   },
   {
-    label: "TrainingPeaks token minted on every connection check disclosed",
+    label: "TrainingPeaks connection check minting no token disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it/i,
+    re: /When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token/i,
+  },
+  {
+    label: "TrainingPeaks answers handed to the App unread (thin Bridge)",
+    section: TRAININGPEAKS_SECTION,
+    re: /hands the Kaiord App TrainingPeaks' answer as it came, without reading it/i,
+  },
+  {
+    label: "TrainingPeaks workout read kept by the App to its id and day",
+    section: TRAININGPEAKS_SECTION,
+    re: /to the Kaiord App, which keeps only that workout's id and day/i,
   },
   {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",
@@ -481,6 +501,11 @@ export const REQUIRED_RULES = [
     label: "WHOOP host disclosed",
     section: WHOOP_SECTION,
     re: /app\.whoop\.com/,
+  },
+  {
+    label: "WHOOP answers handed to the Kaiord App unread (thin Bridge)",
+    section: WHOOP_SECTION,
+    re: /WHOOP's answer is handed to the Kaiord App as it came, without being read/i,
   },
   {
     label: "WHOOP no-OAuth session-bearer nature disclosed",
@@ -684,7 +709,7 @@ export function checkPolicy(src, rules = REQUIRED_RULES) {
 // really have none.
 export const NO_ANALYTICS_CLAIM =
   /(?:\b(?:no|not|without|never)\b|n['’]t\b)[^.]*\banalytics\b/i;
-const BRIDGE_HEADING = /^## Kaiord (?:.+ Bridge|for .+) Extension$/;
+const BRIDGE_HEADING = /^## Kaiord for .+ Extension$/;
 
 export function checkNoAnalyticsClaim(src) {
   const violations = [];

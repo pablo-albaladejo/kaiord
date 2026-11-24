@@ -10,7 +10,8 @@ Port implementations. Each subdirectory holds the runtime code that satisfies a 
 ## Subdirectories
 
 - `analytics/` — `createUmamiAnalytics(websiteId)`, the `Analytics` port impl wired by `main.tsx`.
-- `bridge/` — discovery, ping/verify, transport, and operation-queue plumbing for the in-page extension bridges (Garmin + Train2Go).
+- `bridge/` — discovery, ping/verify, transport, and operation-queue plumbing for the five extensions, the Session check, and `connector-call.ts`: the one call every Connector makes (send with timeout, the protocol fallback, `readJson`, the failure each Connector throws, the 401/403 re-detect rule).
+- `<platform>/connector/` (`garmin`, `tanita`, `train2go`, `trainingpeaks`, `whoop`) — each Platform's Connector (ADR 0004): what it asks its Bridge for, how it reads the answer, and its contract test against the fake extension. Hooks and stores import a Connector's operation files (`*-transport.ts`, `*-operations.ts`), never its paths or readers.
 - `dexie/` — `KaiordDatabase` class, schema versions v1–v13, per-table repositories, migrations, and a `createDexiePersistence()` factory that returns a `PersistencePort`.
 - `train2go/` — Train2Go-specific record converters, coaching transport, sport map, fan-out and zones-sync orchestration (separate from `bridge/` because it sits on top of the bridge transport).
 

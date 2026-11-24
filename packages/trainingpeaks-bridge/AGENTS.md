@@ -19,27 +19,40 @@ vendored masters:
    (`credentials:"omit"` + `Authorization: Bearer`). A 401 re-runs the token
    exchange once (the "refresh").
 
-Raw metric JSON is returned verbatim; parsing lives in `@kaiord/trainingpeaks`,
-called SPA-side.
+**Thin Bridge** (`docs/adr/0004-thin-bridge-smart-connector.md`, protocol
+version 2): the App reaches it only through `{ action: "request", method,
+path, body? }`, which runs only an entry of the closed `ALLOWED` list in
+`background.js` (method + path pattern, and for a write the name of the body
+schema the vendored `bridge-request-gate.js` checks it against) and answers
+TrainingPeaks's answer unread but for its Session secrets (removed by
+the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
+how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/trainingpeaks/`). The App
+falls back to the protocol-1 actions for the store version. The internal
+channel uses `createInternalDispatch`: only the popup is answered, never a
+content script (`test/thin-bridge.test.js`).
+
+The token endpoint is not in `ALLOWED` (its answer is the token); the token is
+minted only for a real request or `read-athlete-id`, which the App sends just
+before a send or an import. Parsing lives in `@kaiord/trainingpeaks`, App-side.
 
 ## Key Files
 
-| File                                    | Description                                                                                                                                                                                                                  |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `background.js`                         | Service worker: path allowlist, read throttle, action routing.                                                                                                                                                               |
-| `tp-auth.js`                            | Bridge-specific dual transport (cookie→token→Bearer). Holds the TP host/paths.                                                                                                                                               |
-| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                                                                                                                                                                |
-| `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                                                                                                                                                                |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                                                                                                                  |
-| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.                                                                                                                                                     |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://tpapi.trainingpeaks.com/*`).                                                                                                                                                    |
-| `store-listing.md`                      | Store listing copy. Short and Detailed Description are a registered claims surface (`claims/trainingpeaks.json`, `pnpm lint:claims`).                                                                                        |
-| `privacy-justification.md`              | Permission justifications. A registered claims surface: every paragraph needs an entry in `claims/trainingpeaks.json`.                                                                                                       |
-| `test/token-confinement.test.js`        | The token stays in `chrome.storage.local`, no answer to any external action carries it, every request goes to `tpapi.trainingpeaks.com`, and the allowlist has no DELETE/PUT/PATCH. Proof for the listing and policy claims. |
+| File                                    | Description                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`                         | Service worker: closed list with body schemas, `request`, `read-athlete-id`, popup-only internal channel.                                                                                                                                                                                                              |
+| `tp-auth.js`                            | Bridge-specific dual transport (cookie→token→Bearer). Holds the TP host/paths.                                                                                                                                                                                                                                         |
+| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                                                                                                                                                                                                                                                          |
+| `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                                                                                                                                                                                                                                                          |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                                                                                                                                                                                                            |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.                                                                                                                                                                                                                                               |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://tpapi.trainingpeaks.com/*`).                                                                                                                                                                                                                                              |
+| `store-listing.md`                      | Store listing copy. Short and Detailed Description are a registered claims surface (`claims/trainingpeaks.json`, `pnpm lint:claims`).                                                                                                                                                                                  |
+| `privacy-justification.md`              | Permission justifications. A registered claims surface: every paragraph needs an entry in `claims/trainingpeaks.json`.                                                                                                                                                                                                 |
+| `test/token-confinement.test.js`        | A Session check makes no request and mints nothing; a token is minted only for a real request and stays in `chrome.storage.local`; no answer carries it; the athlete id goes only to `read-athlete-id`; every request goes to `tpapi.trainingpeaks.com`; no DELETE/PUT/PATCH. Proof for the listing and policy claims. |
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `session-fetch.js`, `bearer-fetch.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `session-fetch.js`, `bearer-fetch.js`,
 `kaiord-announce.js`, `bridge-popup-utils.js`, `bridge-popup-shell.js`,
 `popup.css`, and
 `test/{chrome-mock,bridge-envelope.test,bearer-fetch.test,bridge-popup-shell.test}.js`
@@ -58,15 +71,17 @@ match `BRIDGE_MANIFEST` in `background.js`.
 - The bridge NEVER parses metrics and NEVER imports `@kaiord/trainingpeaks` — it
   returns raw JSON; the SPA parses.
 - External dispatch is origin-pinned and action-allowlisted via the vendored
-  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-metrics` /
-  `push-weight` / `push-workout` / `read-workout` / `open-trainingpeaks` /
-  `set-theme`. `read-workout` reads one workout by id and returns only its id
-  and day, so the App can check its own copy before a re-send.
+  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `request` / `read-athlete-id` /
+  `open-trainingpeaks` / `set-theme`. `read-athlete-id` is read just before a
+  send and is where the token is minted; `checkSession` asks TrainingPeaks
+  nothing (`signed-in` from a valid stored token, else `not-checked`). The App's Connector reads one workout by id and keeps only its id and day.
 - The session cookie is never read, stored, or logged; the extension only holds
-  the minted access token. Session presence is a boolean only.
+  the minted access token. A Session check never mints it (#1643).
 - Weight-unit assumption: the type-9 metric value is kilograms (see
   `@kaiord/trainingpeaks` `TRAININGPEAKS_WEIGHT_UNITS`).
-- English-only: `_locales/en/` is the sole locale (hard constraint).
+- English and Spanish: `_locales/en/` (default) and `_locales/es/`, same keys,
+  chosen by the browser's UI language; the name is "Kaiord for TrainingPeaks" in both
+  (R-BridgeLocalesEnglishSpanish, `scripts/check-bridge-locales-en-es.test.mjs`).
 - Changing what the extension does (a new path, action or stored key) changes
   the registered texts: rewrite the sentence and its entry in
   `claims/trainingpeaks.json`, or `pnpm lint:claims` and

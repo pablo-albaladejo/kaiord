@@ -2,21 +2,23 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { connectionFixHref } from "../../../application/connections/connection-fix-target";
 import {
   failed,
   type PlacementResult,
 } from "../../../application/garmin-placement/placement-result";
 import { appI18n, setActiveLocale } from "../../../i18n/i18n";
 import type { GarminRemovalEntry } from "../../../types/garmin-removal-entry";
-import {
-  GARMIN_BRIDGE_STORE_URL,
-  PlacementFeedback,
-} from "./PlacementFeedback";
+import { PlacementFeedback } from "./PlacementFeedback";
 
 const locale = vi.hoisted(() => ({ active: "en" }));
 
 vi.mock("../../../i18n/LocaleProvider", () => ({
   useActiveLocale: () => locale.active,
+}));
+
+vi.mock("../../../contexts", () => ({
+  useGarminBridge: () => ({ detectExtension: vi.fn() }),
 }));
 
 const DATE = "2026-10-05";
@@ -149,8 +151,11 @@ describe("PlacementFeedback", () => {
 
     // Assert
     expect(
-      screen.getByRole("link", { name: "Update the extension" })
-    ).toHaveAttribute("href", GARMIN_BRIDGE_STORE_URL);
+      screen.getByText("In your Garmin library, with no date.")
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Update Kaiord for Garmin" })
+    ).toHaveAttribute("href", connectionFixHref("update", "garmin-bridge"));
   });
 
   it("should blame neither the page nor the athlete in a browser without Web Locks", () => {
@@ -182,6 +187,38 @@ describe("PlacementFeedback", () => {
 
   it("should word a failure as an error", () => {
     // Arrange
+    const result = failed("record-deleted", false);
+
+    // Act
+    renderFeedback(result);
+
+    // Assert
+    expect(
+      screen.getByText("This workout was deleted while it was being sent.")
+    ).toHaveClass("text-[var(--danger-text)]");
+  });
+
+  it("should say the App did not load the send, with Reload, and never blame Garmin", async () => {
+    // Arrange
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+    const result = failed("app-part-not-loaded", true);
+    renderFeedback(result);
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Reload" }));
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Part of the Kaiord App did not load, so nothing was sent to Garmin."
+    );
+    expect(screen.queryByText(/not answering/i)).not.toBeInTheDocument();
+    expect(reload).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("should show a refused sign-in as the Garmin Connection's notice", () => {
+    // Arrange
     const result = failed("needs-reauth", false);
 
     // Act
@@ -189,8 +226,9 @@ describe("PlacementFeedback", () => {
 
     // Assert
     expect(
-      screen.getByText("Sign in to Garmin Connect again, then retry.")
-    ).toHaveClass("text-[var(--danger-text)]");
+      screen.getByRole("link", { name: "Sign in to Garmin" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/then retry/)).not.toBeInTheDocument();
   });
 
   it("should name the date an entry may remain on after a deletion", () => {

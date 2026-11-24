@@ -18,6 +18,8 @@ import {
   type BridgeSessionSignal,
   sourceStatus,
 } from "./connection-source-status";
+import { connectionReasonOf } from "./connection-state";
+import { sourceConnectionOf } from "./source-connection";
 
 export type ConnectionSourceSignals = BridgeRouteSignals & {
   record: (integrationId: string) => ConnectionRecord | undefined;
@@ -25,6 +27,8 @@ export type ConnectionSourceSignals = BridgeRouteSignals & {
   isDiscovered: (bridgeId: string) => boolean;
   /** Injected rather than inferred — see connection-source-status. */
   hasSessionProbe: (bridgeId: string) => boolean;
+  /** Announced on a protocol the App does not accept, so not registered. */
+  isOutdated?: (bridgeId: string) => boolean;
   lastSyncAt: (bridgeId: string) => string | undefined;
 };
 
@@ -58,8 +62,8 @@ const buildOne = (
     bridgeDetected: detected,
     disconnected: record?.status === "disconnected",
     sessionVerifiable: bridgeId !== null && s.hasSessionProbe(bridgeId),
-    needsReauth: state?.needsReauth === true,
-    outdated: state?.outdated === true,
+    connection: sourceConnectionOf(entry, s, record?.status === "disconnected"),
+    reason: connectionReasonOf(state),
     lastSyncAt: bridgeId === null ? undefined : s.lastSyncAt(bridgeId),
     importTypes:
       detected && bridgeId !== null

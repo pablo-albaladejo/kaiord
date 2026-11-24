@@ -13,7 +13,7 @@ import { bridgeDiscovery } from "../../../../adapters/bridge/bridge-discovery";
 import {
   readWhoopFetch,
   readWhoopStatus,
-} from "../../../../adapters/bridge/whoop-transport";
+} from "../../../../adapters/whoop/connector/whoop-transport";
 import { importWhoopLabs } from "../../../../application/whoop/import-whoop-labs.use-case";
 import { WHOOP_BRIDGE_ID } from "../../../../application/whoop/whoop-lab-provenance";
 import { usePersistence } from "../../../../contexts/persistence-context";
@@ -37,7 +37,13 @@ const useWhoopConnected = (isDiscovered: boolean): boolean => {
     let cancelled = false;
     readWhoopStatus(extensionId)
       .then((status) => {
-        if (!cancelled) setConnected(status.connected && status.userId != null);
+        // The typed outcome when the extension sends one; an older one is
+        // read through its id.
+        const signedIn =
+          status.session !== undefined
+            ? status.session === "signed-in"
+            : status.connected && status.userId != null;
+        if (!cancelled) setConnected(signedIn);
       })
       .catch(() => {
         if (!cancelled) setConnected(false);

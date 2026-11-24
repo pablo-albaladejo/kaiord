@@ -3,17 +3,17 @@
 
 # test/fixtures/
 
-Test data: HTML fragments and JSON responses from Train2Go APIs, used to validate parsers and message handlers without a live session.
+Test data: HTML fragments and JSON responses from Train2Go APIs, used to validate what the extension still reads for its popup and Session check, without a live session. The daily and profile-page fixtures moved with their parsers to the Kaiord App's Train2Go Connector (`packages/workout-spa-editor/src/adapters/train2go/connector/fixtures/`); a copy of two of them stays here to prove that the extension removes Train2Go's anti-forgery token from every answer.
 
 ## Files
 
-| File                  | Source                                             | Purpose                                     |
-| --------------------- | -------------------------------------------------- | ------------------------------------------- |
-| `weekly.html`         | Train2Go `/api/v2/workplan/weekly/{date}` response | Tests `parseWeeklyHtml` activity extraction |
-| `daily.html`          | Train2Go `/api/v2/workplan/daily/{date}` response  | Tests `parseDailyHtml` activity extraction  |
-| `details-active.html` | Train2Go `/user/details` page (server-rendered)    | Tests `parseDetailsHtml` zones extraction   |
-| `ping-active.json`    | Train2Go `/api/v2/profile/ping` response           | Tests active session detection              |
-| `ping-expired.json`   | Train2Go `/api/v2/profile/ping` response           | Tests expired session detection             |
+| File                       | Source                                                       | Purpose                                       |
+| -------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| `weekly.html`              | Train2Go `/api/v2/workplan/weekly/{date}` response           | Tests the popup's `parseWeeklyHtml` counts    |
+| `ping-active.json`         | Train2Go `/api/v2/profile/ping` response                     | Tests active session detection                |
+| `ping-expired.json`        | Train2Go `/api/v2/profile/ping` response                     | Tests expired session detection               |
+| `details-active.html`      | Train2Go `/user/details` page (copy of the App's fixture)    | Its `_token` field is removed from the answer |
+| `daily-with-comments.html` | Train2Go daily workplan fragment (copy of the App's fixture) | Its `_token` field is removed from the answer |
 
 ## Usage in Tests
 
@@ -35,15 +35,14 @@ it("should parse activities from weekly HTML", () => {
   expect(activities[0]).toMatchObject({
     id: expect.any(Number),
     date: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
-    sport: expect.any(String),
-    title: expect.any(String),
+    status: expect.any(Number),
   });
 });
 ```
 
 ## Fixture Formats
 
-### weekly.html, daily.html
+### weekly.html
 
 HTML fragments containing:
 
@@ -53,14 +52,6 @@ HTML fragments containing:
 - Titles in `title="..."` attributes
 
 Used by `parser.js` with regex-based extraction (no DOM parsing in fixtures).
-
-### details-active.html
-
-Server-rendered HTML page with:
-
-- User profile display
-- Training zones table with low/high thresholds (HR, power, pace)
-- Extracted via `parseDetailsHtml` to populate profile zones
 
 ### ping-active.json, ping-expired.json
 

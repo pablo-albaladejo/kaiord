@@ -51,16 +51,60 @@ const fakeTrainingPeaks = (dataStatus = 200) =>
     };
   });
 
+const METRICS_PATH = `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/2026-10-23/2026-11-22`;
+const readMetrics = {
+  action: "request",
+  method: "GET",
+  path: METRICS_PATH,
+};
+
+// Every entry of the closed list, as the Kaiord App's Connector sends it.
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
   { action: "checkSession" },
-  { action: "read-metrics", start: "2026-10-23", end: "2026-11-22" },
-  { action: "push-weight", metric: { details: [{ type: 9, value: 70 }] } },
+  readMetrics,
   {
-    action: "push-workout",
-    workout: { workoutDay: "2026-11-23", title: "Easy run", structure: "{}" },
+    action: "request",
+    method: "POST",
+    path: `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`,
+    body: {
+      athleteId: ATHLETE_ID,
+      timeStamp: "2026-11-23T07:00:00Z",
+      id: null,
+      details: [
+        {
+          type: 9,
+          label: "Weight",
+          value: 70,
+          time: "2026-11-23T07:00:00Z",
+          units: "kg",
+          formatedUnits: "kg",
+        },
+      ],
+    },
   },
-  { action: "read-workout", workoutId: "4242" },
+  {
+    action: "request",
+    method: "POST",
+    path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts`,
+    body: {
+      athleteId: ATHLETE_ID,
+      workoutId: 0,
+      workoutDay: "2026-11-23",
+      title: "Easy run",
+      description: null,
+      workoutTypeValueId: 3,
+      totalTimePlanned: 1,
+      publicSettingValue: 0,
+      structure: "{}",
+    },
+  },
+  {
+    action: "request",
+    method: "GET",
+    path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts/4242`,
+  },
+  { action: "read-athlete-id" },
   { action: "set-theme", theme: "dark" },
   { action: "open-trainingpeaks" },
 ];
@@ -74,6 +118,16 @@ const answersToEveryAction = async () => {
   return answers;
 };
 
+const CHECK_KEYS = [
+  "authenticated",
+  "capabilities",
+  "id",
+  "name",
+  "protocolVersion",
+  "session",
+  "version",
+];
+
 const leaks = (value) => JSON.stringify(value).includes(SECRET);
 
 describe("token confinement", () => {
@@ -85,20 +139,64 @@ describe("token confinement", () => {
     vi.restoreAllMocks();
   });
 
-  it("should mint a token and keep it in chrome.storage.local when the session is checked", async () => {
+  it("should check a session with no request, minting nothing and storing nothing", async () => {
     // Arrange
     fakeTrainingPeaks();
 
     // Act
     const answer = await send({ action: "checkSession" });
+
+    // Assert
+    expect(fetch).not.toHaveBeenCalled();
+    expect(chrome.storage.local.set).not.toHaveBeenCalled();
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data.session).toBe("not-checked");
+    expect(answer.data.authenticated).toBe(false);
+  });
+
+  it("should report signed in from a token a real request minted while it is still valid, and hand over no athlete id", async () => {
+    // Arrange
+    fakeTrainingPeaks();
+    await send(readMetrics);
+    fetch.mockClear();
+    chrome.storage.local.set.mockClear();
+
+    // Act
+    const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(fetch).not.toHaveBeenCalled();
+    expect(chrome.storage.local.set).not.toHaveBeenCalled();
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data.session).toBe("signed-in");
+    expect(JSON.stringify(answer)).not.toContain(String(ATHLETE_ID));
+  });
+
+  it("should mint a token and keep it in chrome.storage.local only when a real request is about to use it", async () => {
+    // Arrange
+    fakeTrainingPeaks();
+
+    // Act
+    await send(readMetrics);
     const stored = await chrome.storage.local.get("tpAccessToken");
 
     // Assert
-    expect(answer.data.authenticated).toBe(true);
     expect(stored.tpAccessToken.accessToken).toBe(SECRET);
-    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
-      "https://tpapi.trainingpeaks.com/users/v3/token",
+    expect(fetch.mock.calls.map(([url]) => new URL(url).pathname)).toEqual([
+      "/users/v3/token",
+      `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/2026-10-23/2026-11-22`,
     ]);
+  });
+
+  it("should hand the athlete id only to the read the Kaiord App makes just before a write", async () => {
+    // Arrange
+    fakeTrainingPeaks();
+
+    // Act
+    const answer = await send({ action: "read-athlete-id" });
+
+    // Assert
+    expect(answer.data).toEqual({ athleteId: ATHLETE_ID });
   });
 
   it("should answer no external action with the token, when TrainingPeaks answers", async () => {
@@ -124,6 +222,24 @@ describe("token confinement", () => {
     // Assert
     expect(answers.some((answer) => answer.ok === false)).toBe(true);
     expect(leaks(answers)).toBe(false);
+  });
+
+  it("should refuse the App a request to the token endpoint, whose answer is the token", async () => {
+    // Arrange
+    fakeTrainingPeaks(200);
+
+    // Act
+    const answer = await send({
+      action: "request",
+      method: "GET",
+      path: "/users/v3/token",
+    });
+
+    // Assert
+    expect(answer.ok).toBe(false);
+    expect(answer.error).toBe("Request not allowed");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(leaks(answer)).toBe(false);
   });
 
   it("should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else", async () => {

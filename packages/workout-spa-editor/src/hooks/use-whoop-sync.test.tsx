@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readWhoopStatus } from "../adapters/bridge/whoop-transport";
+import { readWhoopUserId } from "../adapters/whoop/connector/whoop-user-transport";
 import { syncWhoopActivities } from "../application/whoop/sync-whoop-activities.use-case";
 import { syncWhoopCycles } from "../application/whoop/sync-whoop-cycles.use-case";
 import { syncWhoopHeartRate } from "../application/whoop/sync-whoop-heart-rate.use-case";
@@ -17,8 +17,8 @@ import { useWhoopSync } from "./use-whoop-sync";
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
 }));
-vi.mock("../adapters/bridge/whoop-transport", () => ({
-  readWhoopStatus: vi.fn(),
+vi.mock("../adapters/whoop/connector/whoop-user-transport", () => ({
+  readWhoopUserId: vi.fn(),
   readWhoopFetch: vi.fn(),
 }));
 vi.mock("../application/whoop/sync-whoop-cycles.use-case", () => ({
@@ -41,7 +41,7 @@ vi.mock("./use-discovered-bridges", () => ({
 const NO_FIRE_SETTLE_MS = 5 as const;
 
 const mockedGetExtensionId = vi.mocked(bridgeDiscovery.getExtensionId);
-const mockedReadStatus = vi.mocked(readWhoopStatus);
+const mockedReadUserId = vi.mocked(readWhoopUserId);
 const mockedSyncCycles = vi.mocked(syncWhoopCycles);
 const mockedSyncHeartRate = vi.mocked(syncWhoopHeartRate);
 const mockedSyncActivities = vi.mocked(syncWhoopActivities);
@@ -60,14 +60,7 @@ const wrap = (children: ReactNode) => (
   </PersistenceProvider>
 );
 
-// Epoch-millis, matching the extension's `whoopCapturedAt: Date.now()`.
-const CAPTURED_AT_MS = 1_720_000_000_000;
-
-const connectedStatus = {
-  connected: true,
-  userId: 42,
-  capturedAt: CAPTURED_AT_MS,
-};
+const WHOOP_USER_ID = 42;
 
 describe("useWhoopSync", () => {
   afterEach(() => {
@@ -78,7 +71,7 @@ describe("useWhoopSync", () => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue(connectedStatus);
+    mockedReadUserId.mockResolvedValue(WHOOP_USER_ID);
     mockedSyncCycles.mockResolvedValue({ ok: false, reason: "no-policy" });
     mockedSyncHeartRate.mockResolvedValue({ ok: false, reason: "no-policy" });
     mockedSyncActivities.mockResolvedValue({
@@ -137,12 +130,12 @@ describe("useWhoopSync", () => {
       profileId: "p1",
     },
   ])(
-    "should not read status when $scenario",
+    "should not read the WHOOP id when $scenario",
     async ({ bridges, extensionId, profileId }) => {
       // Arrange
       mockedUseDiscoveredBridges.mockReturnValue(bridges);
       mockedGetExtensionId.mockReturnValue(extensionId);
-      mockedReadStatus.mockResolvedValue(connectedStatus);
+      mockedReadUserId.mockResolvedValue(WHOOP_USER_ID);
       renderHook(() => useWhoopSync(profileId), {
         wrapper: ({ children }) => wrap(children),
       });
@@ -151,31 +144,22 @@ describe("useWhoopSync", () => {
       await settle();
 
       // Assert
-      expect(mockedReadStatus).not.toHaveBeenCalled();
+      expect(mockedReadUserId).not.toHaveBeenCalled();
     }
   );
 
-  it.each([
-    {
-      scenario: "status.connected is false",
-      status: { connected: false, userId: 42, capturedAt: null },
-    },
-    {
-      scenario: "status.userId is null",
-      status: { connected: true, userId: null, capturedAt: null },
-    },
-  ])("should not sync when $scenario", async ({ status }) => {
+  it("should not sync when the extension holds no captured session", async () => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue(status);
+    mockedReadUserId.mockResolvedValue(null);
     renderHook(() => useWhoopSync("p1"), {
       wrapper: ({ children }) => wrap(children),
     });
 
     // Act
     await waitFor(() => {
-      expect(mockedReadStatus).toHaveBeenCalledTimes(1);
+      expect(mockedReadUserId).toHaveBeenCalledTimes(1);
     });
     await settle();
 
@@ -190,7 +174,7 @@ describe("useWhoopSync", () => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue(connectedStatus);
+    mockedReadUserId.mockResolvedValue(WHOOP_USER_ID);
     mockedSyncCycles.mockResolvedValue({ ok: false, reason: "no-policy" });
     mockedSyncHeartRate.mockResolvedValue({ ok: false, reason: "no-policy" });
     mockedSyncActivities.mockResolvedValue({
@@ -224,18 +208,18 @@ describe("useWhoopSync", () => {
     });
   });
 
-  it("should swallow a thrown readWhoopStatus without an unhandled rejection", async () => {
+  it("should swallow a thrown WHOOP id read without an unhandled rejection", async () => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockRejectedValue(new Error("no session token"));
+    mockedReadUserId.mockRejectedValue(new Error("no session token"));
     renderHook(() => useWhoopSync("p1"), {
       wrapper: ({ children }) => wrap(children),
     });
 
     // Act
     await waitFor(() => {
-      expect(mockedReadStatus).toHaveBeenCalledTimes(1);
+      expect(mockedReadUserId).toHaveBeenCalledTimes(1);
     });
     await settle();
 

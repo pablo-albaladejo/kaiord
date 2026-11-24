@@ -32,23 +32,3 @@ export const toTrainingPeaksPushFailure = (
   if (failure?.needsReauth === true) return { ok: false, reason: "sign-in" };
   return { ok: false, reason: "not-answering" };
 };
-
-type ProbedSession = {
-  authenticated: boolean;
-  athleteId?: number;
-  needsReauth?: boolean;
-};
-
-/** The athlete id to write against, or why the push must stop here. An older
-    extension omits `needsReauth`, so only `false` means "not answering". */
-export const athleteIdOrRefusal = (
-  session: ProbedSession
-): { athleteId: number } | TrainingPeaksPushFailureOutcome => {
-  if (!session.authenticated && session.needsReauth === false) {
-    return { ok: false, reason: "not-answering" };
-  }
-  if (!session.authenticated || session.athleteId === undefined) {
-    return { ok: false, reason: "sign-in" };
-  }
-  return { athleteId: session.athleteId };
-};

@@ -22,7 +22,9 @@ const queueMint = (accessToken = "minted", oauth1 = "OT/OS") => {
   fetch
     .mockResolvedValueOnce(textResp("<html>...ticket=ST-9-ABCdef...</html>"))
     .mockResolvedValueOnce(textResp(`oauth_token=${t}&oauth_token_secret=${s}`))
-    .mockResolvedValueOnce(jsonResp({ access_token: accessToken, expires_in: 3600 }));
+    .mockResolvedValueOnce(
+      jsonResp({ access_token: accessToken, expires_in: 3600 })
+    );
 };
 
 describe("garmin-oauth.js", () => {
@@ -93,11 +95,13 @@ describe("garmin-oauth.js", () => {
     });
 
     it("throws needsReauth when the session yields no ticket", async () => {
-      fetch.mockResolvedValueOnce(textResp("<html><form>sign in</form></html>"));
-
-      await expect(garminOAuth.getTicketFromSession(fetch)).rejects.toMatchObject(
-        { needsReauth: true, retryable: true }
+      fetch.mockResolvedValueOnce(
+        textResp("<html><form>sign in</form></html>")
       );
+
+      await expect(
+        garminOAuth.getTicketFromSession(fetch)
+      ).rejects.toMatchObject({ needsReauth: true, retryable: true });
     });
   });
 
@@ -107,7 +111,10 @@ describe("garmin-oauth.js", () => {
 
       const { oauth1, oauth2 } = await garminOAuth.mintFromSession(fetch);
 
-      expect(oauth1).toEqual({ oauth_token: "OT-1", oauth_token_secret: "OS-1" });
+      expect(oauth1).toEqual({
+        oauth_token: "OT-1",
+        oauth_token_secret: "OS-1",
+      });
       expect(oauth2.access_token).toBe("bearer-1");
       expect(oauth2.expires_at).toEqual(expect.any(Number));
 
@@ -163,7 +170,9 @@ describe("garmin-oauth.js", () => {
   describe("exchange", () => {
     it("stamps expires_at from expires_in", async () => {
       vi.spyOn(Date, "now").mockReturnValue(1_000_000 * 1000);
-      fetch.mockResolvedValueOnce(jsonResp({ access_token: "a", expires_in: 100 }));
+      fetch.mockResolvedValueOnce(
+        jsonResp({ access_token: "a", expires_in: 100 })
+      );
 
       const oauth2 = await garminOAuth.exchange(
         { oauth_token: "t", oauth_token_secret: "s" },
@@ -177,7 +186,10 @@ describe("garmin-oauth.js", () => {
       fetch.mockResolvedValueOnce(textResp("nope", false, 401));
 
       await expect(
-        garminOAuth.exchange({ oauth_token: "t", oauth_token_secret: "s" }, fetch)
+        garminOAuth.exchange(
+          { oauth_token: "t", oauth_token_secret: "s" },
+          fetch
+        )
       ).rejects.toMatchObject({ needsReauth: true });
     });
   });
@@ -202,12 +214,12 @@ describe("garmin-oauth.js", () => {
     it("treats a missing or past expires_at as expired (with skew)", () => {
       expect(garminOAuth.isOAuth2Expired(null)).toBe(true);
       expect(garminOAuth.isOAuth2Expired({ access_token: "b" })).toBe(true);
-      expect(
-        garminOAuth.isOAuth2Expired({ expires_at: nowSec() - 1 })
-      ).toBe(true);
-      expect(
-        garminOAuth.isOAuth2Expired({ expires_at: nowSec() + 3600 })
-      ).toBe(false);
+      expect(garminOAuth.isOAuth2Expired({ expires_at: nowSec() - 1 })).toBe(
+        true
+      );
+      expect(garminOAuth.isOAuth2Expired({ expires_at: nowSec() + 3600 })).toBe(
+        false
+      );
     });
   });
 
@@ -492,7 +504,7 @@ describe("garmin-oauth.js", () => {
     });
   });
 
-  describe("connectapiUpload", () => {
+  describe("connectapiFetch with a FormData body", () => {
     it("should POST a FormData body with Bearer auth, no cookies, and no JSON content-type", async () => {
       // Arrange
       await garminOAuth.saveTokens({
@@ -505,8 +517,9 @@ describe("garmin-oauth.js", () => {
       form.append("file", new Blob([new Uint8Array([1, 2, 3])]), "x.fit");
 
       // Act
-      const res = await garminOAuth.connectapiUpload(
+      const res = await garminOAuth.connectapiFetch(
         "/upload-service/upload/.fit",
+        "POST",
         form,
         fetch
       );
@@ -524,7 +537,7 @@ describe("garmin-oauth.js", () => {
       expect(init.body).toBeInstanceOf(FormData);
     });
 
-    it("re-mints and retries once on a 401 before the upload succeeds", async () => {
+    it("should re-mint and retry once on a 401 before the upload succeeds", async () => {
       // Arrange
       await garminOAuth.saveTokens({
         oauth1: { oauth_token: "t", oauth_token_secret: "s" },
@@ -537,8 +550,9 @@ describe("garmin-oauth.js", () => {
       form.append("file", new Blob([new Uint8Array([9])]), "x.fit");
 
       // Act
-      const res = await garminOAuth.connectapiUpload(
+      const res = await garminOAuth.connectapiFetch(
         "/upload-service/upload/.fit",
+        "POST",
         form,
         fetch
       );

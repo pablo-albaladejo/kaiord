@@ -6,45 +6,42 @@
  * user's own logged-in session cookie. All logic talks to background.js via
  * internal runtime messages.
  *
- * The primary CTA is whatever fixes the current state: going to TrainingPeaks
- * when the session is missing, opening the Kaiord editor when the metrics API
- * is reachable.
- *
- * Two shapes of "not signed in", told apart by the stored health record: a
- * bridge never observed working is still being set up, while one that worked
- * and stopped is an outage and says since when.
+ * A working Connection opens the Kaiord editor. Anything else shows one
+ * notice with one fix, worded by the vendored connection-notices.js — the
+ * same wording the Kaiord App shows — and, once an earlier open recorded the
+ * outage in the health record, since when.
  *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
  * bridge-popup-shell.js and bridge-popup-health.js (see popup.html script
  * order).
  */
 
-/* global msg, $, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
-   renderConsequence, renderSkeleton, renderCtas */
+/* global msg, $, uiLocale, localizePage, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
+   renderConsequence, renderSkeleton, renderCtas, renderBrokenConnection,
+   KAIORD_CONNECTION_NOTICES */
 
 const OPEN_TRAININGPEAKS_URL = "https://app.trainingpeaks.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "TrainingPeaks";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for TrainingPeaks",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
   connectedCause: "Reading your body metrics through your session.",
-  notSignedIn: "Not signed in",
-  notSignedInCause:
-    "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
-  sessionEnded: "Session ended",
-  sessionEndedCause:
-    "Nothing has reached Kaiord since $1. Sign in at trainingpeaks.com again and the bridge mints a fresh token.",
+  outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
   captionFeeds: "Feeds Kaiord",
   captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
   typeWeightBack: "Weight ↑ back to TrainingPeaks",
-  weightManualFallback: "Weight currently comes from manual entry.",
   openEditor: "Open Kaiord editor",
-  openTrainingPeaksPrimary: "Open TrainingPeaks",
-  setUpInKaiord: "Set up in Kaiord ↗",
   openTrainingPeaks: "Open TrainingPeaks ↗",
   refresh: "Refresh",
 };
@@ -109,29 +106,68 @@ const renderConnected = () => {
   });
 };
 
-/* `since` is the outage start Kaiord already knew about, or null when this is
-   the first probe that ever failed. Only the first case may name a date. */
-const renderNotSignedIn = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderStatusBlock($, msg, {
-    tone: dated ? "warn" : "muted",
-    mark: dated ? "alert" : "dot",
-    verdictKey: dated ? "sessionEnded" : "notSignedIn",
-    causeKey: dated ? "sessionEndedCause" : "notSignedInCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
-  });
-  // Nothing flows in either direction yet, so one dashed row covers both.
-  renderChips($, chipsFor([...FEED_KEYS, ...FUTURE_KEYS], "dashed"), {
-    caption: msg("captionWillFeed"),
-  });
+// The Connection's state from this popup's own check. When it is not, `needsReauth` says
+// whether the Platform refused the sign-in or merely failed to answer.
+// An extension with the cheap check answers the typed `session` outcome;
+// only "signed-out" there is TrainingPeaks' own refusal.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
+};
+
+const connectionStateOf = (res) => {
+  const typed = res.ok ? TYPED_STATE[res.data?.session] : undefined;
+  if (typed) return typed;
+  if (res.ok && res.data?.authenticated) return "working";
+  if (res.ok && res.data?.needsReauth === true) return "signed-out";
+  return "not-answering";
+};
+
+/* One notice, one fix. `since` is the outage start Kaiord already knew about,
+   or null when this is the first probe that ever failed; only then may the
+   notice carry a date. */
+const renderBroken = (state, since) => {
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_TRAININGPEAKS_URL,
+      onRetry: () => refresh(),
+      formatSince: formatSinceDate,
+    }
+  );
+  renderChips($, []);
   renderChips($, [], { region: "future-region" });
-  renderConsequence($, [msg("weightManualFallback")]);
+  renderConsequence($, []);
+};
+
+/* The check asked nothing: TrainingPeaks offers no request that tells a
+   Session apart without minting a token, and no token is held. Nothing was
+   learned, so no outage is recorded and nothing claims the athlete is signed
+   out; the chips and actions are the signed-in ones a first read would use. */
+const renderNotChecked = () => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, chipsFor(FEED_KEYS), { caption: msg("captionFeeds") });
+  renderChips($, chipsFor(FUTURE_KEYS, "dashed"), {
+    caption: msg("captionWillFeed"),
+    region: "future-region",
+  });
+  renderConsequence($, []);
   renderCtas($, {
-    primaryLabel: msg("openTrainingPeaksPrimary"),
-    primaryHref: OPEN_TRAININGPEAKS_URL,
-    secondaryLabel: msg("setUpInKaiord"),
-    secondaryHref: OPEN_EDITOR_URL,
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openTrainingPeaks"),
+    secondaryHref: OPEN_TRAININGPEAKS_URL,
   });
 };
 
@@ -145,16 +181,21 @@ const refresh = async () => {
   });
   renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
-  const authenticated = res.ok ? !!res.data?.authenticated : false;
-  const health = await recordProbe(authenticated);
-  if (authenticated) renderConnected();
-  else renderNotSignedIn(health.since);
+  const state = connectionStateOf(res);
+  if (state === "not-checked") {
+    renderNotChecked();
+    showRefresh(true);
+    return;
+  }
+  const health = await recordProbe(state === "working");
+  if (state === "working") renderConnected();
+  else renderBroken(state, health.since);
   showRefresh(true);
 };
 
 $("refresh-btn").addEventListener("click", () => refresh());
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   refresh();
 });

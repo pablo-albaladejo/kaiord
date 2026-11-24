@@ -84,12 +84,34 @@ test.describe("Garmin calendar placement", () => {
 
     // Assert
     await expect(ribbon(page)).toContainText(
-      "update the Kaiord extension for Garmin"
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is updated."
     );
     await expect(
-      ribbon(page).getByRole("link", { name: "Update the extension" })
+      ribbon(page).getByRole("link", { name: "Update Kaiord for Garmin" })
     ).toHaveAttribute("href", GARMIN_BRIDGE_STORE_URL);
     expect(await garminStubActions(page)).toEqual(["push"]);
+  });
+
+  test("should say the App did not load the send, with Reload, and ask Garmin nothing", async ({
+    page,
+  }) => {
+    // Arrange
+    await openReadyWorkout(page, page);
+    await page.route(/garmin-workout-operations/, (route) => route.abort());
+
+    // Act
+    await page.getByTestId("send-to-garmin-button").click();
+
+    // Assert
+    await expect(ribbon(page)).toContainText(
+      "Part of the Kaiord App did not load, so nothing was sent to Garmin."
+    );
+    await expect(
+      ribbon(page).getByRole("button", { name: "Reload" })
+    ).toBeVisible();
+    await expect(ribbon(page)).not.toContainText("not answering");
+    await expect(page.getByTestId("send-to-garmin-button")).toBeEnabled();
+    expect(await garminStubActions(page)).toEqual([]);
   });
 
   test("should keep an uncertain placement across a reload until the athlete confirms it (AC-34)", async ({

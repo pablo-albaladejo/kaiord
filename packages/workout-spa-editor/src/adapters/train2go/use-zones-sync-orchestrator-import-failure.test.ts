@@ -14,8 +14,11 @@ vi.mock("../../lib/lazy-import", () => ({
 
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
 
-const ZONES_FETCH_FAILED =
-  "Train2Go is not answering, so your zones were not synced. Try again.";
+// The toast's title, and the Train2Go Connection's own notice as its detail.
+const ZONES_FETCH_FAILED = [
+  "Your zones were not synced.",
+  "Train2Go is not answering, so you cannot use it in Kaiord right now.",
+] as const;
 
 type ToastSpy = ReturnType<typeof useToast>;
 
@@ -35,11 +38,16 @@ const loadFailure = new Error("lazy import failed");
 describe("useZonesSyncOrchestrator with a failed import", () => {
   beforeEach(() => {
     mockLazyImport.mockReset();
+    // Past the queued answers, a load runs for real: the Connection notices
+    // the failure toast words load through the same `lazyImport`.
+    mockLazyImport.mockImplementation((load) =>
+      (load as () => Promise<unknown>)()
+    );
   });
 
   it("should toast a failed fetch when the sync use case fails to load", async () => {
     // Arrange
-    mockLazyImport.mockRejectedValue(loadFailure);
+    mockLazyImport.mockRejectedValueOnce(loadFailure);
     const toasts = buildToasts();
     const { result } = renderHook(() =>
       useZonesSyncOrchestrator(persistence, transport, toasts)
@@ -51,7 +59,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
     expect(result.current.pending).toBeNull();
   });
 
@@ -81,7 +89,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
     expect(result.current.pending).toEqual({
       profileId: "p1",
       conflicts: [conflict],

@@ -41,8 +41,8 @@
           "title": "should answer no external action with a token, when Garmin refuses the token"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
         },
         {
           "test": "packages/whoop-bridge/test/background.test.js",
@@ -68,7 +68,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/components/organisms/Connections/ConnectionsTab.no-extension.test.tsx",
-          "title": "should show one banner with the install action when no extension is detected"
+          "title": "should give every card its own Install notice, naming its Platform"
         },
         {
           "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-persistence-adapter.ts"
@@ -133,7 +133,7 @@
       "proof": [
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -193,8 +193,12 @@
       "text": "Sending workouts from the Kaiord App to your Garmin Connect workout library, and placing them on their day in your Garmin Connect calendar.",
       "proof": [
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -221,8 +225,12 @@
       "text": "Uploading a body-composition measurement from the Kaiord App to Garmin Connect.",
       "proof": [
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "should upload a base64 FIT payload as multipart with a Bearer header and no cookies"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a FIT file as the multipart file field"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
+          "title": "should send a FIT file's bytes as the body of the upload"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-tanita-garmin-sync.test.tsx",
@@ -362,7 +370,11 @@
         },
         {
           "test": "packages/tanita-bridge/test/background.test.js",
-          "title": "should expose exactly the read + session probe surface"
+          "title": "should expose exactly the request and the session probe"
+        },
+        {
+          "test": "packages/tanita-bridge/test/thin-bridge.test.js",
+          "title": "should list only reads of the export"
         }
       ]
     },
@@ -429,8 +441,8 @@
           "contains": "const TOKEN_KEY = \"tpAccessToken\";"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
         },
         {
           "file": "packages/trainingpeaks-bridge/manifest.prod.json",

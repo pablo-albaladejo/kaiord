@@ -4,8 +4,8 @@ import { createBridgeConnectionStore } from "./bridge-connection-store";
 import type { BridgeConnectionStore } from "./bridge-connection-types";
 import type { SessionProbeResult } from "./bridge-session-probe-types";
 
-// tanita-bridge is listed but deliberately has NO prober, mirroring
-// production: its checkSession is a full CSV download and must not be polled.
+// tanita-bridge is listed here with NO prober, to exercise a bridge the
+// store knows but cannot check (every production bridge has one).
 const PROBED_BRIDGE_IDS = ["garmin-bridge", "whoop-bridge"];
 const PROBELESS_BRIDGE_ID = "tanita-bridge";
 const BRIDGE_IDS = [...PROBED_BRIDGE_IDS, PROBELESS_BRIDGE_ID];
@@ -94,6 +94,25 @@ describe("createBridgeConnectionStore", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("should hand each prober the protocol version discovery verified", async () => {
+    // Arrange
+    const probe = vi.fn(async () => ACTIVE);
+    const store = createBridgeConnectionStore({
+      bridgeIds: ["garmin-bridge"],
+      probes: { "garmin-bridge": probe },
+      getExtensionId: () => "ext-g",
+      getProtocolVersion: () => 1,
+      subscribeDiscovery: () => () => undefined,
+      now: () => POLL_INTERVAL_MS,
+    });
+
+    // Act
+    await store.refresh();
+
+    // Assert
+    expect(probe).toHaveBeenCalledWith("ext-g", 1);
   });
 
   it("should report undiscovered bridges without probing them", async () => {
@@ -193,7 +212,7 @@ describe("createBridgeConnectionStore", () => {
     await h.store.refresh();
 
     // Assert
-    expect(h.probe).toHaveBeenCalledWith("ext-g");
+    expect(h.probe).toHaveBeenCalledWith("ext-g", null);
     expect(byId(h.store, "garmin-bridge")).toMatchObject({
       discovered: true,
       sessionActive: true,
@@ -470,7 +489,7 @@ describe("bridge connection store lifecycle", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     // Assert
-    expect(h.probe).toHaveBeenCalledWith("ext-w");
+    expect(h.probe).toHaveBeenCalledWith("ext-w", null);
     h.store.stop();
   });
 

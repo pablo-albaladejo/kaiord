@@ -26,7 +26,7 @@ within round-trip tolerances (time ±1 s, power ±1 W, heart rate ±1 bpm, caden
 Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=fit&to=garmin), choose your `.fit` file
 (**GCN** is already selected as the export format), and download the result. To send
 it straight to your account, use the Editor's Garmin sync (backed by the
-`garmin-bridge` extension).
+Kaiord for Garmin extension).
 
 ### 2. CLI
 

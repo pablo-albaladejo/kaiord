@@ -31,11 +31,10 @@ const EXPIRY_SKEW_SEC = 60;
 // to in exchange for a Bearer. Read by
 // scripts/check-bridge-privacy-surface.mjs into the golden fixture.
 //
-// This path also appears in background.js's ALLOWED, but only so the
-// editor's own session probe can reach it — a coincidence, not a guarantee.
+// This path is deliberately absent from background.js's ALLOWED: the App's
+// `request` may never reach it, because its answer is the token itself.
 // `exchangeToken` below calls `cookieSessionFetch` directly and never
-// consults `isAllowed`, so removing that allowlist entry would drop the
-// endpoint from the golden while the credential kept travelling to it.
+// consults `isAllowed`; this declaration is what keeps it in the golden.
 //
 // Written out rather than composed from TPAPI/TOKEN_PATH: the guard records
 // string literals, and an interpolated `${TPAPI}${TOKEN_PATH}` would reach
@@ -69,9 +68,11 @@ const bearerCore = () => {
 };
 
 // A failed exchange carries needsReauth only when the session-fetch master
-// saw a dead session (redirect/401/403); a 500 is TrainingPeaks failing, not a
-// revoked sign-in, and keeps its status instead. A 200 without a token (or
-// without JSON, such as a login page) still reads as no session.
+// saw a dead session (a redirect or a 401, the answer
+// docs/connectors-research/trainingpeaks.md documents for an expired
+// cookie). A 403 or a 500 is TrainingPeaks failing, not a revoked sign-in,
+// and keeps its status instead; so does a 200 without a token (or without
+// JSON), which no research or fixture identifies as the sign-in page.
 const authError = (message, res = {}) => {
   const err = new Error(message);
   if (res.needsReauth) err.needsReauth = true;
@@ -99,7 +100,7 @@ const isExpired = (record) =>
 // ── Cookie-only token exchange (NO Authorization header) ──
 //
 // Uses the session-fetch master with `credentials:"include"` so the domain
-// cookie travels automatically; a dead cookie (redirect/401/403) surfaces as
+// cookie travels automatically; a dead cookie (a redirect or a 401) surfaces as
 // needsReauth. The JSON body carries `{ token:{access_token,expires_in},
 // athleteId, … }` — we keep only the access token, its expiry, and the athlete
 // id (`user.personId`) used to build data-endpoint paths.
@@ -120,15 +121,11 @@ const exchangeToken = async (fetchImpl) => {
   try {
     payload = JSON.parse(res.body);
   } catch {
-    throw authError("TrainingPeaks token exchange returned a non-JSON body", {
-      needsReauth: true,
-    });
+    throw authError("TrainingPeaks token exchange returned a non-JSON body");
   }
   const accessToken = payload?.token?.access_token;
   if (!accessToken) {
-    throw authError("TrainingPeaks token exchange returned no access token", {
-      needsReauth: true,
-    });
+    throw authError("TrainingPeaks token exchange returned no access token");
   }
   const expiresIn = Number(payload?.token?.expires_in) || 0;
   const record = {
@@ -171,9 +168,10 @@ const ensureAthleteId = async (fetchImpl) =>
 /**
  * Data-call surface: a Bearer request against tpapi with a single
  * 401→re-exchange retry, delegated to the vendored bearer-fetch master. Returns
- * the same envelope the master does: { ok, status, data } | { ok:false, … }.
+ * the same envelope the master does: { ok, status, data } | { ok:false, … },
+ * or with `raw` the answer unread: { ok, status, contentType, body }.
  */
-const tpapiFetch = (path, method, body, fetchImpl) =>
+const tpapiFetch = (path, method, body, fetchImpl, { raw = false } = {}) =>
   bearerCore().bearerRequest({
     baseUrl: TPAPI,
     path,
@@ -182,19 +180,21 @@ const tpapiFetch = (path, method, body, fetchImpl) =>
     getToken: accessTokenAfterEnsure,
     refreshToken: accessTokenAfterExchange,
     fetchImpl,
+    raw,
   });
 
 /**
- * Session probe for the SPA connection pill: forces a cookie→token exchange to
- * confirm the session is live. Returns { ok, athleteId } or a needsReauth
- * envelope. Never returns any credential value.
+ * The Session check: reads the token record a real request minted and makes
+ * no request. The token endpoint is the only one the session cookie
+ * authenticates, and calling it mints a token, so without a still-valid token
+ * there is no cheaper way to tell: the answer is "not-checked", and the first
+ * real request finds out. Never returns any credential value.
  */
-const checkTokenExchange = async (fetchImpl) => {
+const checkStoredToken = async () => {
   try {
-    const record = await exchangeAndSave(fetchImpl);
-    return { ok: true, athleteId: record.athleteId };
-  } catch (e) {
-    return { ok: false, needsReauth: !!e.needsReauth, error: e.message };
+    return isExpired(await loadToken()) ? "not-checked" : "signed-in";
+  } catch {
+    return "not-checked";
   }
 };
 
@@ -213,7 +213,7 @@ const api = {
   ensureToken,
   ensureAthleteId,
   tpapiFetch,
-  checkTokenExchange,
+  checkStoredToken,
 };
 
 if (typeof module !== "undefined") {

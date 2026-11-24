@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import type { TrainingPeaksPushRefusal } from "../../../hooks/trainingpeaks-push-failure";
 import type { TrainingPeaksPushOutcome } from "../../../hooks/use-trainingpeaks-push";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { weekdayDate } from "../../../utils/calendar-day-labels";
 import { Button } from "../../atoms/Button";
 import { ConfirmationModal } from "../ConfirmationModal";
+import { TrainingPeaksRefusal } from "./TrainingPeaksRefusal";
 
 export type TrainingPeaksPushFailure = Exclude<
   TrainingPeaksPushOutcome,
@@ -16,14 +16,6 @@ export type TrainingPeaksPushFailure = Exclude<
 export type TrainingPeaksPushFeedbackProps = {
   failure: TrainingPeaksPushFailure;
   onSendCopy: () => void;
-};
-
-const REFUSAL_KEYS: Record<TrainingPeaksPushRefusal, string> = {
-  horizon: "footer.trainingPeaksHorizon.refused",
-  "not-answering": "footer.trainingPeaksNotAnswering",
-  "no-steps": "footer.trainingPeaksPushError.noSteps",
-  install: "footer.trainingPeaksPushError.install",
-  "sign-in": "footer.trainingPeaksPushError.signIn",
 };
 
 const ERROR_CLASS = "text-xs text-[var(--danger-text)]";
@@ -36,13 +28,8 @@ export const TrainingPeaksPushFeedback = ({
   const t = useTranslate("workout-detail");
   const locale = useActiveLocale();
   const [confirming, setConfirming] = useState(false);
-  if (!("block" in failure)) {
-    return (
-      <span className={ERROR_CLASS} data-testid="trainingpeaks-push-error">
-        {t(REFUSAL_KEYS[failure.reason])}
-      </span>
-    );
-  }
+  if (!("block" in failure))
+    return <TrainingPeaksRefusal reason={failure.reason} />;
   const { block } = failure;
   const message =
     block.reason === "moved"

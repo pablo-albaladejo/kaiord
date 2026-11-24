@@ -3,7 +3,6 @@ import { useConnectionSources } from "../../../hooks/connections/use-connection-
 import { useDataFlows } from "../../../hooks/connections/use-data-flows";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
-import { ConnectionsExtensionBanner } from "./ConnectionsExtensionBanner";
 import { ConnectionsHealth } from "./ConnectionsHealth";
 import { ConnectionSourceCard } from "./ConnectionSourceCard";
 import { ConnectionsScope } from "./ConnectionsScope";
@@ -38,7 +37,6 @@ export const ConnectionsTab: React.FC = () => {
     <div className="space-y-5" data-testid="connections-tab">
       <ConnectionsScope athleteName={active?.profile?.name} sources={sources} />
       <ConnectionsHealth sources={sources} byDataType={byDataType} />
-      <ConnectionsExtensionBanner sources={sources} />
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-ink-muted">

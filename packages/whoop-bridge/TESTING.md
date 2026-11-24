@@ -31,16 +31,16 @@
 - [ ] Verify: response includes
       `{ ok: true, protocolVersion: 1, data: { id: "whoop-bridge", connected: true, capabilities: ["read:body", "read:sleep", "read:activities"] } }`
 
-## Test: Allowlisted Read (whoop-fetch)
+## Test: Listed Read (request)
 
 - [ ] With a WHOOP tab open and connected, run from the SPA console:
-      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "whoop-fetch", path: "/core-details-bff/v0/cycles/details" }, console.log)`
+      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "request", method: "GET", path: "/advanced-labs-service/v1/biomarker-tests" }, console.log)`
 - [ ] Verify: response is
       `{ ok: true, protocolVersion: 1, data: { ok: true, status: 200, data: {...} } }`
 
 ## Test: Disallowed Path Rejected
 
-- [ ] From the SPA console, run `whoop-fetch` with a path outside the
+- [ ] From the SPA console, run `request` with a path outside the
       allowlist (e.g. `/membership-service/v1/affiliate`)
 - [ ] Verify: response data is
       `{ ok: false, error: "Blocked: disallowed path or method" }` and no
@@ -49,7 +49,7 @@
 ## Test: No WHOOP Tab Open
 
 - [ ] Close every `app.whoop.com` tab
-- [ ] From the SPA console, run `whoop-fetch` for an allowed path
+- [ ] From the SPA console, run `request` for an allowed path
 - [ ] Verify: the extension surfaces an error containing "No app.whoop.com
       tab open."
 
@@ -58,8 +58,9 @@
 - [ ] Use a fresh Chrome profile (or clear `chrome.storage.session` via the
       service worker devtools) and do not open `app.whoop.com`
 - [ ] Open the extension popup
-- [ ] Verify: status shows "Session signed out"
-- [ ] Verify: a `whoop-fetch` attempt fails with "no session token
+- [ ] Verify: status shows "You cannot use WHOOP in Kaiord until you sign in
+      to WHOOP in this browser." with the one fix "Sign in to WHOOP"
+- [ ] Verify: a `request` attempt fails with "no session token
       captured — open app.whoop.com and reload it"
 
 ## Test: Service Worker Restart (token survives cold start)
@@ -85,7 +86,7 @@ gate, send a **disallowed action** from an allowed origin.
       and no WHOOP tab opens — `open-whoop` is internal-only and absent from
       `EXTERNAL_ACTIONS`
 - [ ] Repeat with `{ action: "capture-token", token: "x" }` and verify the
-      same envelope, and that the popup still shows "Session signed out"
+      same envelope, and that the popup still shows the sign-in notice
       (no token was stored)
 
 ## Test: Origin Pinning

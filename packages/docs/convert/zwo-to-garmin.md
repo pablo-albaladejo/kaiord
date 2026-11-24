@@ -25,7 +25,7 @@ within round-trip tolerances (time ±1 s).
 Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=garmin), choose your `.zwo` file
 (**GCN** is already selected as the export format), and download the result. To send
 it straight to your watch, use the Editor's Garmin sync (backed by the
-`garmin-bridge` extension).
+Kaiord for Garmin extension).
 
 ### 2. CLI
 

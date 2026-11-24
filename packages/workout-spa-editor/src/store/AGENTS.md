@@ -30,8 +30,7 @@ Zustand stores for editor runtime ONLY. Holds the currently-edited workout, the 
 - `ai-runtime-store.ts` / `.test.ts` + `ai-store-types.ts` — in-flight AI generation state (`pendingPromptId`, `status`, error). Not persisted; persisted AI config lives in Dexie via `AiProviderRepository`.
 - `clipboard-store.ts` / `.test.ts` — clipboard payload for copy/paste of steps.
 - `storage-store.ts` / `.test.ts` — `StorageAvailabilityBanner` flag; written from `use-storage-probe.ts`.
-- `train2go-store.ts` + `train2go-{detect,extension-read-zones,extension-transport,store-actions,send-message,ping-result,pii-redaction,detect-integration}.ts` (+ tests) — Train2Go bridge transport state.
-- `garmin-extension-transport.ts` / `.test.ts` — Garmin push transport state.
+- `train2go-store.ts` + `train2go-{detect,store-actions}.ts` (+ tests, incl. `train2go-pii-redaction`, `train2go-detect-integration`) — Train2Go Connection state; the transport is the Train2Go Connector (`adapters/train2go/connector/`).
 
 ## Subdirectories
 

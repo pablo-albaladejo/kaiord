@@ -51,7 +51,7 @@ const GARMIN = "Kaiord for Garmin Extension";
 const TRAIN2GO = "Kaiord for Train2Go Extension";
 const TANITA = "Kaiord for Tanita Extension";
 const TRAININGPEAKS = "Kaiord for TrainingPeaks Extension";
-const WHOOP = "Kaiord WHOOP Bridge Extension";
+const WHOOP = "Kaiord for WHOOP Extension";
 
 // Delete a whole `## <heading>` section (heading line included) up to the
 // next top-level heading. This is the mutation every section-anchored rule
@@ -341,9 +341,15 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
-    "filtered inside the extension's service worker",
+    "filtered in the Kaiord App, in your browser",
     "processed somewhere",
     "Garmin calendar read filtered on the device",
+  ],
+  [
+    GARMIN,
+    "hands the Kaiord App Garmin's answer as it came, without reading it",
+    "hands the Kaiord App Garmin's answer after reading it",
+    "Garmin answers handed to the App unread",
   ],
   [
     GARMIN,
@@ -427,9 +433,15 @@ const SOLO_CASES = [
   ],
   [
     TRAIN2GO,
-    "passes on only your heart-rate",
-    "passes on your heart-rate",
-    "Train2Go profile-page read limited to zones and weight",
+    "which keeps only your heart-rate",
+    "which keeps your heart-rate",
+    "Train2Go profile page kept by the App to zones and weight only",
+  ],
+  [
+    TRAIN2GO,
+    "hands it Train2Go's answer as it came, without reading it",
+    "hands it Train2Go's answer after reading it",
+    "Train2Go answers handed to the App unread",
   ],
   [
     TRAIN2GO,
@@ -489,9 +501,9 @@ const SOLO_CASES = [
   ],
   [
     TANITA,
-    "single, fixed, read-only `GET`",
-    "request",
-    "Tanita single fixed read-only GET disclosed",
+    "a `HEAD` that checks the connection",
+    "a request that checks the connection",
+    "Tanita read-only requests to one fixed export address disclosed",
   ],
   [
     TANITA,
@@ -507,9 +519,9 @@ const SOLO_CASES = [
   ],
   [
     TANITA,
-    "Checking the Connection Downloads the Export",
-    "Checking the Connection",
-    "Tanita session check downloading the whole export disclosed",
+    "it sends a `HEAD` request for the export, which returns no measurement",
+    "it downloads your whole export again",
+    "Tanita session check by HEAD, downloading nothing, disclosed",
   ],
   [
     TANITA,
@@ -518,6 +530,24 @@ const SOLO_CASES = [
     "Tanita chrome.storage.local contents disclosed",
   ],
 
+  [
+    TRAININGPEAKS,
+    "hands the Kaiord App TrainingPeaks' answer as it came, without reading it",
+    "hands the Kaiord App TrainingPeaks' answer after reading it",
+    "TrainingPeaks answers handed to the App unread",
+  ],
+  [
+    TRAININGPEAKS,
+    "which keeps only that workout's id and day",
+    "which keeps that workout",
+    "TrainingPeaks workout read kept by the App to its id and day",
+  ],
+  [
+    WHOOP,
+    "WHOOP's answer is handed to the Kaiord App as it came, without being read",
+    "WHOOP's answer is read and handed on",
+    "WHOOP answers handed to the Kaiord App unread",
+  ],
   [
     TRAININGPEAKS,
     "tpapi.trainingpeaks.com",
@@ -586,9 +616,9 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
+    "the extension asks TrainingPeaks nothing and mints no token",
     "the extension asks TrainingPeaks for a new token and stores it",
-    "the extension looks",
-    "TrainingPeaks token minted on every connection check disclosed",
+    "TrainingPeaks connection check minting no token disclosed",
   ],
   [
     TRAININGPEAKS,
@@ -829,14 +859,14 @@ for (const [heading, oneLiner] of GUTTED_CASES) {
 
 const SECTION_CASES = [
   { bridge: "Garmin", heading: GARMIN, intro: "Kaiord for Garmin" },
-  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord Train2Go Bridge" },
+  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord for Train2Go" },
   { bridge: "Tanita", heading: TANITA, intro: "Kaiord for Tanita" },
   {
     bridge: "TrainingPeaks",
     heading: TRAININGPEAKS,
     intro: "Kaiord for TrainingPeaks",
   },
-  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord WHOOP Bridge" },
+  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord for WHOOP" },
 ];
 
 for (const { bridge, heading, intro } of SECTION_CASES) {

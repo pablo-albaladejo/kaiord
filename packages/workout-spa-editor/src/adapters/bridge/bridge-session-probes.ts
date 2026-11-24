@@ -4,63 +4,29 @@
  * Every entry answers the same question — "does this extension currently
  * hold a live upstream session?" — through whatever action its bridge
  * exposes, and folds transport failures, dead cookie sessions and protocol
- * mismatches into a single `SessionProbeResult`. A prober never throws, so
- * one unreachable bridge cannot abort a whole refresh pass.
+ * mismatches into a single `SessionProbeResult` (`classifyEnvelope`). A
+ * prober never throws, so one unreachable bridge cannot abort a refresh pass.
  *
- * `tanita-bridge` is deliberately ABSENT: its `checkSession` action is
- * implemented as a full export-CSV download, so polling it would re-fetch
- * the user's entire body-composition history every pass. It joins this map
- * once the extension exposes a cheap session action. Bridges without an
- * entry are reported as discovered-only and are never messaged.
+ * An extension that answers the typed `session` outcome is read through it
+ * (`bridge-session-outcome`); an older one through its own booleans. A
+ * prober is handed the protocol version discovery verified, and asks an
+ * extension one protocol behind nothing when its check would cost data or a
+ * token (`bridge-ping-session-probes`).
  */
-import { errorMessage } from "../../utils/error-message";
-import { checkTrainingPeaksSession } from "../trainingpeaks/trainingpeaks-transport";
 import {
   probeGarminSession,
+  probeTanitaSession,
   probeTrain2GoSession,
+  probeTrainingPeaksSession,
 } from "./bridge-ping-session-probes";
-import {
-  active,
-  inactive,
-  type SessionProber,
-  unreachable,
-} from "./bridge-session-probe-types";
-import { readWhoopStatus } from "./whoop-transport";
+import type { SessionProber } from "./bridge-session-probe-types";
+import { probeWhoopSession } from "./whoop-session-probe";
 
 export type { SessionProbeResult } from "./bridge-session-probe-types";
 
-const needsReauthOf = (err: unknown): boolean =>
-  (err as { needsReauth?: boolean } | null)?.needsReauth === true;
-
-/** Both transports stamp `delivered` on their typed error, mirroring how
-    TrainingPeaks already rides `needsReauth` out to the caller. */
-const wasDelivered = (err: unknown): boolean =>
-  (err as { delivered?: boolean } | null)?.delivered !== false;
-
-const probeWhoopSession: SessionProber = async (extensionId) => {
-  try {
-    const status = await readWhoopStatus(extensionId);
-    return status.connected && status.userId !== null ? active() : inactive();
-  } catch (err) {
-    return wasDelivered(err)
-      ? inactive(errorMessage(err))
-      : unreachable(errorMessage(err));
-  }
-};
-
-const probeTrainingPeaksSession: SessionProber = async (extensionId) => {
-  try {
-    const { authenticated } = await checkTrainingPeaksSession(extensionId);
-    return authenticated ? active() : inactive();
-  } catch (err) {
-    return wasDelivered(err)
-      ? inactive(errorMessage(err), needsReauthOf(err))
-      : unreachable(errorMessage(err));
-  }
-};
-
 export const SESSION_PROBES: Record<string, SessionProber> = {
   "garmin-bridge": probeGarminSession,
+  "tanita-bridge": probeTanitaSession,
   "train2go-bridge": probeTrain2GoSession,
   "whoop-bridge": probeWhoopSession,
   "trainingpeaks-bridge": probeTrainingPeaksSession,

@@ -4,7 +4,7 @@ import type {
   ConnectionSource,
   ConnectionSourceStatus,
 } from "../../../application/connections/connection-source";
-import { detailKeyFor } from "./connection-card-copy";
+import { detailKeyFor, notCheckedReasonFor } from "./connection-card-copy";
 
 const source = (
   status: ConnectionSourceStatus,
@@ -17,60 +17,74 @@ const source = (
     status,
     bridgeDetected: true,
     disconnected: false,
-    needsReauth: false,
-    outdated: false,
+    connection: "working",
     ...overrides,
   }) as ConnectionSource;
 
 describe("detailKeyFor", () => {
-  it("should tell an outdated bridge to update rather than to sign in", () => {
+  // A probed bridge reaches `installed` only when its check asked nothing;
+  // why it asked nothing is the shared notices' wording for its reason.
+  it.each([
+    ["garmin-bridge", "would-mint-token"],
+    ["trainingpeaks-bridge", "would-mint-token"],
+    ["whoop-bridge", "no-token-captured"],
+  ] as const)(
+    "should say why %s's check asked nothing by its own reason, %s",
+    (bridgeId, reason) => {
+      // Arrange
+      const unchecked = source("installed", {
+        bridgeId,
+        sessionVerifiable: true,
+      });
+
+      // Act
+      const said = [notCheckedReasonFor(unchecked), detailKeyFor(unchecked)];
+
+      // Assert
+      expect(said).toEqual([reason, null]);
+    }
+  );
+
+  it("should give a Tanita extension whose check would download the export its own not-checked reason", () => {
     // Arrange
-    // The discriminating state, and the one the product actually produces:
-    // `outdatedExtension()` returns `{outdated: true, needsReauth: false}`, and
-    // its `error` drives the card to `attention`. A fixture with both flags set
-    // would prove nothing — `needsReauth` is read first among the survivors.
-    const outdated = source("attention", { outdated: true });
+    const unchecked = source("installed", {
+      bridgeId: "tanita-bridge",
+      sessionVerifiable: true,
+    });
 
     // Act
-    const key = detailKeyFor(outdated);
+    const said = [notCheckedReasonFor(unchecked), detailKeyFor(unchecked)];
 
     // Assert
-    expect(key).toBe("detail.outdated");
-    expect(key).not.toBe("detail.noAccess");
+    expect(said).toEqual(["would-download-data", null]);
   });
 
-  it("should state a failed read without naming its cause when nothing else is known", () => {
+  it("should keep the announced-on-load wording for a bridge with no prober", () => {
     // Arrange
-    // The same status reached without a version mismatch. Without this the
-    // outdated branch could swallow every attention card and still look green.
-    // This is also the branch the Garmin card lands on: `gcApi.ok === false`
-    // is all the probe has, and it is set by an unusable token, a Garmin 5xx
-    // and a network blip alike.
-    const readFailed = source("attention");
+    const unprobed = source("installed", { sessionVerifiable: false });
 
     // Act
-    const key = detailKeyFor(readFailed);
+    const key = detailKeyFor(unprobed);
 
     // Assert
-    expect(key).toBe("detail.noAccess");
+    expect(key).toBe("detail.installed");
   });
 
-  it("should not treat a re-auth flag as a cause of its own", () => {
-    // Arrange
-    // Its only producer forces the flag true for any non-2xx (#1105), and that
-    // provider authenticates with a session cookie rather than a grant, so
-    // "authorise again" was both uninformative and less accurate than the
-    // sign-in `noAccess` already offers.
-    const reauth = source("attention", { needsReauth: true });
+  it.each(["outdated", "signed-out", "not-answering"] as const)(
+    "should leave a %s Connection's words to its notice, with no detail line",
+    (connection) => {
+      // Arrange
+      const broken = source("attention", { connection });
 
-    // Act
-    const key = detailKeyFor(reauth);
+      // Act
+      const key = detailKeyFor(broken);
 
-    // Assert
-    expect(key).toBe("detail.noAccess");
-  });
+      // Assert
+      expect(key).toBeNull();
+    }
+  );
 
-  it("should leave an absent extension to the extension line rather than say disconnected", () => {
+  it("should leave an absent extension to its Install notice rather than say disconnected", () => {
     // Arrange
     // Both are true of a source the user unlinked and then uninstalled; the
     // blocking one is the missing extension, which is the one with no control.

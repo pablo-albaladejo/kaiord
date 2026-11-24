@@ -1,3 +1,4 @@
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 import { describe, expect, it } from "vitest";
 
 import { getTranslate } from "../../i18n/use-translate";
@@ -5,61 +6,67 @@ import { attentionCauseText } from "./attention-cause-copy";
 import type { AttentionCause } from "./source-attention";
 
 const t = getTranslate("common");
+const tEs = getTranslate("common", "es");
 
 describe("attentionCauseText", () => {
-  it("should state the failed read and offer a sign-in without diagnosing why", () => {
-    // Arrange
-    const cause: AttentionCause = { kind: "noAccess" };
-
-    // Act
-    const text = attentionCauseText(cause, t);
-
-    // Assert
-    // Pinned as concepts, not as one punctuated sentence: the wording is free
-    // to change, the claim it may not make is not.
-    expect(text).toMatch(/cannot read/i);
-    expect(text).toMatch(/sign(?:ing)?\s+in\b/i);
-    expect(text).not.toMatch(/sign(?:ed|ing)?[\s-]*out|signout/i);
-  });
-
-  it("should tell an outdated extension to update", () => {
-    // Arrange
-    const cause: AttentionCause = { kind: "extensionOutdated" };
-
-    // Act
-    const text = attentionCauseText(cause, t);
-
-    // Assert
-    expect(text).toBe("An extension is out of date — update it to resume");
-  });
-
-  it("should date the consequence from the last data that arrived", () => {
+  it("should word a lone source with its own Connection notice", () => {
     // Arrange
     const cause: AttentionCause = {
-      kind: "noNewDataSince",
-      date: "2026-07-25",
+      kind: "notice",
+      connection: "not-answering",
+      name: "Garmin",
     };
 
     // Act
-    const text = attentionCauseText(cause, t);
+    const text = attentionCauseText(cause, t, "en", connectionNotice);
 
     // Assert
-    expect(text).toBe("No new data since 2026-07-25");
+    expect(text).toBe(
+      "Garmin is not answering, so you cannot use it in Kaiord right now."
+    );
+  });
+
+  it("should tell an outdated extension to update, by its name", () => {
+    // Arrange
+    const cause: AttentionCause = {
+      kind: "notice",
+      connection: "outdated",
+      name: "WHOOP",
+    };
+
+    // Act
+    const text = attentionCauseText(cause, tEs, "es", connectionNotice);
+
+    // Assert
+    expect(text).toBe(
+      "No puedes usar WHOOP en Kaiord hasta que actualices Kaiord for WHOOP."
+    );
+  });
+
+  it("should claim only the count for several sources", () => {
+    // Arrange
+    const cause: AttentionCause = { kind: "several" };
+
+    // Act
+    const text = attentionCauseText(cause, t, "en", connectionNotice);
+
+    // Assert
+    expect(text).toBe("Each one shows its fix on Connections.");
   });
 
   it("should never claim a credential expired or a session was signed out", () => {
     // Arrange
-    // WHOOP cannot distinguish an expired token from never having signed in,
-    // and Garmin's reads outlive the browser session entirely, so no cause may
-    // word itself as an expiry OR as a sign-out.
     const causes: readonly AttentionCause[] = [
-      { kind: "noAccess" },
-      { kind: "extensionOutdated" },
-      { kind: "noNewDataSince", date: "2026-07-25" },
+      { kind: "notice", connection: "not-answering", name: "Garmin" },
+      { kind: "notice", connection: "signed-out", name: "Train2Go" },
+      { kind: "notice", connection: "outdated", name: "WHOOP" },
+      { kind: "several" },
     ];
 
     // Act
-    const texts = causes.map((cause) => attentionCauseText(cause, t));
+    const texts = causes.map((cause) =>
+      attentionCauseText(cause, t, "en", connectionNotice)
+    );
 
     // Assert
     for (const text of texts) {

@@ -16,27 +16,49 @@ const externalCb =
 
 // MyTANITA as the service worker meets it: a signed-in session that answers
 // the export with the athlete's whole history. `reads` counts how many times
-// the body was actually read off the wire.
+// the body was actually read off the wire; a HEAD answer has no body.
 const fakeMyTanita = () => {
   const reads = { count: 0 };
-  fetch.mockImplementation(async () => ({
+  fetch.mockImplementation(async (_url, init) => ({
     ok: true,
     status: 200,
     type: "basic",
     redirected: false,
-    headers: { get: () => "text/csv" },
+    headers: { get: () => "application/csvm+json" },
     text: async () => {
       reads.count += 1;
-      return EXPORT_BODY;
+      return init.method === "HEAD" ? "" : EXPORT_BODY;
     },
   }));
   return reads;
 };
 
+// MyTANITA with no session: the export bounces to the login page.
+const signedOutMyTanita = () => {
+  fetch.mockImplementation(async () => ({
+    ok: false,
+    status: 0,
+    type: "opaqueredirect",
+    redirected: false,
+    headers: { get: () => "" },
+    text: async () => "",
+  }));
+};
+
+const CHECK_KEYS = [
+  "authenticated",
+  "capabilities",
+  "id",
+  "name",
+  "protocolVersion",
+  "session",
+  "version",
+];
+
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
   { action: "checkSession" },
-  { action: "read-export-csv" },
+  { action: "request", method: "GET", path: "/en/user/export-csv" },
   { action: "set-theme", theme: "dark" },
 ];
 
@@ -54,7 +76,7 @@ describe("export confinement", () => {
     __resetChromeMock();
   });
 
-  it("should send every request to the MyTANITA export as a GET, and nothing anywhere else", async () => {
+  it("should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else", async () => {
     // Arrange
     fakeMyTanita();
 
@@ -65,10 +87,12 @@ describe("export confinement", () => {
     // Assert
     expect(requests.length).toBeGreaterThan(0);
     expect(requests.filter(([url]) => url !== EXPORT_URL)).toEqual([]);
-    expect(requests.filter(([, method]) => method !== "GET")).toEqual([]);
+    expect(
+      requests.filter(([, method]) => method !== "GET" && method !== "HEAD")
+    ).toEqual([]);
   });
 
-  it("should download the whole export to answer a session check, and answer only yes or no", async () => {
+  it("should check a session with one HEAD of the export, reading no body and answering only yes or no", async () => {
     // Arrange
     const reads = fakeMyTanita();
 
@@ -76,10 +100,37 @@ describe("export confinement", () => {
     const answer = await send({ action: "checkSession" });
 
     // Assert
-    expect(fetch.mock.calls.map(([url]) => url)).toEqual([EXPORT_URL]);
-    expect(reads.count).toBe(1);
+    expect(fetch.mock.calls.map(([url, init]) => [url, init.method])).toEqual([
+      [EXPORT_URL, "HEAD"],
+    ]);
+    expect(reads.count).toBe(0);
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data.session).toBe("signed-in");
     expect(answer.data.authenticated).toBe(true);
-    expect(JSON.stringify(answer)).not.toContain("70.5");
+  });
+
+  it("should report signed out only when MyTANITA bounced the check to its login page", async () => {
+    // Arrange
+    signedOutMyTanita();
+
+    // Act
+    const answer = await send({ action: "checkSession" });
+
+    // Assert
+    expect(answer.data.session).toBe("signed-out");
+    expect(answer.data.authenticated).toBe(false);
+  });
+
+  it("should report that MyTANITA is not answering, never signed out, when the check fails", async () => {
+    // Arrange
+    fetch.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    // Act
+    const answer = await send({ action: "checkSession" });
+
+    // Assert
+    expect(answer.data.session).toBe("not-answering");
+    expect(answer.data.authenticated).toBe(false);
   });
 
   it("should hand the export to the Kaiord App exactly as MyTANITA sent it", async () => {
@@ -87,10 +138,18 @@ describe("export confinement", () => {
     fakeMyTanita();
 
     // Act
-    const answer = await send({ action: "read-export-csv" });
+    const answer = await send({
+      action: "request",
+      method: "GET",
+      path: "/en/user/export-csv",
+    });
 
     // Assert
-    expect(answer.data).toEqual({ csv: EXPORT_BODY });
+    expect(answer.data).toEqual({
+      status: 200,
+      contentType: "application/csvm+json",
+      body: EXPORT_BODY,
+    });
   });
 
   it("should keep only the theme preference in chrome.storage.local, never the export", async () => {

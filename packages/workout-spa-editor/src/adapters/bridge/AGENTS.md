@@ -11,6 +11,11 @@ Discovers, verifies, and talks to the in-page Chrome extension bridges (`@kaiord
 
 - `bridge-discovery.ts` / `bridge-discovery-types.ts` — singleton that listens for `kaiord-announce` events from installed extensions and emits a verified registry via `useSyncExternalStore`.
 - `bridge-discovery-verify.ts` — `ping` round-trip that confirms an announced bridge is live before exposing it to the UI.
+- `bridge-session-outcome.ts` / `bridge-legacy-session-readers.ts` — read a Session check answer into the one `SessionOutcome` (`application/connections/session-outcome.ts`): the typed `session` an extension answers, or an older one's own booleans. Wire fields are read here only.
+- `whoop-session-probe.ts` — WHOOP's Session check: one `status`; for a held sign-in, whether its token names an account (`hasAccountId`, or `userId` in an older `status`) and whether a WHOOP tab is open (`tabOpen`), carried as `reason: "no-account-id"` or `"no-tab"` on the probe result (#1091). No id is asked for.
+- `bridge-protocol.ts` — the protocol versions the App accepts per extension, read from its descriptor (`application/connections/extension-descriptors.ts`: current and previous, 1 and 2); used by discovery, the ping Session probes and the Train2Go detection.
+- `connector-call.ts` — `callConnector` (each leg with the call's timeout), `readJson`, `answerOrThrow` (a failed envelope becomes the Connector's error) and `asksRedetect` (401/403), used by all five Connectors under `adapters/<platform>/connector/`.
+- `thin-bridge-request.ts` — `callThroughBridge`: one `request` (method, path, body) answered raw and read by the Connector's `read`, or the legacy action when the envelope says protocol 1. A reader refuses an answer (an unreadable payload) by throwing `bridgeAnswerRefusal(...)`, a tagged `Error`. Every Connector (Garmin, Tanita, Train2Go, TrainingPeaks, WHOOP) goes through it, by `connector-call.ts`.
 - `bridge-transport.ts` — request/response transport over `chrome.runtime.sendMessage` (with timeout + error wrapping).
 - `operation-queue.ts` / `operation-queue-helpers.ts` / `shared-operation-queue.ts` — token-bucket rate limiter shared across bridges (60/h-per-bridge ceiling mandated by the SPA Bridge Protocol).
 - `bridge-store-persistence-boundary.test.ts` — non-regression guard pinning the rule "bridge registry is never persisted."

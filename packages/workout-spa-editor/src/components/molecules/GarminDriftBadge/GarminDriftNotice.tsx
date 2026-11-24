@@ -6,13 +6,11 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import { Button } from "../../atoms/Button/Button";
+import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
 import { PlacementFeedback } from "../GarminPushButton/PlacementFeedback";
 import { useGarminPlacement } from "../GarminPushButton/useGarminPlacement";
 import { useGarminDriftSentence } from "./GarminDriftBadge";
-import {
-  UPDATE_GARMIN_REASON_KEY,
-  useUpdateGarminReason,
-} from "./use-update-garmin-reason";
+import { useUpdateGarminReason } from "./use-update-garmin-reason";
 
 export type GarminDriftNoticeProps = {
   workout: WorkoutRecord;
@@ -74,9 +72,9 @@ export function GarminDriftNotice({
         {t("garminDrift.update")}
       </Button>
       {reason && (
-        <p id={reasonId} className="w-full text-xs text-ink-muted">
-          {t(UPDATE_GARMIN_REASON_KEY[reason])}
-        </p>
+        <div id={reasonId} className="w-full">
+          <GarminConnectionNotice connection={reason} />
+        </div>
       )}
       {feedback}
     </div>

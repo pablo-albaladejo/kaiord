@@ -32,13 +32,13 @@ const makeJwt = (payload) => {
 };
 
 describe("PROTOCOL_VERSION and BRIDGE_MANIFEST", () => {
-  it("should expose protocol version 1", () => {
+  it("should expose protocol version 2", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(PROTOCOL_VERSION).toBe(1);
+    expect(PROTOCOL_VERSION).toBe(2);
   });
 
   it("should carry the WHOOP identity with enum-valid capabilities", () => {
@@ -51,7 +51,7 @@ describe("PROTOCOL_VERSION and BRIDGE_MANIFEST", () => {
       id: "whoop-bridge",
       name: "WHOOP",
       version: pkg.version,
-      protocolVersion: 1,
+      protocolVersion: 2,
       capabilities: ["read:body", "read:sleep", "read:activities"],
     });
   });
@@ -239,9 +239,13 @@ describe("whoopFetch tab dependency", () => {
     // Arrange
     await storeToken(makeJwt({ "custom:user_id": "1" }));
     chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 99 }]));
-    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-      cb({ ok: true, status: 200, data: { records: [] } })
-    );
+    const raw = {
+      ok: true,
+      status: 200,
+      contentType: "application/json",
+      body: '{"records":[]}',
+    };
+    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => cb(raw));
 
     // Act
     const result = await whoopFetch("/core-details-bff/v0/cycles/details");
@@ -255,7 +259,7 @@ describe("whoopFetch tab dependency", () => {
       }),
       expect.any(Function)
     );
-    expect(result).toEqual({ ok: true, status: 200, data: { records: [] } });
+    expect(result).toEqual(raw);
   });
 
   it("should reject when chrome.runtime.lastError is set during the tab relay", async () => {
@@ -291,7 +295,7 @@ describe("handleAction", () => {
       id: "whoop-bridge",
       name: "WHOOP",
       version: pkg.version,
-      protocolVersion: 1,
+      protocolVersion: 2,
       capabilities: ["read:body", "read:sleep", "read:activities"],
       connected: false,
     });
@@ -309,20 +313,6 @@ describe("handleAction", () => {
     expect(data.id).toBe("whoop-bridge");
   });
 
-  it("should store a token relayed via the capture-token action", async () => {
-    // Arrange
-    const jwt = makeJwt({ "custom:user_id": "9" });
-
-    // Act
-    const result = await handleAction({ action: "capture-token", token: jwt });
-
-    // Assert
-    expect(result).toEqual({ captured: true });
-    expect(chrome.storage.session.set).toHaveBeenCalledWith(
-      expect.objectContaining({ whoopToken: jwt })
-    );
-  });
-
   it("should open the WHOOP dashboard tab and return null on open-whoop", async () => {
     // Arrange
 
@@ -334,34 +324,6 @@ describe("handleAction", () => {
     expect(chrome.tabs.create).toHaveBeenCalledWith({
       url: "https://app.whoop.com/",
     });
-  });
-
-  it("should reject whoop-fetch without a path", async () => {
-    // Arrange
-
-    // Act
-    const attempt = handleAction({ action: "whoop-fetch" });
-
-    // Assert
-    await expect(attempt).rejects.toThrow("Missing path");
-  });
-
-  it("should delegate a whoop-fetch action with a path to whoopFetch", async () => {
-    // Arrange
-    await storeToken(makeJwt({ "custom:user_id": "1" }));
-    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 99 }]));
-    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-      cb({ ok: true, status: 200, data: { records: [] } })
-    );
-
-    // Act
-    const result = await handleAction({
-      action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
-    });
-
-    // Assert
-    expect(result).toEqual({ ok: true, status: 200, data: { records: [] } });
   });
 
   it("should reject an unknown action", async () => {
@@ -441,13 +403,20 @@ describe("tab-open", () => {
 
     // Assert
     expect(external).not.toContain("tab-open");
-    expect(external).toEqual(["ping", "status", "whoop-fetch", "set-theme"]);
+    expect(external).not.toContain("popup-status");
+    expect(external).toEqual([
+      "ping",
+      "status",
+      "read-user-id",
+      "request",
+      "set-theme",
+    ]);
   });
 
   // The credential-handshake surface, recorded in the bridge privacy golden.
   // This bridge mints and exchanges nothing: inject-main.js captures an
   // Authorization header the WHOOP app already sends, and every read then
-  // goes through content.js's prefix gate. Pinned empty rather than left
+  // goes through the `request` gate's closed list. Pinned empty rather than left
   // unstated, so growing a handshake has to change this assertion — and the
   // golden with it.
   it("should declare no credential handshake", () => {
@@ -651,9 +620,13 @@ describe("internal dispatch", () => {
   it("should return true and answer the popup status request", async () => {
     // Arrange
     const respond = vi.fn();
+    const popup = {
+      id: "test-extension-id",
+      origin: "chrome-extension://test-extension-id",
+    };
 
     // Act
-    const kept = internalCb({ action: "status" }, {}, respond);
+    const kept = internalCb({ action: "popup-status" }, popup, respond);
     await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
     // Assert

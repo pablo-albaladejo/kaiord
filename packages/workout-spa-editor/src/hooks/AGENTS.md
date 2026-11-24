@@ -53,7 +53,7 @@ Custom React hooks. This is where the SPA bridges the persistence layer (Dexie v
 - `use-discovered-extension-id.ts` — surfaces the active bridge's extension id.
 - `use-train2go-detection.ts`, `use-train2go-supports-zones.ts` — Train2Go-specific feature checks.
 - `use-garmin-detection.ts` / `.test.ts` — Garmin bridge detection.
-- `garmin-bridge-operations.ts` / `.test.ts`, `use-garmin-bridge-actions.ts`, `use-garmin-bridge-action-helpers.ts` — Garmin push flow.
+- `use-garmin-bridge-actions.ts`, `use-garmin-bridge-action-helpers.ts` — Garmin push flow, over the Garmin Connector (`adapters/garmin/connector/garmin-workout-operations.ts`, `garmin-calendar-operations.ts`, `garmin-ping-evaluation.ts`).
 - `use-profile-snapshot-push.ts` (+ `use-profile-snapshot-push-helpers.ts`) — pushes the active profile to discovered bridges with fingerprint dedup + the shared operation queue.
 
 ### Misc

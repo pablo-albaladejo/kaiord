@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord Tanita Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for Tanita",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Lets the Kaiord App import your weight and body composition from MyTANITA, using your own MyTANITA sign-in",
@@ -23,28 +23,6 @@
     "message": "Reading your body-composition export through your session.",
     "description": "Status cause sentence for the connected state."
   },
-  "notSignedIn": {
-    "message": "Not signed in",
-    "description": "Status verdict when the MyTANITA session cannot reach the export."
-  },
-  "notSignedInCause": {
-    "message": "Sign in at mytanita.eu once — the bridge reads your export from that session, no password stored.",
-    "description": "Status cause sentence explaining how to establish a session."
-  },
-  "sessionEnded": {
-    "message": "Session ended",
-    "description": "Status verdict when the MyTANITA session cannot reach the export AND an earlier popup open already recorded the outage. Distinct from notSignedIn, which is a setup step still pending rather than something that broke."
-  },
-  "sessionEndedCause": {
-    "message": "Nothing has reached Kaiord since $date$. Sign in at mytanita.eu again and the bridge picks your export back up.",
-    "description": "Dated cause sentence for a session that worked and stopped. Names Kaiord's own intake, which the stored stamp establishes.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "23 Jul"
-      }
-    }
-  },
   "captionFeeds": {
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips in the connected state."
@@ -61,21 +39,9 @@
     "message": "Body Composition",
     "description": "Capability chip for the Body Composition data type imported into Kaiord."
   },
-  "manualFallback": {
-    "message": "Both currently come from manual entry.",
-    "description": "Consequence line under the dashed chips: names where the two types are coming from while the bridge is not connected."
-  },
   "openEditor": {
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
-  },
-  "openTanitaPrimary": {
-    "message": "Open MyTANITA",
-    "description": "Primary footer link whenever the bridge is not connected. It is the fix — the session is established at MyTANITA, not in Kaiord — so it outranks the editor link."
-  },
-  "setUpInKaiord": {
-    "message": "Set up in Kaiord ↗",
-    "description": "Secondary footer link while the bridge is not connected. Says set up rather than open: nothing from this source is in the editor yet."
   },
   "openTanita": {
     "message": "Open MyTANITA ↗",
@@ -84,5 +50,15 @@
   "refresh": {
     "message": "Refresh",
     "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Since $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
   }
 }

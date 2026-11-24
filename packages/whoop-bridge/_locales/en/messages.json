@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord WHOOP Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for WHOOP",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Connects the Kaiord editor to your WHOOP recovery & sleep data through your open WHOOP session — no developer app, no passwords.",
@@ -33,47 +33,9 @@
       }
     }
   },
-  "sessionSignedOut": {
-    "message": "Session signed out",
-    "description": "Status verdict when no WHOOP session bearer is available."
-  },
-  "sessionSignedOutCause": {
-    "message": "Kaiord is not holding a WHOOP session, so nothing is reaching it right now.",
-    "description": "Status cause sentence for the signed-out state. Names the bridge's own missing bearer, not a tab: this state is reached whether or not an app.whoop.com tab exists."
-  },
-  "sessionExpired": {
-    "message": "Session expired",
-    "description": "Status verdict when no WHOOP session bearer is available AND an earlier popup open already recorded the outage, so its start date is known."
-  },
-  "sessionExpiredCause": {
-    "message": "Kaiord stopped receiving WHOOP data on $date$ and has held no session since.",
-    "description": "Dated cause sentence for the signed-out state. Names Kaiord's own intake, which the stored stamp establishes, rather than when the WHOOP session actually lapsed, which it does not.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "23 Jul"
-      }
-    }
-  },
-  "noTab": {
-    "message": "No WHOOP tab open",
-    "description": "Status verdict when a session bearer is held but no app.whoop.com tab is open to run reads in."
-  },
-  "noTabCause": {
-    "message": "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
-    "description": "Status cause sentence for the no-tab state."
-  },
   "keepsImported": {
     "message": "Everything already imported stays in Kaiord.",
     "description": "Consequence line: losing the session or the tab deletes nothing that has already arrived."
-  },
-  "resumeOpenTab": {
-    "message": "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
-    "description": "Consequence line naming what ends the no-tab state."
-  },
-  "resumeSignIn": {
-    "message": "Sign in at app.whoop.com and leave the tab open; the bridge picks the session back up on its own.",
-    "description": "Consequence line naming what ends the signed-out state."
   },
   "readsNeedTab": {
     "message": "Kaiord reads through that open tab. Close every app.whoop.com tab and reads stop until you open one again.",
@@ -189,20 +151,30 @@
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
   },
-  "signInWhoop": {
-    "message": "Sign in to WHOOP",
-    "description": "Primary footer link that fixes a signed-out WHOOP session."
-  },
   "openWhoop": {
     "message": "Open WHOOP ↗",
     "description": "Secondary footer link opening app.whoop.com in a new tab."
   },
-  "reviewInKaiord": {
-    "message": "Review in Kaiord ↗",
-    "description": "Secondary footer link in the signed-out state. Says review rather than open because what is worth doing in Kaiord while the session is down is checking what already arrived, not editing."
-  },
   "refresh": {
     "message": "Refresh",
     "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Since $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no WHOOP bearer has been captured since the service worker started: nothing was learned, so no notice."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord learns whether WHOOP works the first time an app.whoop.com tab sends a request.",
+    "description": "Status cause sentence for the not-checked state."
   }
 }

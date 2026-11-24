@@ -2,7 +2,8 @@
  * The consequence banner above the source cards: what broke, and what stopped
  * arriving because of it.
  *
- * Four sentences this banner must never grow, because nothing can back them:
+ * Four sentences this banner must never grow, because nothing can back them
+ * (the Connection notice it borrows for a lone source states none of them):
  * a duration ("down for 3 days") — no transition timestamp exists, so the date
  * is `lastSyncAt` and says when data last arrived; a hand-off ("fell back to
  * Garmin") — `union` is the default and has no winner, so nothing takes over;
@@ -13,6 +14,9 @@
  * garmin's reads outlive the browser session outright, so the title states the
  * failed read and leaves the cause to the card.
  */
+import type { Locale } from "@kaiord/i18n";
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
+
 import type { Translate } from "../../i18n/use-translate";
 import { calendarDay } from "./calendar-day";
 import type { ConnectionCoverage } from "./connection-coverage";
@@ -25,19 +29,22 @@ export type ConnectionConsequence = {
 };
 
 /**
- * A cause is named only for a lone source. With several affected, one of them
- * being out of date does not make the others out of date, and the count is the
- * only claim that holds for all of them.
+ * A lone source's title is its own Connection notice, worded by the one
+ * source every surface and extension popup reads. With several affected, one
+ * of them being out of date does not make the others out of date, and the
+ * count is the only claim that holds for all of them.
  */
 const titleOf = (
   affected: readonly ConnectionSource[],
-  t: Translate
+  t: Translate,
+  locale: Locale
 ): string => {
   const only = affected.length === 1 ? affected[0] : undefined;
-  if (only === undefined) return t("banner.many", { count: affected.length });
-  return only.outdated
-    ? t("banner.oneOutdated", { name: only.name })
-    : t("banner.one", { name: only.name });
+  const notice =
+    only?.connection == null
+      ? null
+      : connectionNotice(only.connection, only.name, locale);
+  return notice?.message ?? t("banner.many", { count: affected.length });
 };
 
 const consequenceOf = (coverage: ConnectionCoverage, t: Translate): string => {
@@ -75,12 +82,13 @@ const sinceOf = (
 export const buildConnectionConsequence = (
   sources: readonly ConnectionSource[],
   coverage: ConnectionCoverage,
-  t: Translate
+  t: Translate,
+  locale: Locale
 ): ConnectionConsequence | null => {
   const affected = sources.filter(sourceNeedsAttention);
   if (affected.length === 0) return null;
   const detail = [consequenceOf(coverage, t), sinceOf(affected, coverage, t)]
     .filter((line): line is string => line !== undefined)
     .join(" ");
-  return { title: titleOf(affected, t), detail };
+  return { title: titleOf(affected, t, locale), detail };
 };

@@ -2,11 +2,18 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  checkAthleteTerms,
   checkRetiredTerms,
   retiredTermProblems,
 } from "./check-retired-terms.mjs";
 import { loadRegisters, repoReader } from "./check-claims.mjs";
-import { FILES, TERMS } from "./retired-terms.vocab.mjs";
+import {
+  ATHLETE_ALLOWED,
+  ATHLETE_FILES,
+  ATHLETE_TERMS,
+  FILES,
+  TERMS,
+} from "./retired-terms.vocab.mjs";
 
 const reader = (files) => (path) => files[path] ?? null;
 
@@ -106,6 +113,130 @@ describe("check-retired-terms", () => {
       registers,
       read: repoReader,
       files: FILES,
+    });
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+});
+
+describe("check-retired-terms, athlete-facing words", () => {
+  const athlete = { terms: ATHLETE_TERMS, allowed: ATHLETE_ALLOWED };
+
+  it("should fail on bridge and on the Kaiord extension, in English and in Spanish", () => {
+    // Arrange
+    const texts = [
+      "Install the Garmin Bridge.",
+      "Kaiord Garmin Bridge",
+      "The bridges read your data.",
+      "Connect through the Kaiord extension.",
+      "Install a Kaiord extension first.",
+      "Se conectan con la extensión de Kaiord.",
+      "Instala la extensión Kaiord.",
+    ];
+
+    // Act
+    const problems = texts.map((text) =>
+      retiredTermProblems("x.json", text, athlete)
+    );
+
+    // Assert
+    assert.ok(
+      problems.every((p) => p.length === 1),
+      JSON.stringify(problems)
+    );
+  });
+
+  it("should let the athlete read Kaiord for a Platform and extension", () => {
+    // Arrange
+    const texts = [
+      "Install Kaiord for Garmin in this browser.",
+      "Each connection holds its own extension and permissions.",
+      "Instala Kaiord for Train2Go: la extensión lee tu plan.",
+    ];
+
+    // Act
+    const problems = texts.flatMap((text) =>
+      retiredTermProblems("x.json", text, athlete)
+    );
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+
+  it("should pass an npm package name and a store address that must stay", () => {
+    // Arrange
+    const text =
+      "`@kaiord/garmin-bridge` is on https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";
+
+    // Act
+    const problems = retiredTermProblems("x.md", text, athlete);
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+
+  it("should read the App dictionaries, the extensions' texts, the registered surfaces and the listed files", () => {
+    // Arrange
+    const registers = [
+      {
+        name: "claims/a.json",
+        data: { surfaces: [{ file: "a.md" }], claims: [] },
+      },
+    ];
+    const files = {
+      "a.md": "The Kaiord extension reads Garmin.\n",
+      "b.md": "Install the Kaiord Tanita Bridge.",
+    };
+    const appTexts = [
+      { where: "es/settings.json#info", text: "la extensión de Kaiord" },
+      { where: "en/connections.json#ok", text: "Kaiord for Garmin" },
+    ];
+
+    // Act
+    const problems = checkAthleteTerms({
+      registers,
+      read: reader(files),
+      files: ["b.md", "gone.md"],
+      athleteTexts: appTexts,
+      allowed: [],
+    });
+
+    // Assert
+    assert.deepEqual(
+      problems.map((p) => p.split(":")[0]),
+      ["a.md", "b.md", "gone.md", "es/settings.json#info"]
+    );
+  });
+
+  it("should fail on an allowed phrase that no athlete text holds any more", () => {
+    // Arrange
+    const allowed = [{ phrase: "@kaiord/foo-bridge", why: "a package name" }];
+
+    // Act
+    const problems = checkAthleteTerms({
+      registers: [],
+      read: reader({}),
+      files: [],
+      athleteTexts: [{ where: "x", text: "Kaiord for Garmin" }],
+      allowed,
+    });
+
+    // Assert
+    assert.deepEqual(problems, [
+      'ALLOWED phrase "@kaiord/foo-bridge" is on no athlete-facing text: remove it from retired-terms.vocab.mjs',
+    ]);
+  });
+
+  it("should pass on the athlete-facing texts the repo ships", () => {
+    // Arrange
+    const registers = loadRegisters();
+
+    // Act
+    const problems = checkAthleteTerms({
+      registers,
+      read: repoReader,
+      files: ATHLETE_FILES,
     });
 
     // Assert

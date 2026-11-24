@@ -68,7 +68,14 @@ const renderStatusMark = (el, mark) => {
 const renderStatusBlock = (
   $,
   msg,
-  { tone = "muted", mark = "dot", verdictKey, verdictSubs, causeKey, causeSubs } = {}
+  {
+    tone = "muted",
+    mark = "dot",
+    verdictKey,
+    verdictSubs,
+    causeKey,
+    causeSubs,
+  } = {}
 ) => {
   const el = $("status");
   el.className = `status-block status-block--${tone}`;
@@ -161,7 +168,9 @@ const renderSkeleton = ($, regions = KD_DEFAULT_SKELETON) => {
     if (!host) continue;
     kdReplace(
       host,
-      parts.filter((name) => KD_SKELETON_PARTS[name]).map((name) => KD_SKELETON_PARTS[name]())
+      parts
+        .filter((name) => KD_SKELETON_PARTS[name])
+        .map((name) => KD_SKELETON_PARTS[name]())
     );
   }
 };
@@ -190,6 +199,62 @@ const renderCtas = (
   kdReplace($("footer-region"), nodes);
 };
 
+const kdFixButton = (label, onClick) => {
+  const btn = kdBlock("button", "cta-primary", label);
+  btn.id = "notice-fix";
+  btn.type = "button";
+  btn.addEventListener("click", onClick);
+  return btn;
+};
+
+// One notice, one fix. `notice` comes from KAIORD_CONNECTION_NOTICES.noticeFor
+// (connection-notices.js), so the wording is the App's. A fix done on another
+// site (signing in) is a link to `href`; "try-again" re-runs the check through
+// `onRetry`. `since` is an already-worded outage date, or null on the first
+// failed check, which is too soon to date anything.
+const renderNotice = (
+  $,
+  notice,
+  { since = null, href = null, onRetry } = {}
+) => {
+  const el = $("status");
+  el.className = "status-block status-block--warn";
+  renderStatusMark(el, since ? "alert" : "dot");
+  $("status-text").textContent = notice.message;
+  const cause = $("status-sub");
+  if (cause) {
+    cause.textContent = since ?? "";
+    cause.hidden = !since;
+  }
+  const fix =
+    notice.fix === "try-again" || !href
+      ? kdFixButton(notice.action, () => onRetry?.())
+      : kdLink("cta-primary", notice.action, href);
+  kdReplace($("footer-region"), [fix]);
+};
+
+// One notice for a Connection that does not work. `since` is the outage
+// start Kaiord already knew of, or null on the first failed probe: only then
+// does the notice carry a date, and the monogram stays muted until it does.
+// The popup words the notice (KAIORD_CONNECTION_NOTICES.noticeFor) and fills
+// its own chips after this.
+const renderBrokenConnection = (
+  $,
+  msg,
+  notice,
+  { since = null, href = null, onRetry, formatSince } = {}
+) => {
+  $("brand-mark")?.classList.toggle(
+    "popup-header__mark--muted",
+    since === null
+  );
+  renderNotice($, notice, {
+    since: since === null ? null : msg("outageSince", [formatSince(since)]),
+    href,
+    onRetry,
+  });
+};
+
 if (typeof module !== "undefined") {
   module.exports = {
     renderStatusBlock,
@@ -197,5 +262,7 @@ if (typeof module !== "undefined") {
     renderConsequence,
     renderSkeleton,
     renderCtas,
+    renderNotice,
+    renderBrokenConnection,
   };
 }

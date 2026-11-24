@@ -6,6 +6,8 @@
  * store can render one uniform state per bridge.
  */
 
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
+
 export type SessionProbeResult = {
   /** Did the extension answer? `false` means it is gone, not signed out. */
   reachable: boolean;
@@ -19,10 +21,22 @@ export type SessionProbeResult = {
    * extension" instead of "the check failed".
    */
   outdated: boolean;
+  /**
+   * The check asked the Platform nothing, because the only request that
+   * could tell would mint a token or download data. Whether the Session works
+   * is learned at the first real read or send, so this is neither working
+   * nor broken. Absent on every other result.
+   */
+  notChecked?: true;
+  /** The Session works but cannot serve: a WHOOP sign-in whose token names
+      no account id, which every import is built on. */
+  reason?: ConnectionReason;
 };
 
+/** `protocolVersion` is the one discovery verified, when it knows it. */
 export type SessionProber = (
-  extensionId: string
+  extensionId: string,
+  protocolVersion?: number | null
 ) => Promise<SessionProbeResult>;
 
 export const inactive = (
@@ -67,4 +81,14 @@ export const unreachable = (
   error,
   needsReauth: false,
   outdated: false,
+});
+
+/** The check could not tell without a real use; see `notChecked`. */
+export const notChecked = (): SessionProbeResult => ({
+  reachable: true,
+  sessionActive: false,
+  error: null,
+  needsReauth: false,
+  outdated: false,
+  notChecked: true,
 });

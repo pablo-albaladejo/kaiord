@@ -6,9 +6,9 @@
  * CTA pair. Auto-fetches on open with bounded per-phase timeouts; Retry only
  * appears on user-resolvable failures.
  *
- * The primary CTA is whatever fixes the current state: signing back in at
- * Garmin Connect when Kaiord has no working access, opening the Kaiord editor
- * when data flows.
+ * A working Connection keeps its useful content (athlete card, sync rollup)
+ * and the editor link. Anything else shows one notice with one fix, worded by
+ * the vendored connection-notices.js — the same wording the Kaiord App shows.
  *
  * The copy deliberately does NOT say the bridge rides a Garmin Connect
  * session. It does not: garmin-oauth.js exchanges the browser SSO session ONCE
@@ -40,30 +40,30 @@
  * popup.js fetch sites and asserts only relative paths.
  */
 
-/* global msg, $, withTimeout, relativeAgo, formatSinceDate, recordProbe,
-   renderRetry, renderStatusBlock, renderChips, renderSkeleton, renderCtas,
-   renderAthleteCard */
+/* global msg, $, uiLocale, localizePage, withTimeout, relativeAgo, formatSinceDate, recordProbe,
+   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderBrokenConnection,
+   renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 const OPEN_GARMIN_URL = "https://connect.garmin.com/modern/";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "Garmin";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for Garmin",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
   connectedCause:
     "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
-  noGarminAccess: "No access to Garmin Connect",
-  noGarminAccessCause:
-    "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
-  noGarminAccessCauseSince:
-    "Kaiord has read nothing from Garmin Connect since $1. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
-  bridgeNotResponding: "Bridge not responding",
-  bridgeNotRespondingCause:
-    "The extension's background worker did not answer. Try again.",
+  outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
   captionFeeds: "Feeds Kaiord",
   typeActivity: "Activity",
   typeWorkoutBack: "Workout ↑ to Garmin",
@@ -89,9 +89,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   dayAgo: "$1 day ago",
   daysAgo: "$1 days ago",
   openEditor: "Open Kaiord editor",
-  signInGarmin: "Sign in to Garmin Connect",
   openGarmin: "Open Garmin Connect ↗",
-  retry: "Retry",
   refresh: "Refresh",
 };
 
@@ -179,35 +177,64 @@ const setMarkEstablished = (established) => {
   $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
 };
 
-// Any non-connected state pauses the flow, so the chips go muted and the
-// primary CTA becomes the fix rather than the editor link.
-const renderBroken = ({ verdictKey, causeKey, causeSubs, mark = "dot" }) => {
-  renderStatusBlock($, msg, {
-    tone: "warn",
-    mark,
-    verdictKey,
-    causeKey,
-    causeSubs,
-  });
-  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
-  renderCtas($, {
-    primaryLabel: msg("signInGarmin"),
-    primaryHref: OPEN_GARMIN_URL,
-    secondaryLabel: msg("openEditor"),
-    secondaryHref: OPEN_EDITOR_URL,
-  });
-  renderRetry(() => loadPopupData());
+// Only a check Garmin itself answered may say the sign-in is gone: a failed
+// read, a timeout or a worker that did not answer is "not-answering", because
+// Garmin being unavailable always explains it too (#1100).
+// An extension with the cheap check answers the typed `session` outcome;
+// only "signed-out" there is Garmin's own refusal.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
 };
 
-const renderNoAccess = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderBroken({
-    mark: dated ? "alert" : "dot",
-    verdictKey: "noGarminAccess",
-    causeKey: dated ? "noGarminAccessCauseSince" : "noGarminAccessCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+const connectionStateOf = (ping) => {
+  const typed = ping?.ok ? TYPED_STATE[ping?.data?.session] : undefined;
+  if (typed) return typed;
+  if (ping?.ok && ping?.data?.gcApi?.ok) return "working";
+  if (ping?.ok && ping?.data?.gcApi?.needsReauth === true) return "signed-out";
+  return "not-answering";
+};
+
+// Any non-working state pauses the flow, so the chips go muted and the notice
+// replaces the verdict; its one fix is the whole footer.
+const renderBroken = (state, since = null) => {
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_GARMIN_URL,
+      onRetry: () => loadPopupData(),
+      formatSince: formatSinceDate,
+    }
+  );
+  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
+};
+
+/* The check asked nothing: no still-valid access is held, and minting one to
+   look would be the cost the check exists to avoid. Nothing was learned, so
+   no outage is recorded and nothing claims the athlete is signed out. */
+const renderNotChecked = (storage) => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
   });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  renderAthleteCard(storage.profileSnapshot);
+  renderRollup(undefined, storage.lastPushReceipt);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openGarmin"),
+    secondaryHref: OPEN_GARMIN_URL,
+  });
+  showRefresh(true);
 };
 
 const loadPopupData = async () => {
@@ -225,10 +252,7 @@ const loadPopupData = async () => {
     storage = await withTimeout(getSnapshot(), SNAPSHOT_TIMEOUT_MS, "snapshot");
   } catch {
     renderAthleteCard(undefined);
-    renderBroken({
-      verdictKey: "bridgeNotResponding",
-      causeKey: "bridgeNotRespondingCause",
-    });
+    renderBroken("not-answering");
     return;
   }
 
@@ -241,19 +265,20 @@ const loadPopupData = async () => {
     // it tells the user when the SPA last synced their profile, which
     // is useful even when Garmin Connect is unreachable.
     renderRollup(undefined, storage.lastPushReceipt);
-    renderBroken({
-      verdictKey: "bridgeNotResponding",
-      causeKey: "bridgeNotRespondingCause",
-    });
+    renderBroken("not-answering");
     return;
   }
 
-  const apiOk = Boolean(ping?.ok && ping?.data?.gcApi?.ok);
-  const health = await recordProbe(apiOk);
-  if (!apiOk) {
+  const state = connectionStateOf(ping);
+  if (state === "not-checked") {
+    renderNotChecked(storage);
+    return;
+  }
+  const health = await recordProbe(state === "working");
+  if (state !== "working") {
     renderAthleteCard(storage.profileSnapshot);
     renderRollup(ping?.data, storage.lastPushReceipt);
-    renderNoAccess(health.since);
+    renderBroken(state, health.since);
     return;
   }
 
@@ -278,6 +303,6 @@ const loadPopupData = async () => {
 $("refresh-btn").addEventListener("click", () => loadPopupData());
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   loadPopupData();
 });

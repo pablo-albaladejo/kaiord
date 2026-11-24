@@ -105,7 +105,7 @@ describe("background — handleExternalMessage origin gate", () => {
 
     await new Promise((r) => setTimeout(r, 10));
     expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: true, protocolVersion: 1 })
+      expect.objectContaining({ ok: true, protocolVersion: 2 })
     );
   });
 
@@ -139,7 +139,7 @@ describe("background — handleExternalMessage origin gate", () => {
     expect(sendResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         ok: false,
-        protocolVersion: 1,
+        protocolVersion: 2,
         error: "Unsupported snapshot schema version",
       })
     );

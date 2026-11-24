@@ -8,14 +8,14 @@
  * disconnect must NOT silently re-link.
  */
 
-import { ping } from "./train2go-extension-transport";
+import { isAcceptedBridgeProtocol } from "../adapters/bridge/bridge-protocol";
+import { ping } from "../adapters/train2go/connector/train2go-extension-transport";
 import type { Train2GoStore } from "./train2go-store";
 
 type Set = (fn: Partial<Train2GoStore>) => void;
 type Get = () => Train2GoStore;
 
 const DETECTION_CACHE_MS = 30_000;
-const SUPPORTED_PROTOCOLS = [1];
 
 export const createDetectAction =
   (set: Set, get: Get, getExtensionId: () => string) =>
@@ -53,10 +53,7 @@ export const createDetectAction =
       return;
     }
 
-    if (
-      !res.protocolVersion ||
-      !SUPPORTED_PROTOCOLS.includes(res.protocolVersion)
-    ) {
+    if (!isAcceptedBridgeProtocol("train2go-bridge", res.protocolVersion)) {
       set({
         extensionInstalled: true,
         sessionActive: false,

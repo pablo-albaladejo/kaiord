@@ -11,4 +11,5 @@ globalThis.KAIORD_BRIDGE_IDENTITY = {
   id: "tanita-bridge",
   name: "Tanita",
   capabilities: ["read:body"],
+  protocolVersion: 2,
 };

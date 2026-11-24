@@ -60,6 +60,59 @@ describe("createBridgeDiscovery", () => {
     // Assert
   });
 
+  it("should remember the protocol version and features the verification answer carried", async () => {
+    // Arrange
+    const verify = vi.fn().mockResolvedValue({
+      id: "garmin-bridge",
+      name: "Garmin",
+      version: "10.4.0",
+      protocolVersion: 1,
+      capabilities: ["write:workouts"],
+      features: ["calendar-write-v1"],
+    });
+    const discovery = createBridgeDiscovery({ verify });
+    discovery.start();
+
+    // Act
+    emit(ANNOUNCE_GARMIN);
+    await vi.runOnlyPendingTimersAsync();
+
+    // Assert
+    expect(discovery.getVerified?.("garmin-bridge")).toEqual({
+      protocolVersion: 1,
+      features: ["calendar-write-v1"],
+    });
+    expect(discovery.getVerified?.("train2go-bridge")).toBeNull();
+    discovery.stop();
+  });
+
+  it("should not register an extension on an unaccepted protocol, but remember it as outdated", async () => {
+    // Arrange
+    const verify = vi.fn().mockResolvedValue({
+      id: "garmin-bridge",
+      name: "x",
+      version: "9.0.0",
+      protocolVersion: 3,
+      capabilities: ["write:workouts"],
+    });
+    const discovery = createBridgeDiscovery({ verify });
+    const listener = vi.fn();
+    discovery.subscribe(listener);
+    discovery.start();
+
+    // Act
+    emit(ANNOUNCE_GARMIN);
+    await vi.runOnlyPendingTimersAsync();
+    discovery.stop();
+
+    // Assert
+    // Not registered (nothing is read or sent through it), yet its
+    // Connection is "outdated", so the App offers Update, not Install.
+    expect(discovery.getExtensionId("garmin-bridge")).toBeNull();
+    expect(discovery.isOutdated?.("garmin-bridge")).toBe(true);
+    expect(listener).toHaveBeenCalled();
+  });
+
   it("should reject announcements that fail verification (spoof)", async () => {
     // Arrange
     const verify = vi.fn().mockResolvedValue(null);

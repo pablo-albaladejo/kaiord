@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "bridge-popup-snapshot.js",
   "popup.js",
@@ -81,6 +82,35 @@ describe("Garmin popup", () => {
 
   afterEach(() => {
     Date.now = originalNow;
+  });
+
+  it("should say the session is not checked yet, and record no outage, when the check asked nothing", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      pingResponse: {
+        ok: true,
+        data: { session: "not-checked", gcApi: { ok: false } },
+      },
+    });
+    const dom = setupDom(chromeMock);
+
+    // Act
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+    const doc = dom.window.document;
+
+    // Assert
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Not checked yet"
+    );
+    expect(doc.body.textContent).not.toContain("No access to Garmin Connect");
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
+    const actions = chromeMock.runtime.sendMessage.mock.calls.map(
+      ([m]) => m.action
+    );
+    expect(new Set(actions)).toEqual(new Set(["ping"]));
   });
 
   it("renders connected state with athlete card and rollup", async () => {
@@ -168,10 +198,10 @@ describe("Garmin popup", () => {
     expect(cause).not.toMatch(/session/i);
   });
 
-  it("renders disconnected state with Retry when ping fails", async () => {
+  it("offers Try again, not a sign-in, when Garmin's read fails", async () => {
     const dom = setupDom(
       buildChromeMock({
-        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+        pingResponse: { ok: true, data: { gcApi: { ok: false, status: 503 } } },
       })
     );
 
@@ -179,17 +209,31 @@ describe("Garmin popup", () => {
     await flushAsync();
     await flushAsync();
 
-    const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status-block--warn");
-    const retry = dom.window.document.getElementById("retry-btn");
-    expect(retry).not.toBeNull();
-    expect(retry.textContent).toBe("Retry");
+    const doc = dom.window.document;
+    // A failed read is no evidence the athlete is signed out (#1100): it can
+    // always be Garmin being unavailable, so the notice names no cause.
+    expect(doc.getElementById("status").className).toContain(
+      "status-block--warn"
+    );
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Garmin is not answering, so you cannot use it in Kaiord right now."
+    );
+    expect(doc.body.textContent).not.toMatch(/signed out|sign in/i);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.children.length).toBe(1);
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
+    expect(
+      doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
+    ).toBe(3);
   });
 
-  it("makes signing back in the primary CTA and mutes the chips when there is no access", async () => {
+  it("offers the sign-in only when Garmin itself refused the sign-in", async () => {
     const dom = setupDom(
       buildChromeMock({
-        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+        pingResponse: {
+          ok: true,
+          data: { gcApi: { ok: false, needsReauth: true } },
+        },
       })
     );
 
@@ -199,34 +243,15 @@ describe("Garmin popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "No access to Garmin Connect"
+      "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser."
     );
-    // The cause must not diagnose. A failed check is not evidence the user is
-    // signed out, because a failure can always be Garmin being unavailable —
-    // which is true however the token refresh turns out to authenticate (see
-    // #1102). The old copy told a signed-in user that their "tab is signed
-    // out". Both possibilities, neither asserted.
-    const cause = doc.getElementById("status-sub").textContent;
-    expect(cause).toContain("could not read from Garmin Connect");
-    expect(cause).toContain("if you are already signed in");
-    // The assertion this whole branch rests on, so it pins the CONCEPT: the
-    // previous form was `not.toContain("signed out,")` — with the comma — and
-    // passed happily on "You are signed out." or "signed out and…". A guard
-    // that excludes one punctuation variant of the regression is not guarding
-    // the regression.
-    expect(cause).not.toMatch(/signed out/i);
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Sign in to Garmin Connect"
-    );
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Open Kaiord editor"
-    );
-    expect(
-      doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
-    ).toBe(3);
+    const fix = doc.querySelector("#footer-region .cta-primary");
+    expect(fix.textContent).toBe("Sign in to Garmin");
+    expect(fix.getAttribute("href")).toBe("https://connect.garmin.com/modern/");
+    expect(doc.getElementById("footer-region").children.length).toBe(1);
   });
 
-  it("does not accumulate a retry button or CTA set across failure cycles", async () => {
+  it("re-runs the check from Try again without piling up controls", async () => {
     const dom = setupDom(
       buildChromeMock({
         pingResponse: { ok: true, data: { gcApi: { ok: false } } },
@@ -237,42 +262,20 @@ describe("Garmin popup", () => {
     await flushAsync();
     await flushAsync();
     const doc = dom.window.document;
-    doc.getElementById("retry-btn").click();
+    const pingsOf = () =>
+      dom.window.chrome.runtime.sendMessage.mock.calls.filter(
+        ([message]) => message.action === "ping"
+      ).length;
+    const before = pingsOf();
+    doc.getElementById("notice-fix").click();
     await flushAsync();
     await flushAsync();
 
-    // The skeleton and CTA renders each clear the footer; losing BOTH
-    // clears duplicates controls, and losing only the CTA clear leaves
-    // skeleton bars behind — the zero-skeleton assert catches that half.
-    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
     const footer = doc.getElementById("footer-region");
-    expect(footer.querySelectorAll(".cta-primary").length).toBe(1);
-    expect(footer.querySelectorAll(".cta-secondary").length).toBe(1);
-    expect(footer.querySelectorAll(".cta-retry").length).toBe(1);
+    expect(doc.querySelectorAll("#notice-fix").length).toBe(1);
+    expect(footer.children.length).toBe(1);
     expect(footer.querySelectorAll(".skeleton").length).toBe(0);
-    // Focus follows the control the user just activated, not a stale node.
-    expect(doc.activeElement.id).toBe("retry-btn");
-  });
-
-  it("keeps focus on the header refresh button when the reload starts there", async () => {
-    const dom = setupDom(
-      buildChromeMock({
-        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
-      })
-    );
-
-    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
-    await flushAsync();
-    await flushAsync();
-    const doc = dom.window.document;
-    const refreshBtn = doc.getElementById("refresh-btn");
-    refreshBtn.focus();
-    refreshBtn.click();
-    await flushAsync();
-    await flushAsync();
-
-    expect(doc.activeElement.id).toBe("refresh-btn");
-    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
+    expect(pingsOf()).toBe(before + 1);
   });
 
   it("renders the checking skeleton before the probe resolves", () => {
@@ -338,7 +341,7 @@ describe("Garmin popup", () => {
     expect(card.querySelector(".lastpush__title")).toBeNull();
   });
 
-  it("dates the no-access state once an earlier open already recorded it", async () => {
+  it("dates the outage once an earlier open already recorded it", async () => {
     const dom = setupDom(
       buildChromeMock({
         pingResponse: { ok: true, data: { gcApi: { ok: false } } },
@@ -352,20 +355,14 @@ describe("Garmin popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
-    // The verdict does not change: a failure is still not a diagnosis, and
-    // Garmin being unavailable remains one of the two live possibilities.
+    // The notice does not change: a failure is still not a diagnosis.
     expect(doc.getElementById("status-text").textContent).toBe(
-      "No access to Garmin Connect"
+      "Garmin is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "Kaiord has read nothing from Garmin Connect since 23 Apr."
+    expect(doc.getElementById("status-sub").textContent).toBe("Since 23 Apr.");
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "svg"
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "Garmin may be temporarily unavailable"
-    );
-    expect(
-      doc.querySelector("[data-status-mark]").tagName.toLowerCase()
-    ).toBe("svg");
   });
 
   it("does not date an outage it has only just noticed", async () => {
@@ -380,7 +377,7 @@ describe("Garmin popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
-    expect(doc.getElementById("status-sub").textContent).not.toContain("since");
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "span"
     );
@@ -402,7 +399,9 @@ describe("Garmin popup", () => {
       () =>
         expect(
           dom.window.document.getElementById("status-text").textContent
-        ).toBe("Bridge not responding"),
+        ).toBe(
+          "Garmin is not answering, so you cannot use it in Kaiord right now."
+        ),
       { timeout: 2_500 }
     );
 

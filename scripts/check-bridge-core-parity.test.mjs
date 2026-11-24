@@ -7,6 +7,7 @@ import {
   BRIDGE_CORE_MASTERS,
   DEFAULT_MASTERS_DIR,
   DEFAULT_PACKAGES_DIR,
+  PACKAGE_COPIES,
 } from "./sync-bridge-core.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -73,6 +74,39 @@ describe("bridge-core parity", () => {
         );
       }
     }
+  });
+
+  it("should keep each package's copy of a master byte-identical to it", () => {
+    // Arrange
+    const copies = PACKAGE_COPIES.map(({ master, dest }) => ({
+      dest,
+      master: readFileSync(join(DEFAULT_MASTERS_DIR, master)),
+      copy: readFileSync(join(DEFAULT_PACKAGES_DIR, dest)),
+    }));
+
+    // Act
+    const drifted = copies.filter((c) => !c.copy.equals(c.master));
+
+    // Assert
+    assert.deepEqual(
+      drifted.map((c) => c.dest),
+      [],
+      "a package copy drifts from its master — run pnpm bridge:sync"
+    );
+  });
+
+  it("should vendor the Connection notices into @kaiord/i18n, where the App reads them", () => {
+    // Arrange
+    const expected = [
+      "i18n/src/generated/connection-notices.js",
+      "i18n/src/generated/connection-notices.d.ts",
+    ];
+
+    // Act
+    const dests = PACKAGE_COPIES.map(({ dest }) => dest);
+
+    // Assert
+    assert.deepEqual(dests, expected);
   });
 
   it("masters contain no per-bridge identity values", () => {
@@ -142,4 +176,59 @@ describe("bridge-core parity", () => {
       }
     }
   });
+});
+
+// A service worker loads its scripts with importScripts into ONE global
+// scope, where two top-level `const`s of the same name are a SyntaxError
+// that only the real extension sees (the vitest suites `require` each file
+// in its own module scope). Every bridge's service worker is evaluated here
+// as Chrome does: background.js, each importScripts file in order, one
+// shared context. session-fetch.js and bearer-fetch.js once both declared
+// UNAUTHORIZED_STATUS, so the TrainingPeaks worker could not load its
+// Bearer transport.
+describe("bridge service worker scope", () => {
+  const stubChrome = () => {
+    const listener = { addListener: () => {} };
+    return {
+      runtime: {
+        id: "scope-test",
+        onMessage: listener,
+        onMessageExternal: listener,
+        onInstalled: listener,
+        getManifest: () => ({}),
+      },
+      webRequest: { onBeforeSendHeaders: listener },
+      storage: { local: {}, session: {} },
+      tabs: {},
+    };
+  };
+
+  for (const bridge of IDENTITY_BRIDGES) {
+    it(`${bridge}: background.js and its imports evaluate in one worker scope`, async () => {
+      const vm = await import("node:vm");
+      const dir = join(REPO, "packages", bridge);
+      const errors = [];
+      const context = vm.createContext({ chrome: stubChrome(), console });
+      context.self = context;
+      context.globalThis = context;
+      context.importScripts = (...files) => {
+        for (const file of files) {
+          try {
+            vm.runInContext(readFileSync(join(dir, file), "utf8"), context, {
+              filename: file,
+            });
+          } catch (e) {
+            errors.push(`${file}: ${e.message}`);
+            throw e;
+          }
+        }
+      };
+      vm.runInContext(
+        readFileSync(join(dir, "background.js"), "utf8"),
+        context,
+        { filename: "background.js" }
+      );
+      assert.deepEqual(errors, [], `${bridge}: a worker import failed`);
+    });
+  }
 });

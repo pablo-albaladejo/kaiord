@@ -19,9 +19,9 @@ const pushMock = vi.fn(async (): Promise<PlacementResult> => ({
   kind: "moved",
 }));
 const bridge = {
-  extensionInstalled: true,
-  sessionActive: true,
+  connection: "working",
   features: [CALENDAR_WRITE_FEATURE],
+  detectExtension: vi.fn(async () => undefined),
 };
 
 vi.mock("../../../contexts", async (importOriginal) => ({
@@ -67,8 +67,7 @@ describe("GarminDriftNotice", () => {
   beforeEach(() => {
     pushMock.mockClear();
     Object.assign(bridge, {
-      extensionInstalled: true,
-      sessionActive: true,
+      connection: "working",
       features: [CALENDAR_WRITE_FEATURE],
     });
   });
@@ -101,19 +100,19 @@ describe("GarminDriftNotice", () => {
 
   it.each([
     [
-      "the bridge is not detected",
-      { extensionInstalled: false },
-      "Install the Kaiord extension for Garmin to send this workout.",
+      "the extension is not installed",
+      { connection: "not-installed" },
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser. Install Kaiord for Garmin",
     ],
     [
-      "Garmin is signed out",
-      { sessionActive: false },
-      "Sign in to Garmin Connect in this browser to send this workout.",
+      "Garmin refused the sign-in",
+      { connection: "signed-out" },
+      "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser. Sign in to Garmin",
     ],
     [
-      "the bridge cannot write the calendar",
+      "the extension cannot write the calendar",
       { features: [] },
-      "Update the Kaiord extension for Garmin to move this workout on the Garmin calendar.",
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is updated. Update Kaiord for Garmin",
     ],
   ])(
     "should keep the state but disable Update Garmin while %s",
@@ -175,7 +174,9 @@ describe("GarminDriftNotice", () => {
 
     // Assert
     expect(
-      await screen.findByText("Sign in to Garmin Connect again, then retry.")
+      await screen.findByText(
+        "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser."
+      )
     ).toBeInTheDocument();
     expect(screen.getByText("Garmin still on Tue, Oct 6")).toBeInTheDocument();
   });

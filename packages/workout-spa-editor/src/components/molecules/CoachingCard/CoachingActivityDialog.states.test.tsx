@@ -121,11 +121,11 @@ describe("CoachingActivityDialog — states", () => {
     await waitFor(() =>
       expect(
         screen.getByTestId("coaching-dialog-description-error")
-      ).toBeInTheDocument()
+      ).toHaveTextContent(
+        "Train2Go is not answering, so you cannot use it in Kaiord right now."
+      )
     );
-    await userEvent.click(
-      screen.getByTestId("coaching-dialog-description-retry")
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(expandActivity).toHaveBeenCalledTimes(2));
   });
 

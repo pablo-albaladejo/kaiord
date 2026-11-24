@@ -16,9 +16,9 @@ Why Kaiord for Tanita asks for each permission in `manifest.prod.json`, for Chro
 
 ### `https://mytanita.eu/*`
 
-**Why**: The extension's service worker makes one kind of request: `GET https://mytanita.eu/en/user/export-csv`, sent with `credentials: "include"` so that Chrome attaches your MyTANITA sign-in cookie. A request to any other path, or with any other method, is refused before it is sent.
+**Why**: The extension's service worker makes requests to one address, `https://mytanita.eu/en/user/export-csv`: a `GET` that downloads the export, and a `HEAD` that asks only whether you are signed in. Both are sent with `credentials: "include"` so that Chrome attaches your MyTANITA sign-in cookie. A request to any other path, or with any other method, is refused before it is sent.
 
-**What MyTANITA answers**: your whole measurement history. When the Kaiord App asks for it (`read-export-csv`), the extension hands it over unchanged. When the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), the extension downloads the same export, keeps only whether it arrived, and discards the rest.
+**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`request`), the extension hands it over unchanged. A page MyTANITA serves in place of the export reaches the Kaiord App without anything in it tied to your MyTANITA sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.
 
 ## Content Script
 

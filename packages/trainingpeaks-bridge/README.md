@@ -21,25 +21,35 @@ This package is `private: true` and is not published to npm.
   `GET /users/v3/token`, then calls the data endpoints with
   `Authorization: Bearer` (`credentials:"omit"`). On a 401 it re-runs the
   exchange once. The extension never reads or stores the cookie.
-- Return **raw JSON** (except `read-workout`, which keeps only a workout's id
-  and day). Parsing lives in `@kaiord/trainingpeaks` and runs SPA-side; this
-  bridge does not import it.
-- Report session presence as a boolean (`ping` / `checkSession`) plus the
-  resolved athlete id, for the SPA connection pill — never exposing any token.
+- Hand TrainingPeaks' answer to the Kaiord App **unread**, but for any Session secret in it, which it removes; the App's
+  Connector reads it (a workout's id and day, the metrics through
+  `@kaiord/trainingpeaks`). This bridge does not import it.
+- Check the Session without a request (`ping` / `checkSession`): the only
+  request the cookie authenticates mints a token, so the check reads only
+  whether a token minted for an earlier read or send is still valid, and
+  never exposes any token or the athlete id.
 
 The only contract is the `chrome.runtime` message shape, documented inline in
 `background.js`:
 
-- `read-metrics` → `{ ok: true, data: <raw consolidatedtimedmetrics JSON> }`,
-  or an error envelope with `needsReauth: true` when the session is dead.
-- `push-weight` → posts a `type 9` weight metric (`write:body`).
-- `push-workout` → posts a structured planned workout (`write:workouts`); a
-  `402` is a date past the account's planning horizon.
-- `read-workout` → `{ workoutId, workoutDay }` of one workout by id, or an error
-  envelope carrying `status` (a `404` means TrainingPeaks does not have it).
-- `ping` / `checkSession` → the bridge manifest plus `{ authenticated, athleteId }`;
-  when not authenticated, `needsReauth` says whether TrainingPeaks reported a
-  dead session or only failed to answer.
+- `request` → `{ action: "request", method, path, body? }`, only for an entry
+  of `ALLOWED` (a body only where the entry declares a schema, and only in that
+  shape), answered `{ ok: true, protocolVersion: 2, data: { status,
+contentType, body } }` with the body unread but for its Session secrets, which it removes; a dead Session is
+  `needsReauth: true`, another failure keeps its `status`, and anything outside
+  the list is `Request not allowed` with nothing sent. The App's Connector
+  builds the path and reads the answer; it falls back to the protocol-1
+  actions for the store version.
+  The list: the metrics range read, the one weight write (`weight` body), the
+  planned-workout write (`workout` body; a `402` is a date past the account's
+  planning horizon) and the read of one workout by id (a `404` means
+  TrainingPeaks does not have it). The token endpoint is not on it.
+- `ping` / `checkSession` → the bridge manifest plus `{ session, authenticated }`:
+  `session` is `signed-in` (a valid token is held) or `not-checked` (none is,
+  and the first real read or send finds out).
+- `read-athlete-id` → `{ athleteId }`, read when the Kaiord App is about to
+  send a workout; this is where the token is minted. A dead session answers
+  an error envelope with `needsReauth: true`.
 
 ## Least-privilege manifest
 
@@ -60,7 +70,7 @@ unpacked". Manifest entrypoints:
 
 - `manifest.json` — development manifest (used for "Load unpacked").
 - `manifest.prod.json` — production manifest used when packaging for the store.
-- `background.js` — service worker (path allowlist, throttle, action routing).
+- `background.js` — service worker (closed list with body schemas, `request`, action routing).
 - `tp-auth.js` — dual-transport auth (cookie→token→Bearer).
 - `session-fetch.js` / `bearer-fetch.js` — vendored identity-free transports
   (loaded via `importScripts`).

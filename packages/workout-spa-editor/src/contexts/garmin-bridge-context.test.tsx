@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GarminBridgeProvider, useGarminBridge } from "./garmin-bridge-context";
 
-vi.mock("../store/garmin-extension-transport", () => ({
+vi.mock("../adapters/garmin/connector/garmin-ping", () => ({
   ping: vi.fn().mockResolvedValue({ ok: false }),
   sendMessage: vi.fn().mockResolvedValue({ ok: false }),
 }));
@@ -30,7 +30,7 @@ describe("garmin-bridge-context", () => {
     expect(result.current.extensionInstalled).toBe(false);
     expect(result.current.sessionActive).toBe(false);
     expect(result.current.pushing).toEqual({ status: "idle" });
-    expect(result.current.lastError).toBeNull();
+    expect(result.current.connection).toBe("checking");
   });
 
   it("should update pushing state", () => {

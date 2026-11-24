@@ -8,13 +8,9 @@
  * That costs no extra message — the probe was being sent anyway.
  *
  * A bridge with NO prober is reported as discovered-only and is never
- * messaged. `tanita-bridge` is that bridge, and it cannot be pinged either:
- * its background script routes `ping` into the same `checkSession` that
- * downloads the whole export CSV, so a liveness ping would re-fetch the
- * user's entire body-composition history every pass. Its presence is
- * consequently NOT verifiable after the initial announcement, and the UI is
- * required to word its state accordingly rather than assert the extension is
- * still there. Lifting that needs a cheap `ping` in the extension.
+ * messaged. A prober itself asks an extension one protocol behind nothing
+ * when its check would cost data or a token (`bridge-ping-session-probes`),
+ * and reports it "not checked".
  */
 import { type RefreshContext, write } from "./bridge-connection-context";
 import { undiscoveredEntry } from "./bridge-connection-entries";

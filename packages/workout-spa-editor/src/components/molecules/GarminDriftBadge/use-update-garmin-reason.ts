@@ -1,24 +1,17 @@
+import type { ConnectionState } from "../../../application/connections/connection-state";
+import { connectionMayBeUsed } from "../../../application/connections/connection-state";
 import { CALENDAR_WRITE_FEATURE } from "../../../application/garmin-placement/placement-timing";
 import { useGarminBridge } from "../../../contexts";
 
-export type UpdateGarminReason = "noExtension" | "signedOut" | "bridgeOutdated";
-
-/** `workout-detail` keys: the send control's own reasons, plus the calendar write it lacks. */
-export const UPDATE_GARMIN_REASON_KEY: Record<UpdateGarminReason, string> = {
-  noExtension: "footer.sendDisabled.noExtension",
-  signedOut: "footer.sendDisabled.signedOut",
-  bridgeOutdated: "garminDrift.bridgeOutdated",
-};
-
 /**
- * Why Update Garmin is unavailable, or `undefined` when it can run. The
- * move needs the calendar write a bridge without `calendar-write-v1` lacks,
- * so an outdated bridge disables it rather than sending to the library only.
+ * Why Update Garmin is unavailable, as the Garmin Connection's state, or
+ * `undefined` when it can run. The move needs the calendar write a bridge
+ * without `calendar-write-v1` lacks, so that bridge is "outdated": its fix is
+ * Update, the same notice every other surface shows for an old extension.
  */
-export const useUpdateGarminReason = (): UpdateGarminReason | undefined => {
-  const { extensionInstalled, sessionActive, features } = useGarminBridge();
-  if (!extensionInstalled) return "noExtension";
-  if (!sessionActive) return "signedOut";
-  if (!features.includes(CALENDAR_WRITE_FEATURE)) return "bridgeOutdated";
+export const useUpdateGarminReason = (): ConnectionState | undefined => {
+  const { connection, features } = useGarminBridge();
+  if (!connectionMayBeUsed(connection)) return connection;
+  if (!features.includes(CALENDAR_WRITE_FEATURE)) return "outdated";
   return undefined;
 };

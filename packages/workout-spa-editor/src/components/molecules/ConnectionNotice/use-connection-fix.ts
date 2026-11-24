@@ -1,0 +1,21 @@
+import type { ShownNotice } from "@kaiord/i18n/connection-notices";
+import { useCallback } from "react";
+
+import { connectionFixHref } from "../../../application/connections/connection-fix-target";
+
+/**
+ * Runs a notice's one fix from a button: the page it names opens in a new
+ * tab, and "try-again" (or a fix with no page) re-runs the check.
+ */
+export const useConnectionFix = (
+  bridgeId: string,
+  retry: () => void
+): ((fix: ShownNotice["fix"]) => void) =>
+  useCallback(
+    (fix) => {
+      const href = connectionFixHref(fix, bridgeId);
+      if (href === null) retry();
+      else window.open(href, "_blank", "noopener,noreferrer");
+    },
+    [bridgeId, retry]
+  );

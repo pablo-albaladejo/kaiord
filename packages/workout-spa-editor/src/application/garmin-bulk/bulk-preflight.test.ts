@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import type { ConnectionState } from "../connections/connection-state";
 import { bulkPreflight } from "./bulk-preflight";
 
 const READY = {
   routeActive: true,
-  bridgeInstalled: true,
-  sessionActive: true,
+  connection: "working" as ConnectionState,
   locks: {},
   secureContext: true,
 };
@@ -18,14 +18,24 @@ describe("bulkPreflight", () => {
       expected: "no-export-route",
     },
     {
-      name: "no bridge",
-      change: { bridgeInstalled: false },
-      expected: "no-bridge",
+      name: "no extension",
+      change: { connection: "not-installed" as ConnectionState },
+      expected: "not-installed",
     },
     {
-      name: "no Garmin session",
-      change: { sessionActive: false },
-      expected: "no-session",
+      name: "an outdated extension",
+      change: { connection: "outdated" as ConnectionState },
+      expected: "outdated",
+    },
+    {
+      name: "a sign-in Garmin refused",
+      change: { connection: "signed-out" as ConnectionState },
+      expected: "signed-out",
+    },
+    {
+      name: "a check that could not tell why",
+      change: { connection: "not-answering" as ConnectionState },
+      expected: "not-answering",
     },
     {
       name: "an insecure page",

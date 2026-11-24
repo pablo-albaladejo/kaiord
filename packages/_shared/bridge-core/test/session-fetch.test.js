@@ -138,7 +138,7 @@ describe("session-fetch (vendored)", () => {
   });
 
   describe("isAuthChallenge", () => {
-    it("should flag 401 and 403 responses", () => {
+    it("should flag a 401 and not a 403, which refuses the request, not the sign-in", () => {
       // Arrange
       const responses = [
         { status: UNAUTHORIZED_STATUS },
@@ -149,7 +149,7 @@ describe("session-fetch (vendored)", () => {
       const flags = responses.map(isAuthChallenge);
 
       // Assert
-      expect(flags).toEqual([true, true]);
+      expect(flags).toEqual([true, false]);
     });
 
     it("should not flag a 200 response", () => {
@@ -217,6 +217,22 @@ describe("session-fetch (vendored)", () => {
 
       // Assert
       expect(result).toMatchObject({ ok: false, needsReauth: true });
+    });
+
+    it("should surface a 403 with its status and without needsReauth", async () => {
+      // Arrange
+      const fetchImpl = () =>
+        Promise.resolve(makeResponse({ ok: false, status: FORBIDDEN_STATUS }));
+
+      // Act
+      const result = await cookieSessionFetch({ url: EXPORT_URL, fetchImpl });
+
+      // Assert
+      expect(result).toEqual({
+        ok: false,
+        status: FORBIDDEN_STATUS,
+        error: `Request failed: ${FORBIDDEN_STATUS}`,
+      });
     });
 
     it("should surface a non-2xx status without needsReauth", async () => {

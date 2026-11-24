@@ -1,75 +1,86 @@
 /**
- * Ping-based session probers for the two bridges whose `ping` payload
- * already carries the session flag (garmin: `gcApi.ok`, train2go:
- * `sessionActive`).
+ * Session probers: one message to the extension, one typed answer.
  *
- * The checks are replicated here rather than imported from
- * `store/train2go-detect` or `hooks/garmin-bridge-operations`: the SPA
- * boundary rules forbid `adapters/**` importing `store/**` or `hooks/**`,
- * and these probers must stay side-effect free (they only report, they
- * never touch a Zustand store or a linked account).
+ * Every prober reads the envelope the same way. The protocol version comes
+ * first, from the envelope itself, so an outdated extension is recognised as
+ * outdated on every bridge — whatever action it answers, and even when that
+ * action fails — instead of looking like a signed-out Session. Then the
+ * typed outcome an extension with the cheap check answers
+ * (`bridge-session-outcome`); an older extension is read through its own
+ * booleans (`bridge-legacy-session-readers`).
+ *
+ * A check never downloads data and never mints a token (ADR 0004). An
+ * extension one protocol behind answers Garmin's `ping` with a read of one
+ * workout, TrainingPeaks' `checkSession` by minting a token and Tanita's by
+ * downloading the export, so those three are asked nothing when discovery
+ * verified protocol 1: their check is "not checked".
  */
-import { z } from "zod";
-
+import type { SessionOutcome } from "../../application/connections/session-outcome";
+import { classifyEnvelope } from "./bridge-envelope-classify";
 import {
-  active,
-  inactive,
-  outdatedExtension,
-  type SessionProbeResult,
-  unreachable,
-} from "./bridge-session-probe-types";
+  readGarminSession,
+  readTanitaSession,
+  readTrain2GoSession,
+  readTrainingPeaksSession,
+} from "./bridge-legacy-session-readers";
+import { notChecked, type SessionProber } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
+import { PREVIOUS_BRIDGE_PROTOCOL_VERSION } from "./thin-bridge-request";
 
 const PING_TIMEOUT_MS = 2_000;
-const SUPPORTED_PROTOCOL_VERSION = 1;
+const STATUS_TIMEOUT_MS = 5_000;
 
-const pingDataSchema = z.object({
-  protocolVersion: z.number().optional(),
-  gcApi: z.object({ ok: z.boolean().optional() }).optional(),
-  sessionActive: z.boolean().optional(),
-});
-
-type PingData = z.infer<typeof pingDataSchema>;
-
-const probeByPing = async (
-  extensionId: string,
-  outdatedMessage: string,
-  readSession: (data: PingData) => boolean
-): Promise<SessionProbeResult> => {
-  const res = await sendBridgeMessage(
-    extensionId,
-    { action: "ping" },
-    PING_TIMEOUT_MS
-  );
-  // Delivery failure means the extension is gone; an `ok:false` envelope
-  // means it answered and the upstream session is the problem.
-  if (!res.ok) {
-    return res.delivered === false
-      ? unreachable(res.error ?? null)
-      : inactive();
-  }
-  const parsed = pingDataSchema.safeParse(res.data);
-  const data: PingData = parsed.success ? parsed.data : {};
-  if (data.protocolVersion !== SUPPORTED_PROTOCOL_VERSION) {
-    return outdatedExtension(outdatedMessage);
-  }
-  return readSession(data) ? active() : inactive();
+type Probe = {
+  bridgeId: string;
+  action: string;
+  timeoutMs: number;
+  readSession: (data: unknown) => SessionOutcome;
+  /** The previous protocol's check reads data or mints a token. */
+  costlyOnPrevious?: true;
 };
 
-export const probeGarminSession = (
-  extensionId: string
-): Promise<SessionProbeResult> =>
-  probeByPing(
-    extensionId,
-    "Update your Kaiord extension for Garmin",
-    (data) => data.gcApi?.ok === true
-  );
+const probeBy =
+  ({ bridgeId, action, timeoutMs, readSession, costlyOnPrevious }: Probe) =>
+  async (
+    extensionId: string,
+    protocolVersion?: number | null
+  ): ReturnType<SessionProber> => {
+    if (
+      costlyOnPrevious &&
+      protocolVersion === PREVIOUS_BRIDGE_PROTOCOL_VERSION
+    )
+      return notChecked();
+    const res = await sendBridgeMessage(extensionId, { action }, timeoutMs);
+    return classifyEnvelope(res, bridgeId, readSession);
+  };
 
-export const probeTrain2GoSession = (
-  extensionId: string
-): Promise<SessionProbeResult> =>
-  probeByPing(
-    extensionId,
-    "Update your Kaiord Train2Go Bridge extension",
-    (data) => data.sessionActive === true
-  );
+export const probeGarminSession = probeBy({
+  bridgeId: "garmin-bridge",
+  action: "ping",
+  timeoutMs: PING_TIMEOUT_MS,
+  readSession: readGarminSession,
+  costlyOnPrevious: true,
+});
+
+export const probeTrain2GoSession = probeBy({
+  bridgeId: "train2go-bridge",
+  action: "ping",
+  timeoutMs: PING_TIMEOUT_MS,
+  readSession: readTrain2GoSession,
+});
+
+export const probeTrainingPeaksSession = probeBy({
+  bridgeId: "trainingpeaks-bridge",
+  action: "checkSession",
+  timeoutMs: STATUS_TIMEOUT_MS,
+  readSession: readTrainingPeaksSession,
+  costlyOnPrevious: true,
+});
+
+export const probeTanitaSession = probeBy({
+  bridgeId: "tanita-bridge",
+  action: "checkSession",
+  timeoutMs: STATUS_TIMEOUT_MS,
+  readSession: readTanitaSession,
+  costlyOnPrevious: true,
+});

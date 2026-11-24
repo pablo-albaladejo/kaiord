@@ -16,6 +16,12 @@ export type BridgeAnnouncement = {
 
 export type DiscoveryListener = () => void;
 
+/** What the verification ping established about a registered extension. */
+export type VerifiedBridge = {
+  readonly protocolVersion: number;
+  readonly features: readonly string[];
+};
+
 export type BridgeDiscovery = {
   start: () => void;
   stop: () => void;
@@ -26,6 +32,12 @@ export type BridgeDiscovery = {
    * spoofable). `null` until verification completes for this bridge.
    */
   getCapabilities: (bridgeId: string) => readonly string[] | null;
+  /** The extension announced itself on a protocol this App does not accept:
+      not registered, but its Connection is "outdated", not absent. */
+  isOutdated?: (bridgeId: string) => boolean;
+  /** The registered extension's verified protocol and features; `null`
+      until verification completes for this bridge. */
+  getVerified?: (bridgeId: string) => VerifiedBridge | null;
   subscribe: (listener: DiscoveryListener) => () => void;
 };
 

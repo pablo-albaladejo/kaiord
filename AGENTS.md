@@ -155,7 +155,9 @@ Before any non-trivial change:
   `https://kaiord.com` only: manifests declare `https://kaiord.com/*` (plus
   the two Vite dev ports in `manifest.json`), and no shipped bridge source
   outside `bridge-envelope.js` tests the origin by suffix, substring, prefix
-  or pattern (R-BridgeExactOrigin).
+  or pattern (R-BridgeExactOrigin); every bridge answers its internal channel
+  only through `createInternalDispatch`, so a content script gets no answer,
+  and any other `onMessage` listener cannot answer (R-BridgeInternalDispatch).
 - `check-security-audit-required.mjs` — the required `Dependency Security
 Audit` job keeps its exact name, reports on every pull request and on push
   to `main`, and fails on a high/critical finding or a missing report
@@ -182,7 +184,22 @@ Audit` job keeps its exact name, reports on every pull request and on push
   Spanish) and no file listed in `scripts/retired-terms.vocab.mjs` uses a term
   GLOSSARY.md retired or withdrew: framework, cockpit, lossless, zero data
   loss, round-trip safe, open standard, interchange format, platform for
-  Kaiord itself (`pnpm lint:retired-terms`).
+  Kaiord itself; and no athlete-facing text (the App's dictionaries and copy,
+  the extensions' `_locales` and popups, the store listings, the privacy
+  policy, the docs pages that address the athlete) says "bridge" or "the
+  Kaiord extension" (`pnpm lint:retired-terms`).
+- `check-bridge-locales-en-es.test.mjs` — every extension ships `_locales/en`
+  and `_locales/es` at parity (same keys and placeholders, none empty), is
+  named "Kaiord for <Platform>" in both, and takes every popup string from
+  `_locales` or the shared notices (R-BridgeLocalesEnglishSpanish).
+- `check-connection-notices.mjs` — a Connection that does not work shows one
+  of four fixes (Install, Update, Sign in to the Platform, Try again), each
+  worded once in English and Spanish by
+  `packages/_shared/bridge-core/connection-notices.js`, which the App reads
+  through `@kaiord/i18n` and every popup vendors; a fifth fix, a second
+  wording in the App or an extension, or a popup naming its Platform or
+  sign-in page unlike the App fails (`pnpm lint:connection-notices`,
+  R-ConnectionNoticesSingleSource).
 - `local/no-jsx-literal-text` + `local/no-literal-copy` (ESLint rules in
   `scripts/eslint-rules/`) — every string the athlete reads in the Kaiord App
   comes from the `en`/`es` dictionaries: JSX copy, toasts, error and message

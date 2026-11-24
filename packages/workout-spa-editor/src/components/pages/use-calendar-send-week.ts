@@ -21,7 +21,7 @@ export function useCalendarSendWeek(
 ) {
   const persistence = usePersistence();
   const analytics = useAnalytics();
-  const { extensionInstalled, sessionActive, features } = useGarminBridge();
+  const { connection, features } = useGarminBridge();
   const routeActive = useGarminExportRoute(profileId) === true;
   const ctx = useMemo(
     () => ({
@@ -29,17 +29,9 @@ export function useCalendarSendWeek(
       analytics,
       features,
       routeActive,
-      bridgeInstalled: extensionInstalled,
-      sessionActive,
+      connection,
     }),
-    [
-      persistence,
-      analytics,
-      features,
-      routeActive,
-      extensionInstalled,
-      sessionActive,
-    ]
+    [persistence, analytics, features, routeActive, connection]
   );
   const send = useSendWeek(ctx);
   const workouts = useMemo(

@@ -10,6 +10,7 @@
  */
 import { useCallback, useState } from "react";
 
+import { bridgeConnections } from "../../adapters/bridge/bridge-connection-store";
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import { usePersistence } from "../../contexts/persistence-context";
 import { bridgeImporterFor } from "../bridge-import/bridge-importers";
@@ -20,7 +21,13 @@ import {
 } from "./import-cooldown";
 
 export type BridgeImportStatus =
-  "idle" | "running" | "done" | "failed" | "cooldown";
+  "idle" | "running" | "done" | "failed" | "cooldown" | "cannot-run";
+
+/** A pull refused for a reason the Connection words (a WHOOP sign-in with no
+    account id): its card's notice says it, so Sync now says nothing of its
+    own, and the Connection is checked again so the notice is current. */
+const cannotRun = (error: unknown): boolean =>
+  typeof (error as { reason?: unknown } | null)?.reason === "string";
 
 export type BridgeImport = {
   readonly supported: boolean;
@@ -56,7 +63,11 @@ export const useBridgeImport = (
       importer(persistence, extensionId, profileId)
     ).then(
       () => setStatus("done"),
-      () => setStatus("failed")
+      (error: unknown) => {
+        if (!cannotRun(error)) return setStatus("failed");
+        setStatus("cannot-run");
+        void bridgeConnections.refresh({ force: true });
+      }
     );
   }, [importer, bridgeId, profileId, persistence]);
 

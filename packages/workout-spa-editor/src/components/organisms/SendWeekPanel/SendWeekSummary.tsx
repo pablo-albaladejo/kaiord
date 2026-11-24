@@ -1,12 +1,11 @@
 /**
  * The run's summary: placed, library-only (warning tone, apart from the
  * failures) and needing attention, plus ONE notice per run for an outdated
- * bridge with the action that opens the extension's store page.
+ * extension: the Update notice every other surface shows, with its one fix.
  */
 import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-garmin";
 import { useTranslate } from "../../../i18n/use-translate";
-import { AttentionMark } from "../../atoms/AttentionMark";
-import { GARMIN_BRIDGE_STORE_URL } from "../../molecules/GarminPushButton/PlacementFeedback";
+import { GarminConnectionNotice } from "../../molecules/ConnectionNotice/GarminConnectionNotice";
 import { hasOutdatedBridge, summarize } from "./send-week-status";
 
 export function SendWeekSummary({
@@ -34,18 +33,10 @@ export function SendWeekSummary({
         )}
       </p>
       {hasOutdatedBridge(outcomes) && (
-        <p className="flex flex-wrap items-center gap-2 text-ink-strong">
-          <AttentionMark size="xs" />
-          <span>{t("sendWeek.outdated")}</span>
-          <a
-            className="underline"
-            href={GARMIN_BRIDGE_STORE_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("sendWeek.updateExtension")}
-          </a>
-        </p>
+        <GarminConnectionNotice
+          connection="outdated"
+          testId="send-week-outdated"
+        />
       )}
     </div>
   );

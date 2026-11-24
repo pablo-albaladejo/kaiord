@@ -21,6 +21,8 @@ const ann: BridgeAnnouncement = {
   capabilities: ["write:workouts"],
 };
 
+const NOT_A_FEATURE = 7;
+
 const validManifest = {
   ok: true,
   protocolVersion: 1,
@@ -42,6 +44,27 @@ describe("verifyAnnouncement", () => {
 
     // Assert
     await expect(verifyAnnouncement(ann)).resolves.toEqual(validManifest.data);
+  });
+
+  it("should keep the features the ping reports and drop its Session fields", async () => {
+    // Arrange
+    mockSend.mockResolvedValue({
+      ...validManifest,
+      data: {
+        ...validManifest.data,
+        features: ["calendar-write-v1", NOT_A_FEATURE],
+        gcApi: { ok: true },
+      },
+    });
+
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
+    // Assert
+    expect(manifest).toEqual({
+      ...validManifest.data,
+      features: ["calendar-write-v1"],
+    });
   });
 
   it("should return false when the ping fails", async () => {
@@ -83,19 +106,69 @@ describe("verifyAnnouncement", () => {
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("should return false when the protocol version is unsupported", async () => {
+  it("should accept an extension on another protocol version so its probe can offer Update", async () => {
     // Arrange
-
-    // Act
+    const otherVersion = validManifest.data.protocolVersion + 1;
     mockSend.mockResolvedValue({
       ok: true,
       data: {
         ...validManifest.data,
-        protocolVersion: 99,
+        protocolVersion: otherVersion,
       },
     });
 
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
     // Assert
-    await expect(verifyAnnouncement(ann)).resolves.toBeNull();
+    // Rejecting it made an outdated extension look absent, so the App said
+    // Install where only Update can help (#1098).
+    expect(manifest?.protocolVersion).toBe(otherVersion);
+  });
+  it.each([1, 2])(
+    "should accept a Train2Go extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      const t2g = {
+        ...ann,
+        bridgeId: "train2go-bridge",
+        protocolVersion: version,
+      };
+      mockSend.mockResolvedValue({
+        ok: true,
+        protocolVersion: version,
+        data: {
+          id: "train2go-bridge",
+          name: "Train2Go",
+          version: "10.5.0",
+          protocolVersion: version,
+          capabilities: ["read:training-plan"],
+        },
+      });
+
+      // Act
+      const manifest = await verifyAnnouncement(t2g);
+
+      // Assert
+      expect(manifest?.protocolVersion).toBe(version);
+    }
+  );
+
+  it("should register a Garmin extension on a protocol it does not accept so its probe can say it is outdated", async () => {
+    // Arrange
+    // Garmin accepts protocols 1 and 2; refusing the announcement here would
+    // make the extension look absent and offer Install (#1098). The Session
+    // probe reads the same version and reports it outdated instead.
+    const UNKNOWN_PROTOCOL = 3;
+    mockSend.mockResolvedValue({
+      ok: true,
+      data: { ...validManifest.data, protocolVersion: UNKNOWN_PROTOCOL },
+    });
+
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
+    // Assert
+    expect(manifest?.protocolVersion).toBe(UNKNOWN_PROTOCOL);
   });
 });

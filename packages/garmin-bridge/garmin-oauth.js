@@ -125,7 +125,13 @@ const sign = async (method, url, extraParams, token) => {
   );
 };
 
-// ── Auth errors carry needsReauth so the SPA can prompt a Garmin login ──
+// ── Auth errors carry needsReauth only when Garmin said the sign-in is gone ──
+//
+// Garmin's own sign-in page answering with no ticket (it has no single
+// sign-on session to issue one from) and a 401 are verified. A 429 (Garmin
+// rate-limits its sign-in), a 403 or a 5xx is Garmin failing, not a revoked
+// sign-in: it keeps its status and no needsReauth.
+const AUTH_UNAUTHORIZED_STATUS = 401;
 
 const authError = (stage, status) => {
   const err = new Error(
@@ -133,7 +139,10 @@ const authError = (stage, status) => {
       ? "No Garmin session. Open Garmin Connect, sign in, then retry."
       : `Garmin auth failed at ${stage}${status ? ` (${status})` : ""}`
   );
-  err.needsReauth = true;
+  if (stage === "ticket" || status === AUTH_UNAUTHORIZED_STATUS) {
+    err.needsReauth = true;
+  }
+  if (typeof status === "number") err.status = status;
   err.retryable = true;
   return err;
 };
@@ -153,6 +162,7 @@ const getTicketFromSession = async (fetchImpl) => {
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     },
   });
+  if (!r.ok) throw authError("sign-in", r.status);
   const html = await r.text();
   const m = html.match(/ticket=([A-Za-z0-9-]+)/);
   if (!m) throw authError("ticket");
@@ -275,6 +285,20 @@ const ensureToken = async (fetchImpl) => {
   return tokens;
 };
 
+// The Session check: reads the tokens a real request minted and makes no
+// request. A refresh or a mint would itself issue a credential, so without a
+// still-valid OAuth2 token the answer is "not-checked" and the first real
+// request finds out. No token value leaves this function.
+const checkStoredTokens = async () => {
+  try {
+    const { oauth1, oauth2 } = await loadTokens();
+    if (!oauth1 || isOAuth2Expired(oauth2)) return "not-checked";
+    return "signed-in";
+  } catch {
+    return "not-checked";
+  }
+};
+
 // ── Bearer transport (shared identity-free master) ──
 //
 // The raw Bearer fetch + 401→re-mint retry live in the vendored bridge-core
@@ -333,7 +357,7 @@ const connectapiFetch = (
   method,
   body,
   fetchImpl,
-  { signal, tokenFetchImpl = fetchImpl } = {}
+  { signal, tokenFetchImpl = fetchImpl, raw = false } = {}
 ) =>
   bearerCore().bearerRequest({
     baseUrl: CONNECTAPI,
@@ -345,22 +369,7 @@ const connectapiFetch = (
     refreshToken: () =>
       raceAbort(() => accessTokenAfterMint(tokenFetchImpl), signal),
     fetchImpl,
-  });
-
-/**
- * Multipart upload surface: POSTs a `FormData` (e.g. a FIT file) through the
- * SAME Bearer + 401→re-mint lifecycle as `connectapiFetch`. The master leaves
- * the Content-Type unset so the runtime attaches the multipart boundary.
- */
-const connectapiUpload = (path, formData, fetchImpl) =>
-  bearerCore().bearerRequest({
-    baseUrl: CONNECTAPI,
-    path,
-    method: "POST",
-    body: formData,
-    getToken: accessTokenAfterEnsure,
-    refreshToken: accessTokenAfterMint,
-    fetchImpl,
+    raw,
   });
 
 const api = {
@@ -378,10 +387,10 @@ const api = {
   clearTokens,
   isOAuth2Expired,
   ensureToken,
+  checkStoredTokens,
   isAbortError,
   raceAbort,
   connectapiFetch,
-  connectapiUpload,
 };
 
 if (typeof module !== "undefined") {

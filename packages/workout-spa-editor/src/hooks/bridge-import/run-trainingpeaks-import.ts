@@ -1,7 +1,6 @@
-import {
-  checkTrainingPeaksSession,
-  readTrainingPeaksMetrics,
-} from "../../adapters/trainingpeaks/trainingpeaks-transport";
+import { checkAllowsUse } from "../../adapters/bridge/bridge-session-outcome";
+import { readTrainingPeaksMetrics } from "../../adapters/trainingpeaks/connector/trainingpeaks-metrics-transport";
+import { checkTrainingPeaksSession } from "../../adapters/trainingpeaks/connector/trainingpeaks-transport";
 import { syncTrainingPeaksWeight } from "../../application/trainingpeaks/sync-trainingpeaks-weight.use-case";
 import type { PersistencePort } from "../../ports/persistence-port";
 
@@ -23,8 +22,10 @@ export const runTrainingPeaksImport = async (
     {
       policyRepo: persistence.integrationPolicy,
       importedRecords: persistence.importedRecords,
+      // The check mints nothing: "not-checked" lets the read itself mint the
+      // token and find out.
       checkSession: async () =>
-        (await checkTrainingPeaksSession(extensionId)).authenticated,
+        checkAllowsUse(await checkTrainingPeaksSession(extensionId)),
       readMetrics: (start, end) =>
         readTrainingPeaksMetrics(extensionId, start, end),
       parse: trainingPeaksMetricsToKrd,

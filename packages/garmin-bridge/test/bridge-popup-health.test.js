@@ -166,7 +166,9 @@ describe("bridge-popup-health (vendored)", () => {
 
     it("should persist the folded record", async () => {
       // Arrange
-      const store = stubStorage({ [KD_HEALTH_KEY]: { brokenSince: EARLIER_MS } });
+      const store = stubStorage({
+        [KD_HEALTH_KEY]: { brokenSince: EARLIER_MS },
+      });
 
       // Act
       await recordProbe(true, NOW_MS);

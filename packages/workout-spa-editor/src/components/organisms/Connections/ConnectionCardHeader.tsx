@@ -1,9 +1,11 @@
+import { connectionNotCheckedText } from "@kaiord/i18n/connection-notices";
 import type { ReactNode } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
-import { sourceFixUrl } from "../../../application/connections/source-fix-link";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
-import { detailKeyFor } from "./connection-card-copy";
+import { detailKeyFor, notCheckedReasonFor } from "./connection-card-copy";
+import { ConnectionCardNotice } from "./ConnectionCardNotice";
 import { ConnectionMark } from "./ConnectionMark";
 import { ConnectionStatusLine } from "./ConnectionStatusLine";
 
@@ -11,11 +13,15 @@ type Props = { source: ConnectionSource; action?: ReactNode };
 
 export function ConnectionCardHeader({ source, action }: Props) {
   const t = useTranslate("connections");
+  const locale = useActiveLocale();
   const detailKey = detailKeyFor(source);
-  // Sits under the detail line rather than beside the action: it is the
-  // answer to the sentence above it, and the action slot is where the card's
-  // own controls live — a link out is not one of them.
-  const fixUrl = sourceFixUrl(source);
+  const notChecked = notCheckedReasonFor(source);
+  const detail =
+    notChecked !== null
+      ? connectionNotCheckedText(notChecked, source.name, locale)
+      : detailKey !== null
+        ? t(detailKey)
+        : null;
 
   return (
     <div className="flex items-start gap-3">
@@ -25,22 +31,15 @@ export function ConnectionCardHeader({ source, action }: Props) {
           {source.name}
         </div>
         <ConnectionStatusLine source={source} />
-        {detailKey !== null && (
-          <p className="text-[12.5px] leading-snug text-ink-muted">
-            {t(detailKey)}
+        {detail !== null && (
+          <p
+            className="text-[12.5px] leading-snug text-ink-muted"
+            data-testid={`connection-detail-${source.id}`}
+          >
+            {detail}
           </p>
         )}
-        {fixUrl !== null && (
-          <a
-            href={fixUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid={`connection-fix-${source.id}`}
-            className="inline-block text-[12.5px] font-semibold text-accent"
-          >
-            {t("fixAtSource", { name: source.name })}
-          </a>
-        )}
+        <ConnectionCardNotice source={source} />
       </div>
       {action}
     </div>
