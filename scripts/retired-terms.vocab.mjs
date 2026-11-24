@@ -125,7 +125,7 @@ export const ATHLETE_ALLOWED = [
     "posting its id, version and capabilities to the page",
     "using the `write:body` capability",
     "Only the `read:body` capability is declared",
-    "These are the `read:body`, `write:body` and `write:workouts` capabilities",
+    "These are the `read:body` and `write:workouts` capabilities",
     "declaring the `read:body`, `read:sleep`, and `read:activities` capabilities",
     "its declared capabilities",
   ].map((phrase) => ({ phrase, why: DECLARED_TOKENS })),
