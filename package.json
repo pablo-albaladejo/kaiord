@@ -111,6 +111,7 @@
     "lint:theme-dialect": "node scripts/check-theme-dialect.mjs",
     "lint:mkt-boundary": "node scripts/check-mkt-boundary.mjs",
     "lint:links": "bash scripts/lint-links.sh",
+    "licenses:text": "node scripts/generate-third-party-licenses.mjs && prettier --write THIRD-PARTY-LICENSES.md",
     "icons:build": "node scripts/build-extension-icons.mjs",
     "brand:images": "node scripts/build-brand-images.mjs",
     "bridge:sync": "node scripts/sync-bridge-core.mjs",
