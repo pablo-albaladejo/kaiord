@@ -91,8 +91,8 @@ const ALLOWED = [
   // prettier-ignore
   { method: "GET", pattern: /^\/activitylist-service\/activities\/search\/activities\?start=\d+&limit=\d+$/ },
   // Calendar placement: POST places a library workout (by workoutId) on a
-  // date; DELETE removes one calendar entry (by workoutScheduleId). Library
-  // workouts are never deleted (owner decision 2026-11-24).
+  // date; DELETE removes one calendar entry (by workoutScheduleId). No entry
+  // deletes a library workout.
   // prettier-ignore
   { method: "POST", pattern: /^\/workout-service\/schedule\/[1-9]\d*$/, body: "schedule" },
   // prettier-ignore
