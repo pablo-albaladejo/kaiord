@@ -94,6 +94,7 @@
     "loadingDescription": "Loading description…",
     "retryDescription": "Retry",
     "descriptionError": {
+      "app-part-not-loaded": "Part of the Kaiord App did not load, so nothing was asked of Train2Go. Reload the App to load it again.",
       "not-linked": "This coach isn't linked to this athlete."
     },
     "showAll": "Show all",
@@ -170,6 +171,7 @@
     "shapeMismatch": "Train2Go sent zones Kaiord cannot read, so they were not synced.",
     "unsupported": "This coaching platform does not share zones.",
     "notSynced": "Your zones were not synced.",
+    "notLoaded": "Part of the Kaiord App did not load, so nothing was asked of Train2Go. Reload the App to load it again.",
     "kept": {
       "thresholds": "Train2Go has different thresholds from the ones you set. Kaiord kept yours.",
       "zones": "Train2Go has different zones from the ones you set. Kaiord kept yours.",

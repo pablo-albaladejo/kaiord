@@ -129,6 +129,35 @@ describe("CoachingActivityDialog — states", () => {
     await waitFor(() => expect(expandActivity).toHaveBeenCalledTimes(2));
   });
 
+  it("should say the App did not load, with Reload, when the description's code fails to load", async () => {
+    // Arrange
+    const activity = { ...baseActivity, description: undefined };
+    const expandActivity = vi
+      .fn()
+      .mockResolvedValue({ ok: false, reason: "app-part-not-loaded" });
+
+    // Act
+    render(
+      wrap(
+        <CoachingActivityDialog
+          activity={activity}
+          onClose={vi.fn()}
+          expandActivity={expandActivity}
+        />
+      )
+    );
+
+    // Assert
+    const error = await screen.findByTestId(
+      "coaching-dialog-description-error"
+    );
+    expect(error).toHaveTextContent(
+      "Part of the Kaiord App did not load, so nothing was asked of Train2Go. Reload the App to load it again."
+    );
+    expect(error).not.toHaveTextContent("not answering");
+    expect(screen.getByRole("button", { name: "Reload" })).toBeVisible();
+  });
+
   it("should render the AI failure inline state when no provider is configured", async () => {
     // Arrange
     render(
