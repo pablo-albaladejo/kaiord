@@ -29,7 +29,7 @@
           "contains": "## The owner's statement"
         },
         {
-          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "author-statement": "doy fe que todos son de un agente, antes era kiro",
           "by": "the repository's owner",
           "on": "2026-11-23"
         },
@@ -78,10 +78,10 @@
     },
     {
       "id": "method.statement.intro",
-      "text": "This section is a declaration by the repository's owner, not a figure: git cannot check it. On 2026-11-23 the owner stated:",
+      "text": "This section is a declaration by the repository's owner, not a figure: git cannot check it. On 2026-11-23 the owner stated, in Spanish, of the commits in this repository:",
       "proof": [
         {
-          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "author-statement": "doy fe que todos son de un agente, antes era kiro",
           "by": "the repository's owner",
           "on": "2026-11-23"
         }
@@ -89,12 +89,42 @@
     },
     {
       "id": "method.statement",
-      "text": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+      "text": "«doy fe que todos son de un agente, antes era kiro»",
       "proof": [
         {
-          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "author-statement": "doy fe que todos son de un agente, antes era kiro",
           "by": "the repository's owner",
           "on": "2026-11-23"
+        }
+      ]
+    },
+    {
+      "id": "method.statement.translation",
+      "text": "English translation: \"I attest that they are all from an agent; before, it was Kiro.\"",
+      "proof": [
+        {
+          "author-statement": "doy fe que todos son de un agente, antes era kiro",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
+        }
+      ]
+    },
+    {
+      "id": "method.statement.scope",
+      "text": "The statement is about the agents' work: the automation commits made by bots are not that work, and are counted apart below.",
+      "proof": [
+        {
+          "author-statement": "doy fe que todos son de un agente, antes era kiro",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
+        },
+        {
+          "test": "scripts/check-method-figures.test.mjs",
+          "title": "should find only pinned git pipelines in the published note, without needing its history"
+        },
+        {
+          "test": "scripts/check-method-figures.test.mjs",
+          "title": "should name the figure whose number drifted from its command"
         }
       ]
     },
