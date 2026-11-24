@@ -28,7 +28,8 @@
     "sending": "Enviando…",
     "sent": "En tu Garmin",
     "garminPushError": {
-      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo."
+      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo.",
+      "notLoaded": "Una parte de la App de Kaiord no se cargó, así que no se envió nada a Garmin. Recarga la App para cargarla de nuevo."
     },
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
@@ -101,6 +102,7 @@
       "bridge-outdated": "En tu biblioteca de Garmin, sin fecha."
     },
     "openConnections": "Abrir Conexiones",
+    "reload": "Recargar",
     "recordDeletedOn": "Este entrenamiento se eliminó mientras se enviaba. Puede seguir en tu calendario de Garmin el {{date}}: elimínalo en Garmin Connect.",
     "failed": {
       "busy": "Este entrenamiento ya se está enviando. Inténtalo de nuevo cuando termine ese envío.",
@@ -112,6 +114,7 @@
       "schedule-endpoint": "El calendario de Garmin no aceptó el entrenamiento.",
       "schedule-rejected": "Garmin rechazó esta fecha para el entrenamiento.",
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
+      "app-part-not-loaded": "Una parte de la App de Kaiord no se cargó, así que no se envió nada a Garmin. Recarga la App para cargarla de nuevo.",
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Conexiones, en Entrenamiento → También se envía a.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
       "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",

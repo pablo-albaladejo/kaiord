@@ -6,16 +6,23 @@ vi.mock("../adapters/dexie/dexie-database", () => ({ db: {} }));
 vi.mock("../adapters/garmin/connector/garmin-workout-operations", () => ({
   executePush: vi.fn(),
 }));
+vi.mock("../adapters/garmin/connector/load-garmin-workout-operations", () => ({
+  loadGarminWorkoutOperations: vi.fn(
+    () => import("../adapters/garmin/connector/garmin-workout-operations")
+  ),
+}));
 vi.mock("./use-garmin-bridge-action-helpers", () => ({
   getGarminExtensionId: () => "ext-id",
-  runPush: vi.fn(),
 }));
+vi.mock("./run-garmin-push", () => ({ runPush: vi.fn() }));
 
 import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
+import { loadGarminWorkoutOperations } from "../adapters/garmin/connector/load-garmin-workout-operations";
 import { recordExport } from "../application/export/record-export.use-case";
 import { createInMemoryExportLedgerRepository } from "../test-utils/in-memory-export-ledger-repository";
+import { isAppPartNotLoaded } from "../types/app-part-not-loaded-error";
 import { buildGarminPushFn, pushQuiet } from "./garmin-push-fn";
-import { runPush } from "./use-garmin-bridge-action-helpers";
+import { runPush } from "./run-garmin-push";
 
 const SENTINEL = "garmin-unconfirmed";
 const OVER_CAP = 65;
@@ -46,6 +53,23 @@ describe("buildGarminPushFn", () => {
     const [row] = [...ledgerRepo.store.values()];
     expect(row?.destinationExternalId).toBe(SENTINEL);
     expect(row?.library).toEqual({ kind: "unconfirmed" });
+  });
+
+  it("should throw the App's own failure when the send did not load", async () => {
+    // Arrange
+    const pushFn = buildGarminPushFn(
+      vi.fn().mockResolvedValue({
+        success: false,
+        garminWorkoutId: null,
+        notLoaded: true,
+      })
+    );
+
+    // Act
+    const error = await pushFn({}).catch((e: unknown) => e);
+
+    // Assert
+    expect(isAppPartNotLoaded(error)).toBe(true);
   });
 
   it("should pass through an id-shaped value from the bridge", async () => {
@@ -164,4 +188,22 @@ describe("pushQuiet", () => {
       expect(runPush).not.toHaveBeenCalled();
     }
   );
+
+  it("should say the send did not load, without asking Garmin, when its code fails to load", async () => {
+    // Arrange
+    vi.mocked(loadGarminWorkoutOperations).mockRejectedValueOnce(
+      new Error("Failed to fetch dynamically imported module")
+    );
+
+    // Act
+    const outcome = await pushQuiet({});
+
+    // Assert
+    expect(outcome).toEqual({
+      success: false,
+      garminWorkoutId: null,
+      notLoaded: true,
+    });
+    expect(executePush).not.toHaveBeenCalled();
+  });
 });

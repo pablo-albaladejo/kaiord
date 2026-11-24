@@ -97,6 +97,15 @@ export default defineConfig({
             { name: "kaiord-tcx", test: /[\\/]packages[\\/]tcx[\\/]/ },
             { name: "kaiord-zwo", test: /[\\/]packages[\\/]zwo[\\/]/ },
             { name: "kaiord-garmin", test: /[\\/]packages[\\/]garmin[\\/]/ },
+            // Its own chunk keeps the entry under Vite's 500 kB chunk warning.
+            {
+              name: "vendor-react",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+            },
+            // Every other module the first route needs joins the entry chunk,
+            // so first load is a handful of files instead of dozens; route
+            // pages and every dynamic import stay chunks of their own.
+            { name: "startup", tags: ["$initial"] },
           ],
         },
       },

@@ -6,9 +6,10 @@
  */
 import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
-import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
+import { loadGarminWorkoutOperations } from "../adapters/garmin/connector/load-garmin-workout-operations";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
+import { AppPartNotLoadedError } from "../types/app-part-not-loaded-error";
 import { parseGarminWorkoutId } from "../types/garmin-ledger";
 import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 
@@ -50,6 +51,7 @@ export const buildGarminPushFn = (
 ): ExecuteWorkoutPushInput["pushFn"] => {
   return async (payload) => {
     const outcome = await pushWorkout(payload);
+    if (outcome.notLoaded) throw new AppPartNotLoadedError();
     if (!outcome.success) throw new BridgePushFailedError();
     const workoutId = parseGarminWorkoutId(outcome.garminWorkoutId);
     return {
@@ -63,9 +65,14 @@ export const buildGarminPushFn = (
 
 /** A `pushWorkout` for bulk sends: maps the bridge push to a
     `GarminPushOutcome` without touching the global push UI state
-    (`setPushing`), which belongs to the single-workout push button. */
+    (`setPushing`), which belongs to the single-workout push button. A send
+    that cannot be loaded never reached Garmin: `notLoaded` says so. */
 export const pushQuiet = async (gcn: unknown): Promise<GarminPushOutcome> => {
-  const result = await executePush(getGarminExtensionId(), gcn);
+  const operations = await loadGarminWorkoutOperations().catch(() => null);
+  if (!operations) {
+    return { success: false, garminWorkoutId: null, notLoaded: true };
+  }
+  const result = await operations.executePush(getGarminExtensionId(), gcn);
   if (result.status !== "success") {
     return { success: false, garminWorkoutId: null };
   }
