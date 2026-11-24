@@ -13,9 +13,15 @@ import { gzipSync } from "node:zlib";
 // into the entry graph fails CI instead of silently costing Lighthouse
 // points. Lazy route chunks are not counted: they load on navigation.
 //
-// Budget: 286.2 kB measured after the leave-tracking fix for lazy imports
-// cancelled by a navigation (#1362), x 1.05. The previous budget was
-// 272.1 kB measured after the perf-app-initial-js change, x 1.05.
+// Budget: 301.2 kB measured on the Bridges block after its first-load seams
+// (shared Connection notices, update prompt and service-worker update watch
+// loaded on demand; #1670), x 1.05. What grew: the Bridges block's bridge
+// protocol, connection state and extension descriptors, Garmin connector and
+// ledger merge, Train2Go ping and the unsaved-work guard (302.9 kB before
+// the seams). Lighthouse mobile median for /app/ (3 runs): 50 before, 50
+// after. The previous budget was 286.2 kB measured after the leave-tracking
+// fix for lazy imports cancelled by a navigation (#1362), x 1.05, and before
+// it 272.1 kB measured after the perf-app-initial-js change, x 1.05.
 // Raise it only with evidence (docs/seo-observatory.md, "SPA initial-JS
 // budget").
 //
@@ -68,7 +74,7 @@ import { gzipSync } from "node:zlib";
 // script, a forbidden lazy-seam source shows up in an initial file, or the
 // total is over budget.
 
-export const SPA_INITIAL_JS_BUDGET_KB = 300.5;
+export const SPA_INITIAL_JS_BUDGET_KB = 316.2;
 
 export const FORBIDDEN_LAZY_SOURCES = [
   "src/adapters/cloud-sync/create-app-cloud-sync.ts",
