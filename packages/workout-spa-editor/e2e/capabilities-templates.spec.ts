@@ -18,12 +18,12 @@ type Words = { library: string; templates: string; capabilities: string };
 const ENGLISH: Words = {
   library: "Library",
   templates: "Templates",
-  capabilities: "Capabilities",
+  capabilities: "Features",
 };
 const SPANISH: Words = {
   library: "Biblioteca",
   templates: "Plantillas",
-  capabilities: "Capacidades",
+  capabilities: "Funciones",
 };
 
 const libraryEntries = (page: Page, words: Words) =>

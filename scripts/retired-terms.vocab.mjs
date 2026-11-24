@@ -78,8 +78,18 @@ export const FILES = [
 const BRIDGE_WORD =
   'GLOSSARY.md, "Bridge": the athlete reads "Kaiord for <Platform>", or "extension"';
 
+// GLOSSARY.md, "Capability": the athlete reads "Feature" ("Función"); the
+// code and internal docs keep "Capability".
+const CAPABILITY_WORD =
+  'GLOSSARY.md, "Capability": the athlete reads "Feature", Spanish "Función"';
+
 export const ATHLETE_TERMS = [
   { term: "bridge", pattern: /\bbridges?\b/i, why: BRIDGE_WORD },
+  {
+    term: "Capability",
+    pattern: /\bcapabilit(?:y|ies)\b|\bcapacidad(?:es)?\b/i,
+    why: CAPABILITY_WORD,
+  },
   {
     term: "the Kaiord extension",
     pattern:
@@ -87,6 +97,11 @@ export const ATHLETE_TERMS = [
     why: `${BRIDGE_WORD}; there are five extensions, so name its Platform`,
   },
 ];
+
+const DECLARED_TOKENS =
+  "an extension's declared data capabilities (`read:body`, `write:body`…), the wire tokens it announces, not a Feature of the Kaiord App";
+const PHYSIOLOGY =
+  "a zone named for a physiological capacity (aerobic, anaerobic), not a Feature of the Kaiord App";
 
 const PACKAGE_NAME = "the npm package name, shown where a page names the code";
 const STORE_ADDRESS =
@@ -106,6 +121,22 @@ export const ATHLETE_ALLOWED = [
     phrase: `github.com/pablo-albaladejo/kaiord/tree/main/packages/${p}-bridge`,
     why: "the source folder an unpublished extension is loaded from",
   })),
+  ...[
+    "posting its id, version and capabilities to the page",
+    "using the `write:body` capability",
+    "Only the `read:body` capability is declared",
+    "These are the `read:body`, `write:body` and `write:workouts` capabilities",
+    "declaring the `read:body`, `read:sleep`, and `read:activities` capabilities",
+    "its declared capabilities",
+  ].map((phrase) => ({ phrase, why: DECLARED_TOKENS })),
+  ...["Capacidad aeróbica", "Capacidad anaeróbica"].map((phrase) => ({
+    phrase,
+    why: PHYSIOLOGY,
+  })),
+  {
+    phrase: "Failed to record a Capability decision",
+    why: "a developer log line (logger.warn), never shown to the athlete",
+  },
 ];
 
 // Athlete-facing files read whole, or only in the named sections, beyond the

@@ -36,7 +36,10 @@ The trace and reflection that motivate this glossary live in
 | **Profile**          | The athlete identity (zones · linked accounts · personal data) |
 | **Calendar week**    | The Monday-anchored week shown on `/calendar`                  |
 | **Trace**            | What one run of the assistant did; Spanish "Traza"             |
-| **Capability**       | A part the athlete turns on in Settings; Spanish "Capacidad"   |
+| **Feature**          | A part turned on in Settings, Features; Spanish "Función"      |
+
+The code and internal docs call a Feature a Capability; the athlete never
+reads "Capability" or "Capacidad" (`pnpm lint:retired-terms`).
 
 ## State labels (visible to user)
 

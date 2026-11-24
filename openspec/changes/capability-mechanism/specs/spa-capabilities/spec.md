@@ -33,7 +33,7 @@ Every surface SHALL ask the read API before showing anything a Capability owns. 
 
 ### Requirement: The athlete activates or deactivates a Capability in one step without losing data
 
-Settings, Capabilities SHALL list every Capability with its name, what it does and its grade, each with one switch. Turning one on SHALL bring back every surface it owns with its data; turning it off SHALL hide them and SHALL NOT delete or change any of its data. Nothing SHALL ask first: the switch is its own undo.
+Settings, Features (Spanish "Funciones") SHALL list every Capability with its name, what it does and its grade, each with one switch. Turning one on SHALL bring back every surface it owns with its data; turning it off SHALL hide them and SHALL NOT delete or change any of its data. Nothing SHALL ask first: the switch is its own undo.
 
 #### Scenario: Off and on again
 
