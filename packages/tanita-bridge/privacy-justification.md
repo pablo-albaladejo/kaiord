@@ -43,5 +43,6 @@ The extension runs no script on `mytanita.eu`.
 - **No password**: The extension never reads, stores, or transmits your MyTANITA password. It reuses your existing MyTANITA sign-in in Chrome.
 - **No cookie access**: The extension does not declare the `cookies` permission and cannot read your MyTANITA session cookie; Chrome attaches it to the request without exposing it to the extension.
 - **The export is passed on, not kept**: The extension hands the export to the Kaiord App as MyTANITA sent it and never writes it to storage.
+- **Personal details removed from a page**: From a page MyTANITA serves in place of the export, the extension also removes each form field named as a first, last or full name, birth date, gender, email, phone or address. The export itself holds only measurements and is passed on unchanged.
 - **Requests to MyTANITA only**: Every request the extension makes goes to `https://mytanita.eu/en/user/export-csv`.
 - **No analytics or tracking**: The extension contains no analytics, error reporting or tracking, and sends nothing anywhere else.

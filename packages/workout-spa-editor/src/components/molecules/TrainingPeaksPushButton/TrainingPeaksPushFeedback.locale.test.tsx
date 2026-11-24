@@ -51,7 +51,7 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
     // Assert
     const text = screen.getByTestId("trainingpeaks-push-error").textContent;
     expect(text).toBe(
-      "TrainingPeaks no responde, así que ahora mismo no puedes usarlo en Kaiord."
+      "TrainingPeaks no responde, así que ahora mismo no puedes usar TrainingPeaks en Kaiord."
     );
   });
 });

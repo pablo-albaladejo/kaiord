@@ -2,6 +2,7 @@ export {
   createLanguageModel,
   type CreateLanguageModelOptions,
 } from "./create-language-model";
+export { EVALUATED_MODELS, isEvaluatedModel } from "./eval-status";
 export { listedModels, modelDisplayName } from "./model-names";
 export { CHARS_PER_TOKEN, estimateTokens } from "./pricing/estimate-tokens";
 export { priceRun, type PriceRunInput } from "./pricing/price-run";

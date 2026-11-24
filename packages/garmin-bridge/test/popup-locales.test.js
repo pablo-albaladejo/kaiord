@@ -107,7 +107,7 @@ describe(`${PLATFORM} popup languages`, () => {
       "Actualizar"
     );
     expect(doc.getElementById("status-text").textContent).toBe(
-      `${PLATFORM} no responde, así que ahora mismo no puedes usarlo en Kaiord.`
+      `${PLATFORM} no responde, así que ahora mismo no puedes usar ${PLATFORM} en Kaiord.`
     );
     expect(footerText(doc)).toBe("Reintentar");
   });

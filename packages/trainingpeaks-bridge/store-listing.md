@@ -40,6 +40,7 @@ Your token and your data:
 • The extension gives the Kaiord App your TrainingPeaks athlete number just before it places a workout or imports your weight, because TrainingPeaks needs it for both, and never the token.
 • The extension sends requests only to TrainingPeaks, and answers only the Kaiord App at https://kaiord.com.
 • Before it hands the Kaiord App an answer, the extension removes anything in it tied to your TrainingPeaks sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.
+• It also removes a workout's comments, your coach's and yours, which the Kaiord App does not read, and any field named as your name, birth date, gender, email, phone or address.
 • No analytics and no tracking.
 • Removing the extension from Chrome deletes everything it stored.
 • Access through your own TrainingPeaks sign-in is unofficial: it is not a TrainingPeaks partner API, and it can stop working without notice.
@@ -75,6 +76,7 @@ Tu token y tus datos:
 • La extensión le da a Kaiord App tu número de atleta de TrainingPeaks justo antes de colocar un entrenamiento o importar tu peso, porque TrainingPeaks lo necesita para ambos, y nunca el token.
 • La extensión solo envía peticiones a TrainingPeaks, y solo responde a Kaiord App en https://kaiord.com.
 • Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de TrainingPeaks: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de TrainingPeaks no traen ninguno.
+• También quita los comentarios de un entrenamiento, los de tu entrenador y los tuyos, que Kaiord App no lee, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.
 • Sin analítica y sin rastreo.
 • Quitar la extensión de Chrome borra todo lo que guardó.
 • El acceso a través de tu propio inicio de sesión de TrainingPeaks no es oficial: no es una API de socio de TrainingPeaks, y puede dejar de funcionar sin aviso.

@@ -120,7 +120,7 @@ describe("background.js", () => {
         name: "TrainingPeaks",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:body", "write:body", "write:workouts"],
+        capabilities: ["read:body", "write:workouts"],
       };
 
       // Act
@@ -202,7 +202,7 @@ describe("background.js", () => {
       expect(allowed).toEqual([false, false]);
     });
 
-    it("should allow the metrics range read and single-metric write", () => {
+    it("should allow the metrics range read and refuse a metric write", () => {
       // Arrange
       const writePath = `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`;
 
@@ -213,7 +213,7 @@ describe("background.js", () => {
       ];
 
       // Assert
-      expect(results).toEqual([true, true]);
+      expect(results).toEqual([true, false]);
     });
 
     it("should allow only the single-workout read, not a range or a delete", () => {
@@ -385,7 +385,7 @@ describe("background.js", () => {
         name: "TrainingPeaks",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:body", "write:body", "write:workouts"],
+        capabilities: ["read:body", "write:workouts"],
       });
     });
 

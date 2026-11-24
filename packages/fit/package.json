@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/fit",
   "version": "10.5.2",
-  "description": "FIT format adapter for the Kaiord SDK",
+  "description": "FIT format adapter for the Kaiord SDK. Its own code is MIT; it depends on Garmin's FIT SDK (@garmin/fitsdk), licensed under Garmin's FIT Protocol License Agreement, not MIT.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

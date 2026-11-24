@@ -72,7 +72,9 @@ describe("ChatModelPicker", () => {
     renderPicker();
 
     // Assert
-    expect(selectedText()).toBe("Same as main model (GPT-5 mini · Mi GPT)");
+    expect(selectedText()).toBe(
+      "Same as main model (GPT-5 mini (not evaluated) · Mi GPT)"
+    );
   });
 
   it("should say it follows the chat setting when chat has its own model", () => {
@@ -87,7 +89,7 @@ describe("ChatModelPicker", () => {
 
     // Assert
     expect(selectedText()).toBe(
-      "Same as chat in Settings (GPT-5 mini · Mi GPT)"
+      "Same as chat in Settings (GPT-5 mini (not evaluated) · Mi GPT)"
     );
   });
 
@@ -99,7 +101,7 @@ describe("ChatModelPicker", () => {
     renderPicker({ running: own, chosen: true });
 
     // Assert
-    expect(selectedText()).toBe("Claude Opus 4.1 · Mi Claude");
+    expect(selectedText()).toBe("Claude Opus 4.1 (not evaluated) · Mi Claude");
   });
 
   it("should offer every account's models in one list", () => {

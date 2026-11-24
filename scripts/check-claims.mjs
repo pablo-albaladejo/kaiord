@@ -13,7 +13,8 @@ import { failIfAny } from "./lib/guard-failure.mjs";
 // Each unit of text on a registered surface must be a register entry, as
 // many times as it appears, each entry must still be on its surface, and
 // each claim that states a fact must be proven by a running test or pinned
-// code; a label states nothing, an external claim is read again in time.
+// code, or declared by the owner's author statement (counted apart, never as
+// proven); a label states nothing, an external claim is read again in time.
 // A Round-trip claim names its formats and is proven by each one's contract
 // test, which the CI round-trip job runs (lib/claims-round-trip.mjs).
 
@@ -34,7 +35,7 @@ export function checkClaimRegisters({ registers, read, today = Date.now() }) {
     strength.push(...found.strength);
   }
   const n = (kind) => strength.filter((s) => s === kind).length;
-  const summary = `${strength.length} claims: ${n("label")} labels, ${n("external")} external, ${n("test")} proven by test, ${n("pinned")} by pinned code, ${n("weak")} unproven`;
+  const summary = `${strength.length} claims: ${n("label")} labels, ${n("external")} external, ${n("test")} proven by test, ${n("pinned")} by pinned code, ${n("statement")} declared by author statement, ${n("weak")} unproven`;
   return { problems, summary };
 }
 

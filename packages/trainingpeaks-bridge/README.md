@@ -12,7 +12,7 @@ This package is `private: true` and is not published to npm.
 
 - Mint a short-lived access token from your existing TrainingPeaks session and
   read your consolidated timed metrics (weight and other health channels) from
-  `tpapi.trainingpeaks.com`, optionally writing a weight measurement back.
+  `tpapi.trainingpeaks.com`. It writes no metric back.
 - **SW-direct, no relay**: all fetches happen in the background service worker;
   there is no content script on TrainingPeaks.
 - **Dual transport, no password**: the durable credential is your own
@@ -40,7 +40,7 @@ contentType, body } }` with the body unread but for its Session secrets, which i
   the list is `Request not allowed` with nothing sent. The App's Connector
   builds the path and reads the answer; it falls back to the protocol-1
   actions for the store version.
-  The list: the metrics range read, the one weight write (`weight` body), the
+  The list: the metrics range read, the
   planned-workout write (`workout` body; a `402` is a date past the account's
   planning horizon) and the read of one workout by id (a `404` means
   TrainingPeaks does not have it). The token endpoint is not on it.

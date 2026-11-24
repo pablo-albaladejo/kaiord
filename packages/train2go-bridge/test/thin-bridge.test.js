@@ -91,6 +91,10 @@ describe("thin Bridge: closed path list", () => {
 
   it.each([
     { label: "a path outside the list", path: "/api/v2/comments/1" },
+    {
+      label: "the activity tooltip, which no Connector reads",
+      path: "/api/v2/workplan/tooltip/activity/123",
+    },
     { label: "a listed path with a query added", path: "/user/details?x=1" },
     { label: "another host", path: "//attacker.example/user/details" },
     { label: "a path with no leading slash", path: "user/details" },
@@ -279,5 +283,20 @@ describe("thin Bridge: internal channel is the popup's only", () => {
       ok: true,
       data: { activities: [{ status: 1, workload: 3 }] },
     });
+  });
+});
+
+describe("popup reads (ADR 0004's bounded exception)", () => {
+  it("should answer every popup read on the popup's channel and none on the App's", () => {
+    // Arrange
+    const bg = require("../background.js");
+
+    // Act
+    const reads = [...bg.POPUP_READS];
+
+    // Assert
+    expect(reads.every((a) => bg.INTERNAL_ACTIONS.has(a))).toBe(true);
+    expect(reads.some((a) => bg.EXTERNAL_ACTIONS.has(a))).toBe(false);
+    expect(Array.isArray(bg.POPUP_READ_SCRIPTS)).toBe(true);
   });
 });

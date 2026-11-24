@@ -74,6 +74,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+let personalFields;
+try {
+  importScripts("personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+}
+
 // ── WHOOP call surface: the closed list ──
 //
 // Method + path pattern, nothing else, GET only: every request is checked
@@ -259,7 +269,7 @@ const request = async (message) => {
       needsReauth: res?.status === UNAUTHORIZED_STATUS,
     });
   }
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 // ── Actions ──
@@ -309,6 +319,13 @@ const EXTERNAL_ACTIONS = new Set([
 // The popup's two reads, answered only to the extension's own pages, never a
 // content script.
 const INTERNAL_ACTIONS = new Set(["popup-status", "tab-open"]);
+
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
 
 // The bearer the WHOOP tab's content script captured: taken only from this
 // extension's own content script running on app.whoop.com, stored, and never
@@ -405,6 +422,8 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     APP_PATTERN,

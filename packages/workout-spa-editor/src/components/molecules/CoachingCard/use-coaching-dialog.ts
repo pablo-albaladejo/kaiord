@@ -11,8 +11,8 @@
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { ExpandActivity } from "../../../types/coaching-expand-result";
 import type { ActivityMatchState } from "./activity-match-state";
-import type { UseCoachingAi } from "./use-coaching-ai-handler";
 import { useCoachingAi } from "./use-coaching-ai-handler";
+import type { UseCoachingAi } from "./use-coaching-ai-types";
 import { useCoachingAutoHeal } from "./use-coaching-auto-heal";
 import { useCoachingConvert } from "./use-coaching-convert";
 import { useCoachingDialogActions } from "./use-coaching-dialog-actions";

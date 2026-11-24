@@ -64,7 +64,7 @@ async function setUpTwoAccounts(page: Page) {
   const settings = page.getByTestId("settings-page");
   await addProvider(settings, "anthropic", "Mi Claude");
   await addProvider(settings, "openai", "Mi GPT");
-  await setMainModel(page, "GPT-5 mini · Mi GPT", "gpt-5-mini");
+  await setMainModel(page, "GPT-5 mini (not evaluated) · Mi GPT", "gpt-5-mini");
 }
 
 test.describe("Chat model picker", () => {
@@ -76,7 +76,7 @@ test.describe("Chat model picker", () => {
     const picker = page.getByTestId("chat-model-select");
     await expect
       .poll(() => shown(picker))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+      .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
 
     // Sending from a following draft pins nothing on the conversation.
     await page.getByLabel("Message").fill("Plan my week");
@@ -91,7 +91,7 @@ test.describe("Chat model picker", () => {
     const conversationUrl = page.url();
     await expect
       .poll(() => shown(picker))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+      .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
 
     // A new main model in settings is what that conversation now runs.
     await setMainModel(page, "Claude Sonnet 5 · Mi Claude", "claude-sonnet-5");
@@ -110,7 +110,7 @@ test.describe("Chat model picker", () => {
     const picker = page.getByTestId("chat-model-select");
     await expect
       .poll(() => shown(picker))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+      .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
 
     // A draft's choice is provider and model together, and stays off the
     // athlete's settings.
@@ -131,7 +131,7 @@ test.describe("Chat model picker", () => {
     await page.getByRole("button", { name: "+ New conversation" }).click();
     await expect
       .poll(() => shown(picker))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+      .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
     await page.getByText("How was my week?").first().click();
     await expect.poll(() => shown(picker)).toBe("o3 · Mi GPT");
 
@@ -139,7 +139,7 @@ test.describe("Chat model picker", () => {
     await picker.selectOption({ index: 0 });
     await expect
       .poll(() => shown(picker))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+      .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
     const [conversation] = await storedRows(page, "chatConversations");
     expect(conversation?.modelId).toBeUndefined();
   });

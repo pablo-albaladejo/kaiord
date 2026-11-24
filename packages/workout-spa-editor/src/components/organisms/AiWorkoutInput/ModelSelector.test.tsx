@@ -76,7 +76,7 @@ describe("ModelSelector", () => {
     // Assert
     expect(shown()).toBe("Same as main model");
     expect(screen.getByRole("combobox")).toHaveAccessibleDescription(
-      "Runs GPT-4.1 · Mi GPT"
+      "Runs GPT-4.1 (not evaluated) · Mi GPT"
     );
   });
 

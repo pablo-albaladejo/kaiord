@@ -577,34 +577,6 @@
       ]
     },
     {
-      "id": "garmin.pj.connect",
-      "text": "`https://connect.garmin.com/*`",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"https://connect.garmin.com/*\""
-        }
-      ]
-    },
-    {
-      "id": "garmin.pj.connect-why",
-      "text": "**Why**: The Garmin Connect site, where you sign in. No request the extension makes is addressed to this host; the popup and the `open-garmin` action only open it in a new tab.",
-      "proof": [
-        {
-          "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
-        },
-        {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles open-garmin action"
-        },
-        {
-          "file": "packages/garmin-bridge/popup.js",
-          "contains": "const OPEN_GARMIN_URL = \"https://connect.garmin.com/modern/\";"
-        }
-      ]
-    },
-    {
       "id": "garmin.pj.content-script",
       "text": "Content Script",
       "kind": "label"
@@ -882,7 +854,7 @@
     },
     {
       "id": "garmin.pp.workouts",
-      "text": "**Workouts and Activities**: The extension uploads the workouts you send from the Kaiord App to your Garmin Connect workout library, lists up to 20 of your library workouts, and reads your 20 most recent activities, which it passes to the Kaiord App as Garmin returns them.",
+      "text": "**Workouts and Activities**: The extension uploads the workouts you send from the Kaiord App to your Garmin Connect workout library, lists up to 20 of your library workouts, and reads your 20 most recent activities, which it passes to the Kaiord App as Garmin returns them, without the personal fields below.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/thin-bridge.test.js",
@@ -907,6 +879,10 @@
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
           "title": "should return the raw feed on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
         }
       ]
     },
@@ -936,7 +912,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -1461,7 +1437,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -1479,7 +1455,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -1497,11 +1473,83 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
           "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "garmin.pp.personal-fields",
+      "text": "**Personal Fields Removed**: The extension also removes from every answer, by name and without reading it, the personal details no part of the Kaiord App reads: a workout's author (your name and profile pictures) and the people it is shared with, an activity's owner names and pictures and the places it started and ended, and any field named as a first, last or full name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.pj.personal-fields",
+      "text": "**Personal details removed from answers**: The extension also removes from every answer, by name, the personal details no part of the Kaiord App reads: a workout's author and the people it is shared with, an activity's owner names and pictures and the places it started and ended, and any field named as a first, last or full name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.listing.personal-fields",
+      "text": "It also removes the personal details the Kaiord App does not read: a workout's author (your name and profile pictures), an activity's owner names and pictures and the places it started and ended, and any field named as your name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.listing.es.personal-fields",
+      "text": "También quita los datos personales que Kaiord App no lee: el autor de un entrenamiento (tu nombre y tus fotos de perfil), los nombres y fotos del propietario de una actividad y los lugares donde empezó y terminó, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
         }
       ]
     }

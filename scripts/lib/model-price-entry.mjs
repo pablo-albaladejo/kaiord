@@ -14,11 +14,11 @@ export const MAX_AGE_DAYS = 120;
 export const QUOTES_REQUIRED_AFTER = "2026-11-23";
 
 const DAY_MS = 86_400_000;
-const NUMBER = /(\d[\d,]*(?:\.\d+)?)\s*([KM])?(?![A-Za-z])/g;
-const SCALE = { K: 1_000, M: 1_000_000 };
+const NUMBER = /(\d[\d,]*(?:\.\d+)?)\s*([KkM])?(?![A-Za-z])/g;
+const SCALE = { K: 1_000, k: 1_000, M: 1_000_000 };
 const PRICE_FIELDS = ["input", "output", "cacheRead", "cacheWrite"];
 
-/** Every number a quote states: `$1.25`, `1,000`, `200K`, `1M`. */
+/** Every number a quote states: `$1.25`, `1,000`, `200K`, `200k`, `1M`. */
 export const quotedNumbers = (lines) =>
   new Set(
     lines.flatMap((line) =>

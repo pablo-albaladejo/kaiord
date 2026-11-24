@@ -4,10 +4,9 @@
  * cost was computed from. A model with no price shows "Price unknown" and
  * adds nothing to the cost.
  */
-import { modelDisplayName } from "@kaiord/ai/providers";
-
 import type { ModelUsage } from "../../../application/usage/fold-usage-events";
 import { priceBasisOf } from "../../../application/usage/price-basis";
+import { useModelName } from "../../../hooks/use-model-name";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { formatUsageCost } from "./format-usage-cost";
@@ -22,6 +21,7 @@ const rowId = (m: ModelUsage) =>
 
 function ModelRow({ usage }: { usage: ModelUsage }) {
   const t = useTranslate("settings");
+  const name = useModelName();
   const locale = useActiveLocale();
   const basis = priceBasisOf(usage.providerType, usage.modelId);
   const priced = usage.totals.unknownCostRuns < usage.totals.runs;
@@ -29,7 +29,7 @@ function ModelRow({ usage }: { usage: ModelUsage }) {
     <tr data-testid={rowId(usage)} className="border-b border-edge-soft">
       <td className={CELL}>
         {usage.modelId
-          ? modelDisplayName(usage.modelId)
+          ? name(usage.providerType, usage.modelId)
           : t("usage.byModel.unknownModel")}
       </td>
       <td className={`${CELL} ${WIDE}`}>{usage.totals.runs}</td>

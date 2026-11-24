@@ -203,14 +203,6 @@ describe("thin Bridge: closed path list", () => {
         body: { ...WORKOUT, workoutDay: "2026-02-30" },
       },
     ],
-    [
-      "a metric that is not a weight",
-      {
-        method: "POST",
-        path: "/metrics/v3/athletes/123/consolidatedtimedmetric",
-        body: { ...WEIGHT, details: [{ ...WEIGHT.details[0], type: 5 }] },
-      },
-    ],
   ])(
     "should refuse %s without minting or sending anything",
     async (_label, rest) => {
@@ -252,6 +244,29 @@ describe("thin Bridge: closed path list", () => {
     expect(init.body).toBeUndefined();
   });
 
+  it("should refuse to add a weight measurement, which the Kaiord App never sends", async () => {
+    // Arrange
+    seedToken();
+    const message = {
+      action: "request",
+      method: "POST",
+      path: "/metrics/v3/athletes/123/consolidatedtimedmetric",
+      body: WEIGHT,
+    };
+
+    // Act
+    const res = await answer(externalCb, message, APP);
+
+    // Assert
+    expect(res).toEqual({
+      ok: false,
+      protocolVersion: 2,
+      error: "Request not allowed",
+      retryable: false,
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("should refuse a path outside its closed list without minting or sending anything", async () => {
     // Arrange
     const message = {
@@ -288,27 +303,6 @@ describe("thin Bridge: closed path list", () => {
     expect(init.headers.Authorization).toBe("Bearer TP-BEARER");
     expect(init.credentials).toBe("omit");
     expect(init.body).toBe(JSON.stringify(WORKOUT));
-  });
-
-  it("should send a weight that matches its declared shape as JSON", async () => {
-    // Arrange
-    seedToken();
-    fetch.mockResolvedValueOnce(reply('{"id":555}'));
-    const path = "/metrics/v3/athletes/123/consolidatedtimedmetric";
-
-    // Act
-    const res = await answer(
-      externalCb,
-      { action: "request", method: "POST", path, body: WEIGHT },
-      APP
-    );
-
-    // Assert
-    expect(res.data.body).toBe('{"id":555}');
-    const [url, init] = fetch.mock.calls[0];
-    expect(url).toBe(`${TPAPI}${path}`);
-    expect(init.headers.Authorization).toBe("Bearer TP-BEARER");
-    expect(init.body).toBe(JSON.stringify(WEIGHT));
   });
 
   it("should mint the token right before the first real request, never at the Session check", async () => {
@@ -455,5 +449,20 @@ describe("thin Bridge: internal channel is the popup's only", () => {
     // Assert
     expect(res.ok).toBe(true);
     expect(res.data.session).toBe("not-checked");
+  });
+});
+
+describe("popup reads (ADR 0004's bounded exception)", () => {
+  it("should answer every popup read on the popup's channel and none on the App's", () => {
+    // Arrange
+    const bg = require("../background.js");
+
+    // Act
+    const reads = [...bg.POPUP_READS];
+
+    // Assert
+    expect(reads.every((a) => bg.INTERNAL_ACTIONS.has(a))).toBe(true);
+    expect(reads.some((a) => bg.EXTERNAL_ACTIONS.has(a))).toBe(false);
+    expect(Array.isArray(bg.POPUP_READ_SCRIPTS)).toBe(true);
   });
 });
