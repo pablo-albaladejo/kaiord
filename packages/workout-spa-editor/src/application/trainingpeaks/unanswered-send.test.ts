@@ -49,6 +49,7 @@ const deps = () => ({
   ledgerRepo: repo,
   destinationBridgeId: BRIDGE,
   days: day.port,
+  sleep: async () => undefined,
 });
 const row = () => repo.findByNaturalKey(KEY);
 
@@ -181,6 +182,38 @@ describe("recordUnansweredSend", () => {
       destinationExternalId: "pending",
       contentHash: "h1",
       unansweredSend: { day: DAY, title: "Easy run", at: AT },
+    });
+  });
+
+  it("should not send again when TrainingPeaks commits the timed-out send while the day is read", async () => {
+    // Arrange
+    // The send gave up at 15 s; TrainingPeaks commits it at 20 s; the
+    // athlete sends again at 17 s, when the day still reads empty.
+    const clock = { ms: 17_000 };
+    const committedAtMs = 20_000;
+    const port: TrainingPeaksDayPort = {
+      titlesOn: async () => ({
+        ok: true,
+        titles: clock.ms >= committedAtMs ? ["Easy run"] : [],
+      }),
+    };
+    const slowDeps = {
+      ...deps(),
+      days: port,
+      sleep: async (ms: number) => {
+        clock.ms += ms;
+      },
+    };
+    await recordUnansweredSend(slowDeps, RECORD, SENT);
+
+    // Act
+    const verdict = await checkUnansweredSend(slowDeps, RECORD, false);
+
+    // Assert
+    expect(verdict).toEqual({
+      blocked: true,
+      reason: "may-be-there",
+      date: DAY,
     });
   });
 });
