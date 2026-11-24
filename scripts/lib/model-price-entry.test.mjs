@@ -48,6 +48,20 @@ test("should read prices, thousands separators and K or M suffixes from a quote"
   );
 });
 
+test("should read a lowercase k as thousands, as Google's page writes `200k tokens`", () => {
+  // Arrange
+  const lines = ["$2.00, prompts <= 200k tokens"];
+
+  // Act
+  const numbers = quotedNumbers(lines);
+
+  // Assert
+  assert.deepEqual(
+    [...numbers].sort((a, b) => a - b),
+    [2, 200000]
+  );
+});
+
 test("should pass a renewed entry whose every price appears in its quote", () => {
   // Arrange
   const renewed = entry({ quote: QUOTE });
