@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-11-23 -->
 
 # docs
 
@@ -38,9 +38,10 @@ production runbooks.
 
 ## Subdirectories
 
-| Directory   | Purpose                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- |
-| `runbooks/` | Operational runbooks for production-impacting workflows (see `runbooks/AGENTS.md`) |
+| Directory   | Purpose                                                                                                          |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| `runbooks/` | Operational runbooks for production-impacting workflows (see `runbooks/AGENTS.md`)                               |
+| `research/` | Dated research notes from primary sources, named `YYYY-MM-DD-<topic>.md`; facts and citations only, no decisions |
 
 ## For AI Agents
 
