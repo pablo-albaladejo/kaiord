@@ -185,14 +185,12 @@ git commit -s -m "fix: resolve power target conversion issue"
 Forgot? Sign off every commit on your branch with
 `git rebase --signoff origin/main` and push again.
 
-The "DCO sign-off" check (`.github/workflows/dco.yml`) fails a pull request
-from an outside contributor when a commit it adds has no sign-off matching
-its author's email; merge commits are not checked. Outside means GitHub
-does not list the author as the repository's owner, a member or a
-collaborator, and the author is not a bot. Pull requests from the owner, the
-owner's AI agents and the automation bots are not held to it: their commits
-carry an agent co-author trailer or come from automation, and requiring a
-sign-off there would break the agents' and bots' workflow.
+The [DCO](https://developercertificate.org/) applies to outside contributors
+only: the "DCO sign-off" check (`.github/workflows/dco.yml`,
+`scripts/check-dco.mjs`) fails their pull request when a commit has no
+sign-off matching its author's email. Pull requests from the repository's
+owner, members, collaborators and bots are not checked, as their commits carry
+an agent co-author trailer or come from automation.
 
 ### 6. Push and Create Pull Request
 
