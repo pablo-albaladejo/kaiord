@@ -71,9 +71,11 @@ export function SourceHealthPill({ attention }: SourceHealthPillProps) {
             <span className="block text-sm font-semibold text-ink-strong">
               {attention.title}
             </span>
-            <span className="block text-xs text-ink-muted">
-              {attention.detail}
-            </span>
+            {attention.detail !== null && (
+              <span className="block text-xs text-ink-muted">
+                {attention.detail}
+              </span>
+            )}
           </DropdownMenu.Label>
           <MenuItem
             className={MENU_ITEM_CLASS}

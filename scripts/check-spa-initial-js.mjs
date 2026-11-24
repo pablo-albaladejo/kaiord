@@ -54,6 +54,14 @@ import { gzipSync } from "node:zlib";
 // - `src/adapters/train2go/connector/read-train2go-answers.ts` (Train2Go's
 //   HTML parsers, loaded by `loadTrain2GoAnswers` on the first read; the
 //   coaching transport built at boot would otherwise carry them)
+// The first-load size seams of the Bridges block keep what only runs once
+// something needs the athlete out of the entry graph:
+// - `i18n/dist/connection-notices.js` (the shared Connection notices, behind
+//   `@kaiord/i18n/connection-notices`: the header pill and the zones toast
+//   load them through `src/i18n/connection-notices.ts` once they word one)
+// - `src/components/organisms/UpdatePrompt/UpdatePrompt.tsx` and
+//   `src/lib/service-worker/{watch-registration,apply-update}.ts` (behind
+//   `UpdatePromptGate` and the service worker's registration, after load)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -78,6 +86,10 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/boot/render-stale-boot.tsx",
   "src/components/organisms/StaleSchemaDialog/StaleSchemaMidSession.tsx",
   "src/adapters/train2go/connector/read-train2go-answers.ts",
+  "i18n/dist/connection-notices.js",
+  "src/components/organisms/UpdatePrompt/UpdatePrompt.tsx",
+  "src/lib/service-worker/watch-registration.ts",
+  "src/lib/service-worker/apply-update.ts",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets

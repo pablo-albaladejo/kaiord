@@ -1,4 +1,4 @@
-import { connectionNotCheckedText } from "@kaiord/i18n";
+import { connectionNotCheckedText } from "@kaiord/i18n/connection-notices";
 import type { ReactNode } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";

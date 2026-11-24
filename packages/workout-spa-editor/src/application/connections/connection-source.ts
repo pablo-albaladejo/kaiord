@@ -6,7 +6,10 @@
  * connected: no state backs any of those, so the card cannot claim them.
  */
 import type { ManagedDataType } from "@kaiord/core";
-import type { ConnectionReason, ConnectionState } from "@kaiord/i18n";
+import type {
+  ConnectionReason,
+  ConnectionState,
+} from "@kaiord/i18n/connection-notices";
 
 import type { ConnectionMechanism } from "../../types/connection";
 

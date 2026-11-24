@@ -66,12 +66,12 @@ export const useZonesSyncOrchestrator = (
         () => import("../../application/coaching/sync-zones")
       ).catch(() => null);
       if (!loaded) {
-        handleFailure("transport-error", toasts, t, locale);
+        await handleFailure("transport-error", toasts, t, locale);
         return;
       }
       const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) {
-        handleFailure(r.reason, toasts, t, locale);
+        await handleFailure(r.reason, toasts, t, locale);
         return;
       }
       if (r.conflicts.length > 0) {
@@ -88,7 +88,7 @@ export const useZonesSyncOrchestrator = (
         () => import("../../application/coaching/commit-conflict-resolution")
       ).catch(() => null);
       if (!loaded) {
-        handleFailure("transport-error", toasts, t, locale);
+        await handleFailure("transport-error", toasts, t, locale);
         return;
       }
       await loaded.commitConflictResolution(
