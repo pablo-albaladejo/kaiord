@@ -1,4 +1,3 @@
-import { useChoiceName } from "../../../hooks/use-model-name";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
@@ -10,6 +9,7 @@ import {
   modelChoiceGroups,
 } from "./model-choice";
 import { ModelChoiceOptions } from "./ModelChoiceOptions";
+import { useChoiceName } from "./use-choice-name";
 import { useModelChoice } from "./use-model-choice";
 
 export type ModelChoiceSelectProps = {
