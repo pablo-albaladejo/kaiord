@@ -128,10 +128,12 @@ test.describe("AI settings layout", () => {
     await expect(advanced).not.toHaveAttribute("open", "");
     await advanced.getByText(/^Advanced: model per task \(for .+\)$/).click();
     const lab = advanced.getByLabel("Lab extraction");
-    await lab.selectOption({ label: "Claude Opus 5 · Anthropic 2" });
+    await lab.selectOption({
+      label: "Claude Opus 5 (not evaluated) · Anthropic 2",
+    });
     // The select shows the stored choice once the write has landed.
     await expect(lab.locator("option:checked")).toHaveText(
-      "Claude Opus 5 · Anthropic 2"
+      "Claude Opus 5 (not evaluated) · Anthropic 2"
     );
     await page.reload();
     await expect(settings.getByTestId("advanced-models")).toHaveAttribute(

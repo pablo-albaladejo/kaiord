@@ -114,8 +114,8 @@ test.describe("Chat model picker", () => {
 
     // A draft's choice is provider and model together, and stays off the
     // athlete's settings.
-    await picker.selectOption({ label: "o3 · Mi GPT" });
-    await expect.poll(() => shown(picker)).toBe("o3 · Mi GPT");
+    await picker.selectOption({ label: "o3 (not evaluated) · Mi GPT" });
+    await expect.poll(() => shown(picker)).toBe("o3 (not evaluated) · Mi GPT");
     const bindings = await storedRows(page, "aiModelBindings");
     expect(bindings.map((b) => b.purpose)).toEqual(["default"]);
 
@@ -125,7 +125,7 @@ test.describe("Chat model picker", () => {
     await expect
       .poll(async () => (await polledRows(page, "chatConversations"))?.[0])
       .toMatchObject({ modelId: "o3" });
-    await expect.poll(() => shown(picker)).toBe("o3 · Mi GPT");
+    await expect.poll(() => shown(picker)).toBe("o3 (not evaluated) · Mi GPT");
 
     // A new conversation does not inherit the previous draft's choice.
     await page.getByRole("button", { name: "+ New conversation" }).click();
@@ -133,7 +133,7 @@ test.describe("Chat model picker", () => {
       .poll(() => shown(picker))
       .toBe("Same as main model (GPT-5 mini (not evaluated) · Mi GPT)");
     await page.getByText("How was my week?").first().click();
-    await expect.poll(() => shown(picker)).toBe("o3 · Mi GPT");
+    await expect.poll(() => shown(picker)).toBe("o3 (not evaluated) · Mi GPT");
 
     // "Same as main model" clears the conversation's own model.
     await picker.selectOption({ index: 0 });

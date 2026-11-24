@@ -76,8 +76,8 @@ test.describe("AI settings truth", () => {
       "Runs GPT-5 mini (not evaluated) · Mi GPT"
     );
     await settings.getByText(/^Advanced: model per task/).click();
-    await chat.selectOption({ label: "o3 · Mi GPT" });
-    await expect.poll(() => shown(chat)).toBe("o3 · Mi GPT");
+    await chat.selectOption({ label: "o3 (not evaluated) · Mi GPT" });
+    await expect.poll(() => shown(chat)).toBe("o3 (not evaluated) · Mi GPT");
     const bindings = await storedBindings(page);
     expect(bindings.map((b) => [b.purpose, b.modelId]).sort()).toEqual([
       ["chat", "o3"],
