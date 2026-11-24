@@ -78,6 +78,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+let personalFields;
+try {
+  importScripts("personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+}
+
 // ── Tanita call surface: the closed list ──
 //
 // Method + path pattern, nothing else: every request, the App's included,
@@ -149,7 +159,7 @@ const request = async (message) => {
     fetchImpl: fetch,
   });
   if (!res.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const handleAction = async (message) => {

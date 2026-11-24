@@ -69,3 +69,23 @@ describe("the answer carries no MyTANITA Session secret", () => {
     );
   });
 });
+
+describe("the answer carries no personal field the Connector does not read", () => {
+  beforeEach(() => __resetChromeMock());
+  afterEach(() => vi.restoreAllMocks());
+
+  it("should remove a prefilled email from a page served in place of the export", async () => {
+    // Arrange
+    const page =
+      '<form><input type="email" name="email" value="a@b.c"><input type="password" name="pass"></form>';
+    fetch.mockResolvedValueOnce(reply("text/html", page));
+
+    // Act
+    const res = await ask();
+
+    // Assert
+    expect(res.data.body).toBe(
+      '<form><input type="password" name="pass"></form>'
+    );
+  });
+});

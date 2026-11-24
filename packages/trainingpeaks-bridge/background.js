@@ -83,6 +83,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+let personalFields;
+try {
+  importScripts("personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+}
+
 // ── Dual-transport auth (bridge-specific; cookie→token→Bearer) ──
 let tpAuth;
 try {
@@ -168,7 +178,7 @@ const request = async (message) => {
   })(message);
   const res = await tpAuth.tpapiFetch(path, method, body, fetch, { raw: true });
   if (!res?.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const openTrainingPeaks = async () => {

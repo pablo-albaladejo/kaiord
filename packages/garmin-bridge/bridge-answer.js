@@ -14,6 +14,12 @@
  *     string, the same in HTML that a JSON answer wraps;
  *   - JSON: every member whose key is a credential name (`_token`,
  *     `csrf_token`, `access_token`, `sessionId`, `authorization`, …).
+ * Then the personal fields no Connector reads, as the extension declares
+ * them (its `personal-fields.js`): a JSON member, or an HTML form control
+ * (`<input>`, or a `<select>` / `<textarea>` with its content), whose name
+ * is on the list, compared in lower case without `_` or `-`. This is
+ * trimming by name, never reading: no value is looked at, no member is
+ * moved, and text outside a named field is left as it came.
  * An answer with nothing to remove is handed over byte for byte. Cookies
  * never pass: the transports never read a `set-cookie` header.
  *
@@ -35,21 +41,43 @@ const bridgeAnswer = (() => {
   const INLINE_TOKEN =
     /(\b(?:_token|csrf[-_]?token|xsrf[-_]?token|x-csrf-token|x-xsrf-token)\b["']?\s*[:=]\s*)(["'])[^"'\\\n]*\2/gi;
   const JSON_TYPE = /\bjson\b/i;
+  const CONTAINER = /<(select|textarea)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
+  const NO_FIELDS = Object.freeze({ json: [], html: [] });
 
-  const isSecretTag = (tag) => {
+  const normalize = (name) => String(name).toLowerCase().replace(/[-_]/g, "");
+  const nameOf = (tag) => {
     const m = NAME_ATTR.exec(tag);
-    return !!m && SECRET_FIELD.test(m[1] ?? m[2] ?? m[3] ?? "");
+    return m ? (m[1] ?? m[2] ?? m[3] ?? "") : null;
   };
 
-  const stripHtml = (text) =>
+  const isSecretTag = (tag) => {
+    const name = nameOf(tag);
+    return name !== null && SECRET_FIELD.test(name);
+  };
+
+  // `personal` is a Set of normalized names; an empty one removes nothing.
+  const isPersonalTag = (tag, personal) => {
+    const name = nameOf(tag);
+    return name !== null && personal.has(normalize(name));
+  };
+
+  const stripHtml = (text, personal) =>
     text
-      .replace(TAG, (tag) => (isSecretTag(tag) ? "" : tag))
+      .replace(CONTAINER, (el) =>
+        isPersonalTag(el.slice(0, el.indexOf(">") + 1), personal) ? "" : el
+      )
+      .replace(TAG, (tag) =>
+        isSecretTag(tag) ||
+        (/^<input/i.test(tag) && isPersonalTag(tag, personal))
+          ? ""
+          : tag
+      )
       .replace(INLINE_TOKEN, "$1$2$2");
 
   // Returns the value with its secrets removed, and whether any was.
-  const stripValue = (value) => {
+  const stripValue = (value, fields) => {
     if (typeof value === "string") {
-      const next = stripHtml(value);
+      const next = stripHtml(value, fields.html);
       return { value: next, changed: next !== value };
     }
     if (value === null || typeof value !== "object") {
@@ -57,15 +85,16 @@ const bridgeAnswer = (() => {
     }
     let changed = false;
     const walk = (v) => {
-      const r = stripValue(v);
+      const r = stripValue(v, fields);
       changed = changed || r.changed;
       return r.value;
     };
     if (Array.isArray(value)) return { value: value.map(walk), changed };
     const out = {};
     for (const [key, v] of Object.entries(value)) {
-      if (SECRET_KEY.test(key)) changed = true;
-      else out[key] = walk(v);
+      if (SECRET_KEY.test(key) || fields.json.has(normalize(key))) {
+        changed = true;
+      } else out[key] = walk(v);
     }
     return { value: out, changed };
   };
@@ -78,18 +107,25 @@ const bridgeAnswer = (() => {
     }
   };
 
-  const stripSessionSecrets = (contentType, body) => {
+  const toSets = (personal) => ({
+    json: new Set((personal?.json ?? []).map(normalize)),
+    html: new Set((personal?.html ?? []).map(normalize)),
+  });
+
+  const stripSessionSecrets = (contentType, body, personal = NO_FIELDS) => {
     if (typeof body !== "string" || body === "") return body;
+    const fields = toSets(personal);
     const json = JSON_TYPE.test(contentType || "") ? parseJson(body) : null;
-    if (!json?.ok) return stripHtml(body);
-    const { value, changed } = stripValue(json.value);
+    if (!json?.ok) return stripHtml(body, fields.html);
+    const { value, changed } = stripValue(json.value, fields);
     return changed ? JSON.stringify(value) : body;
   };
 
-  const toAnswer = (res) => ({
+  // `personal`: the extension's declared personal fields (`json`, `html`).
+  const toAnswer = (res, personal = NO_FIELDS) => ({
     status: res.status,
     contentType: res.contentType,
-    body: stripSessionSecrets(res.contentType, res.body),
+    body: stripSessionSecrets(res.contentType, res.body, personal),
   });
 
   const toBridgeError = (res, fallback = "Request failed") => {

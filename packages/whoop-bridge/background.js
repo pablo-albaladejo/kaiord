@@ -74,6 +74,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+let personalFields;
+try {
+  importScripts("personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+}
+
 // ── WHOOP call surface: the closed list ──
 //
 // Method + path pattern, nothing else, GET only: every request is checked
@@ -259,7 +269,7 @@ const request = async (message) => {
       needsReauth: res?.status === UNAUTHORIZED_STATUS,
     });
   }
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 // ── Actions ──

@@ -106,7 +106,7 @@
     },
     {
       "id": "train2go.listing.zones",
-      "text": "Fetches your Train2Go profile page when the Kaiord App asks, and the Kaiord App keeps from it only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. The rest of that page (gender, birthday, body fat, height, contact details, records and tests) reaches the Kaiord App in your browser and is dropped there as the page is read.",
+      "text": "Fetches your Train2Go profile page when the Kaiord App asks, and the Kaiord App keeps from it only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. The extension first removes from that page your gender, birthday, body fat, BMI, height and smoking, the notes your coach keeps about you and your contact details; the rest of it (records and tests) reaches the Kaiord App in your browser and is dropped there as the page is read.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
@@ -123,6 +123,18 @@
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
           "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove gender, height, body fat, BMI, smoking and the coach's notes from the profile page"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove birth date and contact details from the profile page"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same zones and weight from the trimmed profile page"
         }
       ]
     },
@@ -148,7 +160,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
-          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+          "title": "should remove the anti-forgery token from the profile page and keep what the Connector reads"
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
@@ -162,7 +174,7 @@
     },
     {
       "id": "train2go.listing.who",
-      "text": "Checking the connection tells the Kaiord App only whether you are signed in. When you connect Train2Go, the Kaiord App reads who is signed in from Train2Go's answer, which also holds your coach's name and the notes your coach keeps about you when Train2Go provides them, and keeps only your id and name.",
+      "text": "Checking the connection tells the Kaiord App only whether you are signed in. When you connect Train2Go, the Kaiord App reads who is signed in from Train2Go's answer and keeps only your id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and notes.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -183,6 +195,14 @@
         {
           "test": "packages/train2go-bridge/test/parser.test.js",
           "title": "extracts notes from data.user.user_notes (HTML stripped to text)"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should keep only the id and name the Connector reads from the profile ping's user"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same athlete id and name from the trimmed profile ping"
         }
       ]
     },
@@ -637,7 +657,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
-          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+          "title": "should remove the anti-forgery token from the profile page and keep what the Connector reads"
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
@@ -941,7 +961,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
-          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+          "title": "should remove the anti-forgery token from the profile page and keep what the Connector reads"
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
@@ -981,7 +1001,7 @@
     },
     {
       "id": "train2go.pp.zones",
-      "text": "**Zones and Weight**: When the Kaiord App asks, the extension fetches your Train2Go profile page and hands it to the Kaiord App, which keeps only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Gender, birthday, body fat, height, contact details, records and tests on that page reach the Kaiord App in your browser and are dropped there as the page is read.",
+      "text": "**Zones and Weight**: When the Kaiord App asks, the extension fetches your Train2Go profile page and hands it to the Kaiord App, which keeps only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Before handing the page over, the extension removes from it your gender, birthday, body fat, BMI, height and smoking, the notes your coach keeps about you, and each field named as your email, phone or address; the records and tests on that page reach the Kaiord App in your browser and are dropped there as the page is read.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
@@ -1002,12 +1022,24 @@
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
           "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove gender, height, body fat, BMI, smoking and the coach's notes from the profile page"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove birth date and contact details from the profile page"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same zones and weight from the trimmed profile page"
         }
       ]
     },
     {
       "id": "train2go.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the answer also holds your coach's name and the notes your coach keeps about you when Train2Go provides them, which reach the Kaiord App in your browser and are dropped there. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
+      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1044,6 +1076,14 @@
         {
           "file": "packages/train2go-bridge/popup.js",
           "contains": "loadPopupData({ bypassTtl: true })"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should keep only the id and name the Connector reads from the profile ping's user"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same athlete id and name from the trimmed profile ping"
         }
       ]
     },
@@ -1192,7 +1232,7 @@
     },
     {
       "id": "train2go.es.listing.zones",
-      "text": "Pide tu página de perfil de Train2Go cuando Kaiord App lo solicita, y Kaiord App guarda de ella solo tus zonas de frecuencia cardiaca, potencia y ritmo por deporte, tu frecuencia cardiaca máxima y en reposo, y tu peso. El resto de esa página (género, cumpleaños, grasa corporal, altura, datos de contacto, marcas y tests) llega a Kaiord App en tu navegador y se descarta allí al leer la página.",
+      "text": "Pide tu página de perfil de Train2Go cuando Kaiord App lo solicita, y Kaiord App guarda de ella solo tus zonas de frecuencia cardiaca, potencia y ritmo por deporte, tu frecuencia cardiaca máxima y en reposo, y tu peso. Antes, la extensión quita de esa página tu género, cumpleaños, grasa corporal, IMC, altura y si fumas, las notas que tu entrenador guarda sobre ti y tus datos de contacto; el resto (marcas y tests) llega a Kaiord App en tu navegador y se descarta allí al leer la página.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
@@ -1209,6 +1249,18 @@
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
           "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove gender, height, body fat, BMI, smoking and the coach's notes from the profile page"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove birth date and contact details from the profile page"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same zones and weight from the trimmed profile page"
         }
       ]
     },
@@ -1234,7 +1286,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
-          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+          "title": "should remove the anti-forgery token from the profile page and keep what the Connector reads"
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
@@ -1248,7 +1300,7 @@
     },
     {
       "id": "train2go.es.listing.who",
-      "text": "Comprobar la conexión solo le dice a Kaiord App si tienes la sesión iniciada. Cuando conectas Train2Go, Kaiord App lee quién tiene la sesión iniciada en la respuesta de Train2Go, que también contiene el nombre de tu entrenador y las notas que tu entrenador guarda sobre ti cuando Train2Go las da, y guarda solo tu id y tu nombre.",
+      "text": "Comprobar la conexión solo le dice a Kaiord App si tienes la sesión iniciada. Cuando conectas Train2Go, Kaiord App lee quién tiene la sesión iniciada en la respuesta de Train2Go y guarda solo tu id y tu nombre; antes, la extensión quita de esa respuesta tus apellidos, género, altura, peso y frecuencias cardiacas, y el nombre y las notas de tu entrenador.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1269,6 +1321,14 @@
         {
           "test": "packages/train2go-bridge/test/parser.test.js",
           "title": "extracts notes from data.user.user_notes (HTML stripped to text)"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should keep only the id and name the Connector reads from the profile ping's user"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same athlete id and name from the trimmed profile ping"
         }
       ]
     },
@@ -1471,6 +1531,32 @@
         {
           "file": "LICENSE",
           "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.personal-fields",
+      "text": "**Personal details removed**: the extension also removes, by name, the personal details the Kaiord App does not read: from the profile page your gender, birthday, body fat, BMI, height and smoking, the notes your coach keeps about you and any field named as your email, phone or address; from the profile ping your surname, gender, height, weight, heart rates and your coach. Everything the Kaiord App reads is kept: your id and name, the plan and its comments, the zones, and the weight and heart rates of the profile page.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove gender, height, body fat, BMI, smoking and the coach's notes from the profile page"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove birth date and contact details from the profile page"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same zones and weight from the trimmed profile page"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should keep only the id and name the Connector reads from the profile ping's user"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
+          "title": "should read the same athlete id and name from the trimmed profile ping"
         }
       ]
     }

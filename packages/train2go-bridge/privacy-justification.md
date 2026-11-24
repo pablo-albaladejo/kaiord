@@ -30,6 +30,8 @@ No other permission is declared. Opening Train2Go in a new tab from the popup or
 
 **What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.
 
+**Personal details removed**: the extension also removes, by name, the personal details the Kaiord App does not read: from the profile page your gender, birthday, body fat, BMI, height and smoking, the notes your coach keeps about you and any field named as your email, phone or address; from the profile ping your surname, gender, height, weight, heart rates and your coach. Everything the Kaiord App reads is kept: your id and name, the plan and its comments, the zones, and the weight and heart rates of the profile page.
+
 **No content script on Train2Go**: the extension injects nothing into Train2Go pages and does not read them.
 
 ## Content Script

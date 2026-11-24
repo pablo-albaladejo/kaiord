@@ -243,7 +243,7 @@ describe("request confinement", () => {
 
   it("should hand the Kaiord App Train2Go's answer as it came, without reading it", async () => {
     // Arrange
-    const page = '<main><input name="birthday" value="1990-01-01"></main>';
+    const page = '<main><input name="ftp" value="250"></main>';
     fetch.mockResolvedValueOnce(reply("text/html", page));
 
     // Act

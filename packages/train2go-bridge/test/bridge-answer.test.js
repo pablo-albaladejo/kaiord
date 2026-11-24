@@ -202,3 +202,88 @@ describe("bridge-answer: toBridgeError", () => {
     expect("status" in err).toBe(false);
   });
 });
+
+describe("bridge-answer: personal fields no Connector reads", () => {
+  const PERSONAL = Object.freeze({
+    json: ["surname", "birthdate", "email", "author"],
+    html: ["gender", "birthday", "usernotes"],
+  });
+  const answerOf = (contentType, body) =>
+    toAnswer({ status: 200, contentType, body }, PERSONAL);
+
+  it("should drop every listed JSON member at any depth, by its name in any case or separator", () => {
+    // Arrange
+    const body = JSON.stringify({
+      data: {
+        user: { id: 7, name: "Ana", Surname: "Ruiz", birth_date: "1990-01-01" },
+        items: [{ workoutId: 1, author: { fullName: "Ana Ruiz" } }],
+      },
+      "e-mail": "a@b.c",
+      emailVerified: true,
+    });
+
+    // Act
+    const answer = answerOf("application/json", body);
+
+    // Assert
+    expect(JSON.parse(answer.body)).toEqual({
+      data: { user: { id: 7, name: "Ana" }, items: [{ workoutId: 1 }] },
+      emailVerified: true,
+    });
+  });
+
+  it("should drop listed form controls from HTML, a select or a textarea with its content", () => {
+    // Arrange
+    const page =
+      '<form><input name="weight" value="70"><input name="birthday" value="1990-01-01">' +
+      '<select id="g" name="gender"><option selected>male</option></select>' +
+      '<textarea name="user_notes">private</textarea><input name="bpm_max" value="187"></form>';
+
+    // Act
+    const answer = answerOf("text/html", page);
+
+    // Assert
+    expect(answer.body).toBe(
+      '<form><input name="weight" value="70"><input name="bpm_max" value="187"></form>'
+    );
+  });
+
+  it("should drop listed controls from the HTML a JSON string carries", () => {
+    // Arrange
+    const body = JSON.stringify({
+      content: '<p>day</p><input name="birthday" value="1990-01-01">',
+    });
+
+    // Act
+    const answer = answerOf("application/json", body);
+
+    // Assert
+    expect(JSON.parse(answer.body)).toEqual({ content: "<p>day</p>" });
+  });
+
+  it("should hand an answer with no listed field over byte for byte", () => {
+    // Arrange
+    const body = '{ "id": 7,  "name": "Ana" }';
+
+    // Act
+    const answer = answerOf("application/json", body);
+
+    // Assert
+    expect(answer.body).toBe(body);
+  });
+
+  it("should remove only Session secrets when no personal fields are declared", () => {
+    // Arrange
+    const body = JSON.stringify({ email: "a@b.c", _token: "S" });
+
+    // Act
+    const answer = toAnswer({
+      status: 200,
+      contentType: "application/json",
+      body,
+    });
+
+    // Assert
+    expect(JSON.parse(answer.body)).toEqual({ email: "a@b.c" });
+  });
+});

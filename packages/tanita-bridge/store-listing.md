@@ -22,6 +22,7 @@ What it does:
 
 • Downloads your MyTANITA export, which holds every measurement in your history, and hands it to the Kaiord App exactly as MyTANITA sent it. The extension does not interpret the measurements; the Kaiord App does.
 • If MyTANITA sends a page in place of the export, the extension removes from it any field named as a token, CSRF, session or nonce value before handing it to the Kaiord App.
+• From such a page it also removes any field named as your name, birth date, gender, email, phone or address. The export itself holds only measurements and is passed on unchanged.
 • The Kaiord App asks for the export when you open its calendar, if Tanita is switched on for weight or body composition, and when you press Sync now. The Kaiord App turns it into weight and body-composition entries kept in your browser.
 • Each time you open the extension's popup or press Refresh, it asks MyTANITA only for the export's headers, without downloading it, to learn whether you are still signed in. It shows only the answer.
 
@@ -52,6 +53,7 @@ Qué hace:
 
 • Descarga tu exportación de MyTANITA, que contiene todas las mediciones de tu historial, y se la entrega a Kaiord App tal como la envió MyTANITA. La extensión no interpreta las mediciones; lo hace Kaiord App.
 • Si MyTANITA envía una página en lugar de la exportación, la extensión quita de ella cualquier campo con nombre de token, CSRF, sesión o nonce antes de entregársela a Kaiord App.
+• De esa página también quita cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección. La exportación solo contiene mediciones y se entrega sin cambios.
 • Kaiord App pide la exportación cuando abres su calendario, si Tanita está activado para el peso o la composición corporal, y cuando pulsas Sincronizar ahora. Kaiord App la convierte en entradas de peso y de composición corporal que se guardan en tu navegador.
 • Cada vez que abres la ventana emergente de la extensión o pulsas Actualizar, pide a MyTANITA solo las cabeceras de la exportación, sin descargarla, para saber si sigues con la sesión iniciada. Solo muestra la respuesta.
 

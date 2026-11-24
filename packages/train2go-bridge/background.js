@@ -52,6 +52,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 const sessionFetch = loadScript("session-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 
 // ── Train2Go call surface: the closed list ──
 //
@@ -218,7 +219,7 @@ const request = async (message) => {
     fetchImpl: fetch,
   });
   if (!res.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const openTrain2Go = async () => {

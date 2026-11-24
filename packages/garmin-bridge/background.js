@@ -58,6 +58,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 loadScript("bearer-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 const snapshotValidator = loadScript("profile-snapshot.js");
 
 // Garmin's own: OAuth token minting + connectapi Bearer calls, the body
@@ -163,7 +164,7 @@ const request = async (message) => {
     toWireBody(path, body)
   );
   if (!res?.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const openGarmin = async () => {

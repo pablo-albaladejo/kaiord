@@ -300,6 +300,36 @@ test("a landing privacy page without the redirect fails on each missing part", (
 // nothing else fires.
 
 const SOLO_CASES = [
+  [
+    GARMIN,
+    "a workout's author (your name and profile pictures) and the people it is shared with, an activity's owner names and pictures and the places it started and ended",
+    "some details",
+    "Garmin personal fields removed from answers",
+  ],
+  [
+    TRAIN2GO,
+    "the extension removes from it your gender, birthday, body fat, BMI, height and smoking",
+    "some details",
+    "Train2Go personal fields removed from answers",
+  ],
+  [
+    TANITA,
+    "also removes each form field named as a first, last or full name, birth date, gender, email, phone or address",
+    "some details",
+    "Tanita personal fields removed from answers",
+  ],
+  [
+    TRAININGPEAKS,
+    "the personal details the Kaiord App does not read: a workout's comments (your coach's and yours)",
+    "some details",
+    "TrainingPeaks personal fields removed from answers",
+  ],
+  [
+    WHOOP,
+    "the personal details the Kaiord App does not read: a lab test's patient name, height and weight",
+    "some details",
+    "WHOOP personal fields removed from answers",
+  ],
   [GARMIN, "connect.garmin.com", "redacted.example", "Garmin host disclosed"],
   [GARMIN, "sso.garmin.com", "redacted.example", "Garmin SSO host disclosed"],
   [
@@ -1049,7 +1079,7 @@ test("gutting the rule set for a section that still exists is flagged", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /tanita-bridge Bridge extension covered/);
-  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 13/);
+  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 14/);
 });
 
 test("the rule-count floor is shrink-only, not a flat minimum", () => {
