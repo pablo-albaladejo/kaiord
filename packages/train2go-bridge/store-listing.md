@@ -25,7 +25,7 @@ What it does:
 • Fetches your Train2Go profile page when the Kaiord App asks, and the Kaiord App keeps from it only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. The extension first removes from that page your gender, birthday, body fat, BMI, height and smoking, the notes your coach keeps about you and your contact details; the rest of it (records and tests) reaches the Kaiord App in your browser and is dropped there as the page is read.
 • Hands the Kaiord App what Train2Go answers, as it came, except that it first removes the anti-forgery token tied to your Train2Go sign-in (the hidden _token field of Train2Go's pages) and any other field named as a token, CSRF, session or nonce value. It makes only the requests on its fixed list of read-only Train2Go addresses. It refuses any other request without sending it.
 • Checking the connection tells the Kaiord App only whether you are signed in. When you connect Train2Go, the Kaiord App reads who is signed in from Train2Go's answer and keeps only your id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and notes.
-• Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload, read each time you open it and never stored.
+• Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload, read at most once every 5 minutes unless you press Refresh, and never stored on disk.
 • Only reads. It never changes anything on Train2Go.
 
 How it works:
@@ -59,7 +59,7 @@ Qué hace:
 • Pide tu página de perfil de Train2Go cuando Kaiord App lo solicita, y Kaiord App guarda de ella solo tus zonas de frecuencia cardiaca, potencia y ritmo por deporte, tu frecuencia cardiaca máxima y en reposo, y tu peso. Antes, la extensión quita de esa página tu género, cumpleaños, grasa corporal, IMC, altura y si fumas, las notas que tu entrenador guarda sobre ti y tus datos de contacto; el resto (marcas y tests) llega a Kaiord App en tu navegador y se descarta allí al leer la página.
 • Entrega a Kaiord App lo que responde Train2Go, tal como llegó, salvo que antes quita el token antifalsificación ligado a tu inicio de sesión de Train2Go (el campo oculto _token de las páginas de Train2Go) y cualquier otro campo con nombre de token, CSRF, sesión o nonce. Solo hace las peticiones de su lista fija de direcciones de Train2Go de solo lectura. Rechaza cualquier otra petición sin enviarla.
 • Comprobar la conexión solo le dice a Kaiord App si tienes la sesión iniciada. Cuando conectas Train2Go, Kaiord App lee quién tiene la sesión iniciada en la respuesta de Train2Go y guarda solo tu id y tu nombre; antes, la extensión quita de esa respuesta tus apellidos, género, altura, peso y frecuencias cardiacas, y el nombre y las notas de tu entrenador.
-• Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana, que lee cada vez que la abres y no guarda.
+• Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana, que lee como mucho una vez cada 5 minutos salvo que pulses Actualizar, y no guarda en disco.
 • Solo lee. Nunca cambia nada en Train2Go.
 
 Cómo funciona:

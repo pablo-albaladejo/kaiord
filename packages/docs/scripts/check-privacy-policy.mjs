@@ -347,9 +347,9 @@ export const REQUIRED_RULES = [
     re: NO_TELEMETRY,
   },
   {
-    label: "Train2Go popup reads kept to the open popup",
+    label: "Train2Go popup reads kept in memory, at most once every 5 minutes",
     section: TRAIN2GO_SECTION,
-    re: /it keeps none of this once the popup closes and never hands it to the Kaiord App/i,
+    re: /at most once every 5 minutes unless you press Refresh; it keeps what it read only in the extension's memory, never on disk, and never hands it to the Kaiord App/i,
   },
   {
     label: "Train2Go personal fields removed from answers",

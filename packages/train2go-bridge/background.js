@@ -201,14 +201,40 @@ const readProfile = async () => {
   }
 };
 
+// The popup asks Train2Go for the week at most once every 5 minutes. The
+// last week read is kept only in this worker's memory, never in
+// chrome.storage, and is gone when the worker stops; Refresh reads again.
+const WEEK_READ_INTERVAL_MS = 5 * 60 * 1_000;
+
+const weekReadLimit = (() => {
+  let last = null;
+  return {
+    recent: (key) =>
+      last?.key === key && Date.now() - last.at < WEEK_READ_INTERVAL_MS
+        ? last.week
+        : null,
+    keep: (key, week) => {
+      last = { key, at: Date.now(), week };
+    },
+    clear: () => {
+      last = null;
+    },
+  };
+})();
+
 // Popup only (internal channel): the inputs of its weekly figures.
-const readWeek = async (date, userId) => {
+const readWeek = async (date, userId, force = false) => {
+  const key = `${date}|${userId}`;
+  const recent = force ? null : weekReadLimit.recent(key);
+  if (recent) return recent;
   const path = `/api/v2/workplan/weekly/${date}?user=${userId}`;
   const res = await train2goFetch(path);
   if (!res?.ok) throw answerCore.toBridgeError(res, "Read week failed");
 
   const html = res.data?.data?.replace?.["#workplan"] ?? "";
-  return { activities: parser.parseWeeklyHtml(html) };
+  const week = { activities: parser.parseWeeklyHtml(html) };
+  weekReadLimit.keep(key, week);
+  return week;
 };
 
 // ── The App's one read: a request from the closed list, answered raw ──
@@ -266,7 +292,11 @@ const handleAction = async (message) => {
       return await request(message);
     case "read-week":
       if (!message.userId) throw new Error("Missing userId");
-      return await readWeek(message.date, message.userId);
+      return await readWeek(
+        message.date,
+        message.userId,
+        message.force === true
+      );
     case "open-train2go":
       await openTrain2Go();
       return null;
@@ -361,6 +391,7 @@ if (typeof module !== "undefined") {
     checkSession,
     readProfile,
     readWeek,
+    weekReadLimit,
     request,
     openTrain2Go,
     persistSnapshot,

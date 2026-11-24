@@ -4,7 +4,7 @@
  *
  * A working extension's popup may read and interpret data only for its own
  * window, when the athlete opens it, through the same closed list of paths,
- * without storing it beyond the popup's lifetime and without ever handing
+ * without storing it on disk and without ever handing
  * it to the Kaiord App. Each bridge's background.js declares its popup's
  * reads (`POPUP_READS`, the internal actions that read for the popup) and
  * the scripts only they use (`POPUP_READ_SCRIPTS`), possibly empty. From the
