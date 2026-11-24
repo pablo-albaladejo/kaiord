@@ -6,27 +6,23 @@ vi.mock("@kaiord/ai", () => ({
   createTextToWorkout: vi.fn(() => mockTextToWorkout),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
 const mockPersistence = {
   profiles: { getActiveId: vi.fn(), getById: vi.fn() },
   aiProviders: { getCustomPrompt: vi.fn() },
+  traces: createInMemoryTraceRepository(),
 };
-
-vi.mock("../../adapters/dexie/dexie-persistence-adapter", () => ({
-  createDexiePersistence: vi.fn(() => mockPersistence),
-}));
-
-vi.mock("../../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
-  createDexieUsageTelemetrySink: vi.fn(() => ({ emit: vi.fn() })),
-}));
 
 import { makeWorkoutRecord } from "../../application/test-helpers";
 import { PACE_MODEL } from "../../lib/athlete/zone-models";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
+import { createInMemoryTraceRepository } from "../../test-utils/in-memory-trace-repository";
 import type { Profile } from "../../types/profile";
 import { createProcessOne } from "./batch-process-one";
 
@@ -80,7 +76,13 @@ describe("createProcessOne (Train2Go coaching path)", () => {
     const processOne = createProcessOne(
       PROVIDER,
       "m",
-      createInMemoryPersistence()
+      createInMemoryPersistence(),
+      {
+        deps: {
+          persistence: mockPersistence as never,
+          usage: { emit: vi.fn() },
+        },
+      }
     );
     const workout = makeWorkoutRecord({
       raw: {

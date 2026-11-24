@@ -139,8 +139,8 @@
     "replayTipsHint": "Vuelve a mostrar los consejos que ya cerraste."
   },
   "usage": {
-    "title": "Uso de IA — todos los atletas",
-    "heading": "Uso de IA — todos los atletas, últimos {{count}} meses",
+    "title": "Uso de IA en este dispositivo — todos los atletas",
+    "heading": "Uso de IA en este dispositivo — todos los atletas, últimos {{count}} meses",
     "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. Se rellena en cuanto uses el asistente de IA o crees un entreno con IA.",
     "month": "Mes",
     "input": "Entrada",
@@ -151,7 +151,32 @@
       "chat": "Chat",
       "workout_generation": "Generación de entrenamientos",
       "lab_extraction": "Extracción de laboratorio"
+    },
+    "unknownCost_one": "+ {{count}} ejecución con precio desconocido",
+    "unknownCost_other": "+ {{count}} ejecuciones con precio desconocido",
+    "costBasis": "Cada ejecución se calcula con los precios de entrada, salida y caché de su propio modelo, y el coste incluye cada intento que el proveedor facturó: reintentos, intentos fallidos y cada paso de un turno del chat.",
+    "thisDevice": "Es el uso de este navegador solamente: el registro se queda en este dispositivo, no en la sincronización con Drive ni en una copia de seguridad, así que otro dispositivo muestra el suyo.",
+    "includesEstimate": "incluye una estimación",
+    "estimated_one": "{{count}} petición se cortó antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de la petición y del texto recibido.",
+    "estimated_other": "{{count}} peticiones se cortaron antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de cada petición y del texto recibido.",
+    "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
+    "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste.",
+    "byModel": {
+      "heading": "Coste por modelo, últimos {{count}} meses",
+      "model": "Modelo",
+      "runs": "Ejecuciones",
+      "failed": "Intentos fallidos",
+      "tokens": "Tokens",
+      "cost": "Coste (USD)",
+      "price": "Precio",
+      "unknownModel": "Modelo desconocido"
     }
+  },
+  "price": {
+    "priced": "Precio actual: {{input}} de entrada · {{output}} de salida por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "pricedCache": "Precio actual: {{input}} de entrada · {{output}} de salida · {{cacheRead}} de entrada en caché por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "unknown": "Precio desconocido: este modelo no está en la lista de precios de su proveedor.",
+    "source": "Lista de precios"
   },
   "preferences": {
     "units": "Unidades",
@@ -179,9 +204,12 @@
     "missingKey": "«{{account}}» no tiene clave de API: las copias de seguridad nunca incluyen claves. Introdúcela abajo con «Reemplazar clave» para elegir el modelo de tu asistente.",
     "noAthlete": "Elige un atleta para escoger el modelo de tu asistente.",
     "runsOn": "en {{account}}",
-    "usage_one": "Total este mes (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
-    "usage_other": "Total este mes (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "Ningún atleta ha usado la IA este mes."
+    "usage_one": "Total este mes en este dispositivo (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total este mes en este dispositivo (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "Ningún atleta ha usado la IA este mes en este dispositivo.",
+    "usageEstimate": "incluye una estimación",
+    "usageUnknown_one": "No incluye {{count}} ejecución con precio desconocido.",
+    "usageUnknown_other": "No incluye {{count}} ejecuciones con precio desconocido."
   },
   "keyStatus": {
     "verified": "Clave verificada",
@@ -211,5 +239,59 @@
     "saving": "Guardando…",
     "saved": "Guardado ✓",
     "failed": "No se pudo guardar. Inténtalo de nuevo."
+  },
+  "traces": {
+    "title": "Trazas",
+    "intro": "Lo que hizo cada ejecución del asistente: cuándo, con qué resultado y a qué coste.",
+    "empty": "Aún no hay trazas. Cada ejecución del asistente deja una aquí.",
+    "export": "Exportar todas (JSON)",
+    "exportFailed": "No se pudieron exportar las trazas.",
+    "deleteAll": "Borrar todas",
+    "deleteConfirm": "¿Borrar todas las trazas de este navegador? No se puede deshacer.",
+    "deleteConfirmAction": "Borrar trazas",
+    "deleteCancel": "Cancelar",
+    "feature": {
+      "chat": "Chat",
+      "generation": "Generación de entrenamiento",
+      "batch": "Generación por lotes",
+      "lab_import": "Documento de laboratorio"
+    },
+    "outcome": {
+      "ok": "Terminada",
+      "failed": "Fallida",
+      "stopped": "Detenida"
+    },
+    "model": "Proveedor y modelo",
+    "unit": "Versión del prompt",
+    "latency": "Duración",
+    "latencyValue": "{{seconds}} s",
+    "calls": "Peticiones al proveedor",
+    "retries": "Reintentos",
+    "cost": "Coste",
+    "costUnknown": "desconocido",
+    "tokens": "{{input}} tokens de entrada y {{output}} de salida",
+    "tools": "Herramientas",
+    "noTools": "No se llamó a ninguna herramienta.",
+    "toolLine": "{{name}}: {{confirmation}}, {{result}}",
+    "confirmation": {
+      "athlete": "confirmada por ti",
+      "automatic": "aprobada automáticamente",
+      "not_needed": "sin confirmación necesaria"
+    },
+    "result": {
+      "ok": "hecha",
+      "refused": "rechazada",
+      "failed": "fallida",
+      "unanswered": "sin respuesta"
+    },
+    "sent": "Enviado",
+    "sentNothing": "No se envió nada.",
+    "sentLine": "A {{provider}}: {{kinds}}",
+    "sentDeclared": "A {{provider}}: {{kinds}}; puede haber llevado también {{declared}}, que Kaiord no puede contar",
+    "includesEstimate": "incluye una estimación",
+    "estimated_one": "{{count}} petición se cortó antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de la petición y del texto recibido.",
+    "estimated_other": "{{count}} peticiones se cortaron antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de cada petición y del texto recibido.",
+    "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
+    "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste."
   }
 }

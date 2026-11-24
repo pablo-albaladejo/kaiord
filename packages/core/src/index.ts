@@ -261,6 +261,24 @@ export { computePeriodizedTarget } from "./application/energy/periodized-target"
 
 // Round-Trip Validation
 export { compareKRDs } from "./application/round-trip/compare-krds";
+export { DECLARED_TOLERANCES } from "./application/round-trip/contract/declared-tolerances";
+export { diffRoundTrip } from "./application/round-trip/contract/diff-round-trip";
+export {
+  FIT_ROUND_TRIP,
+  GCN_ROUND_TRIP,
+  ROUND_TRIP_CONTRACTS,
+  TCX_ROUND_TRIP,
+  ZWO_ROUND_TRIP,
+} from "./application/round-trip/contract/formats";
+export type {
+  DeclaredField,
+  FieldPattern,
+  FieldTolerance,
+  RoundTripContract,
+  RoundTripDifference,
+  RoundTripFormat,
+  UnsupportedTarget,
+} from "./application/round-trip/contract/round-trip-contract";
 export type { ValidateRoundTrip } from "./application/round-trip/validate-round-trip";
 export { validateRoundTrip } from "./application/round-trip/validate-round-trip";
 

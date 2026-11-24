@@ -90,3 +90,31 @@ export {
   VIOLATION_COUNT_LAP,
   VIOLATION_COUNT_RECORD,
 } from "./round-trip-fixtures";
+
+// Round-trip cases: every duration, target, intensity and sport a contract carries
+export type { RoundTripCase } from "./round-trip-cases";
+export { buildRoundTripCases, buildUnsupportedCases } from "./round-trip-cases";
+export {
+  buildRecordedActivity,
+  buildStructureWorkout,
+  buildSwimWorkout,
+  roundTripStep,
+  roundTripWorkout,
+} from "./round-trip-structure";
+export type {
+  RoundTripCodec,
+  RoundTripFixture,
+  RoundTripReport,
+} from "./round-trip-report";
+export {
+  roundTripReport,
+  unsupportedButCarried,
+  unusedDeclarations,
+} from "./round-trip-report";
+export type {
+  FirstReadFixture,
+  SourceField,
+  SourceValue,
+} from "./first-read-report";
+export { firstReadReport } from "./first-read-report";
+export { sourceValuesOf } from "./source-values";

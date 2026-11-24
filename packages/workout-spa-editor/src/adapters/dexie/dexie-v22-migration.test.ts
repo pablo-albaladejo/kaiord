@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_SEED = 19;
-const SCHEMA_HEAD = 37;
+const SCHEMA_HEAD = 39;
 const STORES_SEED = {
   profiles: "id",
   aiProviders: "id, createdAt",

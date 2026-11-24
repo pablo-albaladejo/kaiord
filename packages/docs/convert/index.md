@@ -16,9 +16,9 @@ Choose a file in the [Kaiord Editor](https://kaiord.com/app/#/convert) and downl
 the result. Developers can script the same conversions with the
 [CLI](/cli/commands) or the [TypeScript SDK](/guide/quick-start).
 
-Every conversion goes through **KRD**, Kaiord's canonical format, so round-trips
-stay within tight tolerances (time ±1 s, power ±1 W or ±1 % FTP, heart rate
-±1 bpm, cadence ±1 rpm). See the [KRD format](/formats/krd) for the details.
+Every conversion goes through **KRD**, Kaiord's canonical format. What each
+format keeps on a Round-trip, and within which tolerances, is listed in
+[What survives a conversion?](#what-survives-a-conversion).
 
 ## Pick a conversion
 
@@ -59,22 +59,36 @@ and a converted file carries no recorded data.
 
 ## What survives a conversion?
 
-The source and target formats are not identical, so a conversion keeps only
-what the target can hold. Each pair page has a **"What survives the
-conversion"** table and the gotchas that matter for that direction. In short:
+The formats are not identical, so a conversion keeps only what the target can
+hold. Each pair page has a **"What survives the conversion"** table for its
+direction.
 
-- **FIT** is the richest workout format (power, heart rate, cadence, speed, and
-  distance/time durations).
-- **TCX** workout targets are heart rate, speed, and cadence — **not power**.
-- **ZWO** is power-based (% of FTP); heart-rate and cadence targets have no
-  native equivalent.
-- **Garmin Connect (GCN)** covers power, heart rate, speed, and cadence in
-  watts/bpm/rpm, plus calorie durations. Power targets in % FTP (every ZWO
-  target, ramps included, and FIT targets stored as % FTP) are converted to
-  watts with your FTP; without one the conversion stops instead of guessing.
+Every format below has a Round-trip test in CI: a workout goes from the format
+to KRD and back, and every value must come back within the declared tolerances
+(time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence
+±1 rpm, pace ±0.01 m/s). The first read of each format's test files must also keep every field KRD can hold. A field a format cannot carry is listed by name; the test fails on any other value that changes.
 
-Format-specific data that has no target-side equivalent is preserved under the
-KRD `extensions` object so it can survive a later round-trip.
+- **FIT**: Round-trip tested. Converting FIT → KRD → FIT keeps every value of a
+  workout within the declared tolerances, for every duration, target,
+  intensity and sport. Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string; the name of a repeat step; a custom heart-rate range given as a share of maximum, which is read as bpm.
+- **TCX**: Round-trip tested. Converting TCX → KRD → TCX keeps every value of
+  a Running, Biking or Other workout within the declared tolerances. Fields
+  TCX cannot carry: power targets other than a single watt value; a single
+  heart rate, which comes back as a range from that value to itself; heart
+  rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities; a step that ends when heart rate rises above a value, which is skipped.
+- **ZWO**: Round-trip tested. Converting KRD → ZWO → KRD keeps every value of a bike or run workout within the declared tolerances; the ZWO test files were written by Kaiord, so a file from Zwift is not checked field by field. Fields ZWO cannot
+  carry: cadence and pace targets; calorie, power-above and repeat-until
+  durations; step notes; the sub-sport.
+- **Garmin Connect (GCN)**: Round-trip tested. Converting GCN → KRD → GCN
+  keeps every value of a running, cycling, swimming or cardio workout within
+  the declared tolerances. Fields GCN cannot carry: a single target value,
+  which is sent as a band and comes back as that range; power as a share of
+  FTP and heart rate as a share of maximum, which are sent in watts and bpm;
+  pace zones; heart-rate, power and repeat-until durations; step names; the
+  sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multi-sport workouts, read as generic; a workout name beyond 255 characters.
+
+These tests cover workouts: each format's writer refuses a recorded activity,
+so no Round-trip is claimed for recorded activities or health data.
 
 ## Formats
 

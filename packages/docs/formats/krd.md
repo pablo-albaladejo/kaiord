@@ -11,7 +11,7 @@ description: "KRD (Kaiord Representation Definition) is a JSON-based canonical f
 
 ## Design principles
 
-- **Round-trip tested** -- CI converts workouts to KRD and back and compares them within declared tolerances; not every field of every format is covered yet (#1654)
+- **Round-trip tested** -- CI converts workouts from FIT, TCX, ZWO and GCN to KRD and back and compares every value within the declared tolerances; the fields each format cannot carry are listed in [What survives a conversion?](/convert/#what-survives-a-conversion)
 - **Schema-validated** -- all KRD files validate against Zod schemas
 - **Normalized** -- consistent units and naming across all source formats
 - **Extensible** -- custom fields via `extensions` object
@@ -227,11 +227,17 @@ FIT developer fields and unknown messages are preserved during round-trip conver
 
 ## Round-trip tolerances
 
+Declared once, in `DECLARED_TOLERANCES` of `@kaiord/core`, for every format:
+
 - Time: +/- 1 second
-- Power: +/- 1 watt or +/- 1% FTP
-- Heart rate: +/- 1 bpm
-- Cadence: +/- 1 rpm
 - Distance: +/- 1 meter
+- Power: +/- 1 watt or +/- 1% FTP
+- Heart rate: +/- 1 bpm or +/- 1% of maximum
+- Cadence: +/- 1 rpm
+- Pace: +/- 0.01 m/s
+
+Every other number (a zone, a stroke, a repeat count, calories, a pool
+length) must come back exactly.
 
 ## Example: minimal valid KRD
 

@@ -1,4 +1,9 @@
 import type { StepResult, ToolSet } from "ai";
+import { toUsage } from "../agents/attempt-usage";
+import { streamedChars } from "../agents/cut-request";
+import { sumUsage } from "../observability/sum-usage";
+import type { AiRequest } from "../observability/telemetry-types";
+import { inFlightRequest } from "./in-flight-request";
 import type { ChatUsage } from "./chat-types";
 import type { RawTurn } from "./run-turn";
 import type { TurnStopCause } from "./turn-watchdog";
@@ -9,11 +14,22 @@ export type TurnMetrics = {
   toolNames: string[];
   /** Summed usage of the completed steps; `undefined` before the first. */
   usage?: ChatUsage;
+  /** One per step started: a finished step with its usage, a cut one estimated. */
+  requests: AiRequest[];
 };
 
+/**
+ * How a step still running when the turn ended is reported: `stopped` for
+ * the athlete's Stop, `timeout` for the watchdog, `error` for a thrown
+ * failure.
+ */
+export type TurnCut = "stopped" | "timeout" | "error";
+
 export type TurnStats = {
+  onStepStart: () => void;
+  onChunk: (chunk: object) => void;
   onStepEnd: (step: StepResult<ToolSet>) => void;
-  snapshot: () => TurnMetrics;
+  snapshot: (cut?: TurnCut) => TurnMetrics;
 };
 
 const isInvalid = (call: object) => "invalid" in call && Boolean(call.invalid);
@@ -23,28 +39,53 @@ const isInvalid = (call: object) => "invalid" in call && Boolean(call.invalid);
  * tool in `registered` with a schema-valid input are named: a model can call
  * a name it made up, and that string is model output, not a tool id.
  *
- * Usage is the provider-reported total of each FINISHED step. A step cut by
- * an abort or the watchdog never reports usage (providers send it with the
- * final chunk), so its tokens are not counted.
+ * Usage is the provider-reported total of each FINISHED step. A step cut
+ * before its final chunk never reports usage, yet the Provider bills it: it
+ * is listed estimated (`inFlightRequest`). `sentChars` is the text the
+ * turn's first request carries; each later step also carries what the
+ * earlier ones streamed.
  */
-export const createTurnStats = (registered: ToolSet): TurnStats => {
-  let steps = 0;
+export const createTurnStats = (
+  registered: ToolSet,
+  sentChars = 0
+): TurnStats => {
   const toolNames: string[] = [];
-  const usage: ChatUsage = { promptTokens: 0, completionTokens: 0 };
+  const requests: AiRequest[] = [];
+  const flight = { started: 0, priorChars: 0, stepChars: 0 };
   return {
+    onStepStart: () => {
+      flight.started += 1;
+      flight.stepChars = 0;
+    },
+    onChunk: (chunk) => {
+      flight.stepChars += streamedChars(chunk);
+    },
     onStepEnd: (step) => {
-      steps += 1;
       for (const call of step.toolCalls)
         if (Object.hasOwn(registered, call.toolName) && !isInvalid(call))
           toolNames.push(call.toolName);
-      usage.promptTokens += step.usage.inputTokens ?? 0;
-      usage.completionTokens += step.usage.outputTokens ?? 0;
+      requests.push({ outcome: "ok", usage: toUsage(step.usage) });
+      flight.priorChars += flight.stepChars;
+      flight.stepChars = 0;
     },
-    snapshot: () => ({
-      steps,
-      toolNames: [...toolNames],
-      ...(steps > 0 ? { usage: { ...usage } } : {}),
-    }),
+    snapshot: (cut) => {
+      const steps = requests.length;
+      const cutStep =
+        cut && flight.started > steps
+          ? inFlightRequest(
+              cut,
+              sentChars + flight.priorChars,
+              flight.stepChars
+            )
+          : undefined;
+      const { promptTokens, completionTokens } = sumUsage(requests);
+      return {
+        steps,
+        toolNames: [...toolNames],
+        ...(steps > 0 ? { usage: { promptTokens, completionTokens } } : {}),
+        requests: [...requests, ...(cutStep ? [cutStep] : [])],
+      };
+    },
   };
 };
 
@@ -79,6 +120,7 @@ export const stoppedTurn = (
   toolCalls: [],
   finishReason: cause,
   usage: metrics.usage,
+  requests: metrics.requests,
   messages: streamed ? [{ role: "assistant", content: streamed }] : [],
   stopped: cause,
   steps: metrics.steps,

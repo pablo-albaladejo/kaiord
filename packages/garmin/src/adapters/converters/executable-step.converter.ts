@@ -9,6 +9,7 @@ import {
   strokeToFitValue,
 } from "../mappers/stroke.mapper";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
+import { equipmentKeyOf, strokeKeyOf } from "./garmin-type-key.converter";
 import { convertGarminTargetToKrd } from "./target-from-garmin.converter";
 
 export const mapExecutableStep = (
@@ -24,11 +25,9 @@ export const mapExecutableStep = (
 
   const { targetType, target } = resolveTarget(step);
   const intensity = mapStepTypeToIntensity(step.stepType.stepTypeKey, logger);
-  const equipment = mapGarminEquipmentToKrd(
-    step.equipmentType?.equipmentTypeKey ?? null
-  );
+  const equipment = mapGarminEquipmentToKrd(equipmentKeyOf(step));
   const stroke = mapGarminStrokeToKrd(
-    step.strokeType?.strokeTypeKey ?? null,
+    strokeKeyOf(step),
     step.strokeType?.strokeTypeId ?? 0,
     logger
   );

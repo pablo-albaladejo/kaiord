@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { UsageEventRecord } from "../../types/usage-event-schemas";
-import { foldUsageEvents } from "./fold-usage-events";
+import { foldUsageByModel, foldUsageEvents } from "./fold-usage-events";
+
+const DIGITS = 10;
+// claude-sonnet-5 at $2 input and $10 output per 1M: 1000*2 + 500*10.
+const SONNET_5_1000_IN_500_OUT_USD = 0.007;
+const PRICED_RUN_USD = 0.004;
 
 const event = (over: Partial<UsageEventRecord>): UsageEventRecord => ({
   id: "e",
@@ -85,10 +90,95 @@ describe("foldUsageEvents", () => {
 
     // Assert
     expect(totals).toEqual({
+      runs: 0,
       inputTokens: 0,
       outputTokens: 0,
       totalTokens: 0,
       totalCost: 0,
+      unknownCostRuns: 0,
+      failedRequests: 0,
+      unmeasuredRequests: 0,
+      estimatedRequests: 0,
     });
+  });
+
+  it("should count a run whose model has no price as unknown, adding nothing to the cost", () => {
+    // Arrange
+    const events = [
+      event({ id: "a", costBasis: "price_table", cost: PRICED_RUN_USD }),
+      event({ id: "b", costBasis: "unknown", cost: 0, modelId: "o1" }),
+    ];
+
+    // Act
+    const totals = foldUsageEvents(events);
+
+    // Assert
+    expect(totals.totalCost).toBeCloseTo(PRICED_RUN_USD, DIGITS);
+    expect(totals.unknownCostRuns).toBe(1);
+  });
+
+  it("should price a row written at the old blended rate again at its model's own prices", () => {
+    // Arrange
+    // Written before per-model pricing, with no costBasis
+    const legacy = event({
+      providerType: "anthropic",
+      modelId: "claude-sonnet-5",
+      promptTokens: 1000,
+      completionTokens: 500,
+      tokens: 1500,
+      cost: 0.0045,
+      createdAt: "2026-11-01T10:00:00.000Z",
+    });
+
+    // Act
+    const totals = foldUsageEvents([legacy]);
+
+    // Assert
+    expect(totals.totalCost).toBeCloseTo(SONNET_5_1000_IN_500_OUT_USD, DIGITS);
+  });
+
+  it("should sum the failed and unmeasured requests of every run", () => {
+    // Arrange
+    const events = [
+      event({ id: "a", costBasis: "price_table", failedRequests: 2 }),
+      event({
+        id: "b",
+        costBasis: "price_table",
+        failedRequests: 1,
+        unmeasuredRequests: 1,
+      }),
+    ];
+
+    // Act
+    const totals = foldUsageEvents(events);
+
+    // Assert
+    expect(totals).toMatchObject({ failedRequests: 3, unmeasuredRequests: 1 });
+  });
+});
+
+describe("foldUsageByModel", () => {
+  it("should give each model its own runs, tokens and cost, most expensive first", () => {
+    // Arrange
+    const events = [
+      event({ id: "a", modelId: "claude-haiku-4-5", cost: 0.001 }),
+      event({ id: "b", modelId: "claude-sonnet-5", cost: 0.003 }),
+      event({ id: "c", modelId: "claude-sonnet-5", cost: 0.002 }),
+    ].map((e) => ({ ...e, costBasis: "price_table" as const }));
+
+    // Act
+    const models = foldUsageByModel(events);
+
+    // Assert
+    expect(
+      models.map((m) => ({
+        modelId: m.modelId,
+        runs: m.totals.runs,
+        tokens: m.totals.totalTokens,
+      }))
+    ).toEqual([
+      { modelId: "claude-sonnet-5", runs: 2, tokens: 300 },
+      { modelId: "claude-haiku-4-5", runs: 1, tokens: 150 },
+    ]);
   });
 });

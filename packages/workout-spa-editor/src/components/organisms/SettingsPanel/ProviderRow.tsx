@@ -1,4 +1,4 @@
-import { PROVIDER_TYPE_NAMES } from "../../../application/ai/provider-label";
+import { providerName } from "../../../application/ai/provider-label";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
@@ -24,7 +24,7 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
 }) => {
   const t = useTranslate("settings");
   const last4 = keyLastFour(p.apiKey);
-  const typeName = PROVIDER_TYPE_NAMES[p.type];
+  const typeName = providerName(p.type);
   return (
     // On a phone the actions sit under the account, so a long key status
     // ("Clave sin comprobar") never runs beneath them.

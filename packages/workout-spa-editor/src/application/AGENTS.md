@@ -15,7 +15,7 @@ Use cases. Pure functions and small orchestrators that take a `PersistencePort` 
 - `on-workout-mutation.ts` / `.test.ts` — invariants triggered when a workout changes (e.g. recompute compliance).
 - `compute-compliance-score.ts` / `.test.ts`, `compliance-bucket.ts` / `.test.ts` — coaching compliance scoring.
 - `ai-workout-processor.ts` / `.test.ts`, `ai-prompts.ts` / `.test.ts` — orchestrates a single AI workout generation: builds the prompt (with zones), calls the AI port, validates the response.
-- `batch-processor.ts` / `.test.ts` + `batch-processor.test-fixtures.ts`, `batch-progress.ts`, `cost-estimation.ts` / `.test.ts`, `provider-rates.ts` / `.test.ts` — multi-coaching-activity batch AI conversion with cost estimation.
+- `batch-processor.ts` / `.test.ts` + `batch-processor.test-fixtures.ts`, `batch-progress.ts`, `cost-estimation.ts` / `.test.ts` — multi-coaching-activity batch AI conversion; the estimate is priced with `priceRun` from `@kaiord/ai/providers`.
 - `parse-coaching-duration.ts` / `.test.ts` — parses Train2Go coaching duration strings into seconds.
 - `canonical-sport-family.ts` / `.test.ts` — normalises sport identifiers across formats.
 - `sanity-checks.ts` / `.test.ts` — boot-time invariant checks.

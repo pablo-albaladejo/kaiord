@@ -6,8 +6,10 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { formatUsageCost } from "./format-usage-cost";
 
 /**
- * This month's AI use in one line: requests, tokens and estimated cost. The
- * usage log is not kept per athlete, so the line says it is the total.
+ * This month's AI use in one line: requests, tokens and cost, priced per
+ * model, and how many runs the cost leaves out because their model's price is
+ * unknown, and whether it includes an estimate. The usage log is not kept per
+ * athlete and stays on this device, so the line says it is this device's total.
  */
 export function AssistantUsage() {
   const t = useTranslate("settings");
@@ -22,6 +24,7 @@ export function AssistantUsage() {
   }
   const totals = foldUsageEvents(month);
   const cost = formatUsageCost(totals.totalCost, locale);
+  const unknown = totals.unknownCostRuns;
   return (
     <p data-testid="assistant-usage" className="m-0 text-sm text-ink-muted">
       {t(pluralKey("assistant.usage", month.length), {
@@ -29,6 +32,9 @@ export function AssistantUsage() {
         tokens: totals.totalTokens.toLocaleString(locale),
         cost,
       })}
+      {totals.estimatedRequests > 0 && ` · ${t("assistant.usageEstimate")}`}
+      {unknown > 0 &&
+        ` · ${t(pluralKey("assistant.usageUnknown", unknown), { count: unknown })}`}
     </p>
   );
 }

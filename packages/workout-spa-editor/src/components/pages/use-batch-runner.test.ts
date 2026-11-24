@@ -2,7 +2,9 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
+import { createInMemoryTraceRepository } from "../../test-utils/in-memory-trace-repository";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import { createProcessOne } from "./batch-process-one";
 import { useBatchRunner } from "./use-batch-runner";
 
 const processBatchSpy = vi.fn();
@@ -11,8 +13,10 @@ vi.mock("../../application/batch-processor", () => ({
   processBatch: (...args: unknown[]) => processBatchSpy(...args),
 }));
 
+const traces = createInMemoryTraceRepository();
+
 vi.mock("../../contexts/persistence-context", () => ({
-  usePersistence: () => ({}),
+  usePersistence: () => ({ traces }),
 }));
 
 vi.mock("./batch-process-one", () => ({
@@ -40,7 +44,12 @@ describe("useBatchRunner", () => {
   it("should flip isProcessing around the batch run and calls processBatch", async () => {
     // Arrange
 
-    processBatchSpy.mockResolvedValueOnce(undefined);
+    processBatchSpy.mockResolvedValueOnce({
+      succeeded: [],
+      skipped: [],
+      failed: [],
+      cancelled: false,
+    });
     const setMessage = vi.fn();
 
     // Act
@@ -139,5 +148,33 @@ describe("useBatchRunner", () => {
       "Batch processing encountered an unexpected error."
     );
     expect(result.current.isProcessing).toBe(false);
+  });
+
+  it("should leave one Trace for the whole batch, handed to every generation", async () => {
+    // Arrange
+    await traces.clear();
+    processBatchSpy.mockResolvedValueOnce({
+      succeeded: [],
+      skipped: [],
+      failed: [{ id: "w1", error: "x" }],
+      cancelled: false,
+    });
+    const { result } = renderHook(() => useBatchRunner(vi.fn()));
+
+    // Act
+    await act(async () => {
+      await result.current.run({
+        provider,
+        modelId: "claude",
+        workouts: [workout, workout],
+      });
+    });
+    const stored = await traces.list();
+
+    // Assert
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({ feature: "batch", outcome: "failed" });
+    const trace = vi.mocked(createProcessOne).mock.calls.at(-1)?.[3].trace;
+    expect(trace?.id).toBe(stored[0]?.id);
   });
 });

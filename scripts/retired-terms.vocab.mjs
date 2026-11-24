@@ -9,8 +9,7 @@
 // them whole. Every surface registered in claims/*.json is read unit by unit.
 
 const RETIRED = "retired by GLOSSARY.md";
-const WITHDRAWN =
-  "withdrawn until the round-trip validator covers every format (#1654)";
+const WITHDRAWN = `${RETIRED}: say Round-trip, per format, within the declared tolerances, proven by that format's Round-trip test (#1654)`;
 
 export const TERMS = [
   {

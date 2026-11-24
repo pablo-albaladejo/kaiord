@@ -9,6 +9,7 @@ import type { ChatTurnResult } from "@kaiord/ai";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { newChatMessage } from "./chat-message-mapper";
 import { toolEventContent } from "./tool-event-content";
+import { turnReadHealth } from "./turn-read-health";
 
 export type IdGen = { newId: () => string; now: () => string };
 
@@ -91,6 +92,7 @@ export const appendAssistantTurn = async (
         result.status === "aborted" || result.status === "timeout"
           ? result.status
           : undefined,
+      readHealth: turnReadHealth(result),
     })
   );
 };

@@ -1,3 +1,5 @@
+import { WORKOUT_PARSER_SYSTEM } from "@kaiord/ai/prompts";
+import { CHARS_PER_TOKEN } from "@kaiord/ai/providers";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -10,7 +12,7 @@ const anthropic: LlmProviderConfig = {
   id: "p1",
   type: "anthropic",
   apiKey: "k",
-  model: "claude",
+  model: "claude-sonnet-5",
   label: "My Claude",
   isDefault: true,
   createdAt: 0,
@@ -46,8 +48,12 @@ describe("BatchCostConfirmation", () => {
     expect(screen.getByTestId("batch-cost-provider")).toHaveTextContent(
       "My Claude"
     );
-    // "3k z1" → 5 chars / 3 = ceil 2 + 500 output = 502 tokens.
-    expect(screen.getByTestId("batch-cost-tokens")).toHaveTextContent("502");
+    // The system prompt and "3k z1", 3 characters a token, + 500 output.
+    const chars = WORKOUT_PARSER_SYSTEM.template.length + "3k z1".length;
+    const input = Math.ceil(chars / CHARS_PER_TOKEN);
+    expect(screen.getByTestId("batch-cost-tokens")).toHaveTextContent(
+      (input + 500).toLocaleString("en")
+    );
     expect(screen.getByTestId("batch-cost-usd")).toHaveTextContent("$");
   });
 

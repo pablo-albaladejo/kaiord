@@ -1,0 +1,569 @@
+{
+  "unit": "USD per 1,000,000 tokens, Standard tier, global routing",
+  "entries": [
+    {
+      "provider": "anthropic",
+      "ids": ["claude-fable-5"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-fable-5-1"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-opus-5-5"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": [
+        "claude-opus-5",
+        "claude-opus-4-8",
+        "claude-opus-4-7",
+        "claude-opus-4-6",
+        "claude-opus-4-5",
+        "claude-opus-4-5-20251101"
+      ],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-sonnet-5-5"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-sonnet-5"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": [
+        "claude-sonnet-4-6",
+        "claude-sonnet-4-5",
+        "claude-sonnet-4-5-20250929"
+      ],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 3.75 }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-haiku-5-5"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 0.1,
+          "output": 0.5,
+          "cacheRead": 0.01,
+          "cacheWrite": 0.125,
+          "longContext": {
+            "aboveInputTokens": 100000,
+            "input": 0.5,
+            "output": 2.5,
+            "cacheRead": 0.05,
+            "cacheWrite": 0.625
+          }
+        }
+      ]
+    },
+    {
+      "provider": "anthropic",
+      "ids": ["claude-haiku-4-5", "claude-haiku-4-5-20251001"],
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 1, "output": 5, "cacheRead": 0.1, "cacheWrite": 1.25 }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-6-astra"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 10,
+          "output": 50,
+          "cacheRead": 1,
+          "cacheWrite": 12.5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 20,
+            "output": 75,
+            "cacheRead": 2,
+            "cacheWrite": 25
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-6.1-sol"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 2,
+          "output": 10,
+          "cacheRead": 0.1,
+          "cacheWrite": 2.5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 4,
+            "output": 15,
+            "cacheRead": 0.2,
+            "cacheWrite": 5
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-6-sol"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 2,
+          "output": 10,
+          "cacheRead": 0.2,
+          "cacheWrite": 2.5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 4,
+            "output": 15,
+            "cacheRead": 0.4,
+            "cacheWrite": 5
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-6-luna"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 0.1,
+          "output": 0.5,
+          "cacheRead": 0.01,
+          "cacheWrite": 0.125,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 0.2,
+            "output": 0.75,
+            "cacheRead": 0.02,
+            "cacheWrite": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.6-sol"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 4,
+          "output": 20,
+          "cacheRead": 0.4,
+          "cacheWrite": 5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 8,
+            "output": 30,
+            "cacheRead": 0.8,
+            "cacheWrite": 10
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.6-terra"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 2,
+          "output": 12,
+          "cacheRead": 0.2,
+          "cacheWrite": 2.5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 4,
+            "output": 18,
+            "cacheRead": 0.4,
+            "cacheWrite": 5
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.6-luna"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 0.2,
+          "output": 1.2,
+          "cacheRead": 0.02,
+          "cacheWrite": 0.25,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 0.4,
+            "output": 1.8,
+            "cacheRead": 0.04,
+            "cacheWrite": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.5", "gpt-5.5-2026-04-23"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 5,
+          "output": 30,
+          "cacheRead": 0.5,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 10,
+            "output": 45,
+            "cacheRead": 1
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.4", "gpt-5.4-2026-03-05"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 2.5,
+          "output": 15,
+          "cacheRead": 0.25,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 5,
+            "output": 22.5,
+            "cacheRead": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.4-pro", "gpt-5.4-pro-2026-03-05"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 30,
+          "output": 180,
+          "longContext": {
+            "aboveInputTokens": 272000,
+            "input": 60,
+            "output": 270
+          }
+        }
+      ]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.4-mini", "gpt-5.4-mini-2026-03-17"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.75, "output": 4.5, "cacheRead": 0.075 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.4-nano", "gpt-5.4-nano-2026-03-17"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.2, "output": 1.25, "cacheRead": 0.02 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.2", "gpt-5.2-2025-12-11"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 1.75, "output": 14, "cacheRead": 0.175 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.2-pro", "gpt-5.2-pro-2025-12-11"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 21, "output": 168 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5.1", "gpt-5.1-2025-11-13", "gpt-5", "gpt-5-2025-08-07"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 1.25, "output": 10, "cacheRead": 0.125 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5-mini", "gpt-5-mini-2025-08-07"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.25, "output": 2, "cacheRead": 0.025 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-5-nano", "gpt-5-nano-2025-08-07"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.05, "output": 0.4, "cacheRead": 0.005 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-4.1", "gpt-4.1-2025-04-14", "o3", "o3-2025-04-16"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 2, "output": 8, "cacheRead": 0.5 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-4.1-mini", "gpt-4.1-mini-2025-04-14"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.4, "output": 1.6, "cacheRead": 0.1 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-4o"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 2.5, "output": 10, "cacheRead": 1.25 }]
+    },
+    {
+      "provider": "openai",
+      "ids": ["gpt-4o-mini", "gpt-4o-mini-2024-07-18"],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.15, "output": 0.6, "cacheRead": 0.075 }]
+    },
+    {
+      "provider": "openai",
+      "ids": [
+        "o1",
+        "o1-2024-12-17",
+        "o3-mini",
+        "o3-mini-2025-01-31",
+        "o4-mini",
+        "o4-mini-2025-04-16",
+        "gpt-4.1-nano",
+        "gpt-4.1-nano-2025-04-14",
+        "gpt-4o-2024-05-13",
+        "gpt-4o-2024-08-06",
+        "gpt-4o-2024-11-20",
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo-16k",
+        "gpt-5-chat-latest",
+        "gpt-5.1-chat-latest",
+        "gpt-5.2-chat-latest",
+        "gpt-5.3-chat-latest",
+        "gpt-5.6"
+      ],
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "unpriced": "Not listed on the official pricing page; a dated gpt-4o snapshot may differ from the gpt-4o price"
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-4-argon"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 2, "output": 10, "cacheRead": 0.1 },
+        { "from": "2026-12-01", "input": 4, "output": 20, "cacheRead": 0.2 }
+      ]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-3.8-flash", "gemini-3.6-flash"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        { "input": 0.75, "output": 3.75, "cacheRead": 0.075 },
+        { "from": "2027-01-01", "input": 1.5, "output": 7.5, "cacheRead": 0.15 }
+      ]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-3.5-flash-lite", "gemini-2.5-flash"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "note": "From 2026-12-01 gemini-2.5-flash routes to and bills as gemini-3.5-flash-lite, at the same price",
+      "periods": [{ "input": 0.3, "output": 2.5, "cacheRead": 0.03 }]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-3.1-pro-preview", "gemini-3.1-pro-preview-customtools"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [
+        {
+          "input": 2,
+          "output": 12,
+          "cacheRead": 0.2,
+          "longContext": {
+            "aboveInputTokens": 200000,
+            "input": 4,
+            "output": 18,
+            "cacheRead": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-3-flash-preview"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.5, "output": 3, "cacheRead": 0.05 }]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-2.5-pro"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "note": "From 2026-12-01 gemini-2.5-pro routes to and bills as gemini-3.8-flash",
+      "periods": [
+        {
+          "input": 1.25,
+          "output": 10,
+          "cacheRead": 0.125,
+          "longContext": {
+            "aboveInputTokens": 200000,
+            "input": 2.5,
+            "output": 15,
+            "cacheRead": 0.25
+          }
+        },
+        {
+          "from": "2026-12-01",
+          "input": 0.75,
+          "output": 3.75,
+          "cacheRead": 0.075
+        },
+        { "from": "2027-01-01", "input": 1.5, "output": 7.5, "cacheRead": 0.15 }
+      ]
+    },
+    {
+      "provider": "google",
+      "ids": ["gemini-2.5-flash-lite"],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "periods": [{ "input": 0.1, "output": 0.4, "cacheRead": 0.01 }]
+    },
+    {
+      "provider": "google",
+      "ids": [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-001",
+        "gemini-2.0-flash-lite",
+        "gemini-2.0-flash-lite-001",
+        "gemini-3-pro-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3.5-flash",
+        "gemini-3.7-flash",
+        "gemini-pro-latest",
+        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
+        "aqa",
+        "gemma-3-1b-it",
+        "gemma-3-4b-it",
+        "gemma-3n-e4b-it",
+        "gemma-3n-e2b-it",
+        "gemma-3-12b-it",
+        "gemma-3-27b-it"
+      ],
+      "source": "https://aistudio.google.com/docs/pricing",
+      "readOn": "2026-11-23",
+      "quote": null,
+      "unpriced": "Not listed on the official pricing page (it lists gemini-3.1-flash-lite, not the -preview id, and does not say what the -latest aliases point to)"
+    }
+  ]
+}

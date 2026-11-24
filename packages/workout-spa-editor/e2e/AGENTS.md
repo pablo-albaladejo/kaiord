@@ -27,6 +27,7 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 - `import-export-formats.spec.ts` — round-trip across FIT / TCX / ZWO / KRD / GCN.
 - `tcx-repeat-import.spec.ts` — imports `test-fixtures/tcx/WorkoutRepeatBlocks.tcx` through the editor and asserts its 5× repetition block renders.
 - `ai-generate-workout.spec.ts` — AI generation (stubbed LLM responses via `fixtures/llm-responses.ts`).
+- `ai-usage-cost.spec.ts` — the cost of a run against a stubbed Provider: a failed attempt is counted, and the Usage tab shows the cost by model with its prices.
 - `profiles.spec.ts`, `zones-sync.spec.ts` — profile + Train2Go zone sync flows.
 - `settings.spec.ts`, `onboarding.spec.ts` — settings + onboarding.
 - `button-improvements.spec.ts`, `modal-interactions.spec.ts`, `error-handling.spec.ts` — UX guardrails.

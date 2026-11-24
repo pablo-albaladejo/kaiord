@@ -44,7 +44,12 @@ describe("useChatTurn unmount", () => {
       (_messages: unknown, options: { signal: AbortSignal }) =>
         new Promise((resolve) => {
           options.signal.addEventListener("abort", () =>
-            resolve({ status: "aborted", text: "Half a", messages: [] })
+            resolve({
+              status: "aborted",
+              toolNames: [],
+              text: "Half a",
+              messages: [],
+            })
           );
         })
     );
@@ -70,6 +75,7 @@ describe("useChatTurn unmount", () => {
     // Arrange
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "pending_action",
+      toolNames: [],
       pendingAction: {
         toolCallId: "call-1",
         toolName: "create_workout",
@@ -86,7 +92,7 @@ describe("useChatTurn unmount", () => {
     fakeAgent.resume.mockImplementationOnce(
       async (_m: unknown, _r: unknown, options: { signal: AbortSignal }) => {
         resumeSignal = options.signal;
-        return { status: "aborted", text: "", messages: [] };
+        return { status: "aborted", toolNames: [], text: "", messages: [] };
       }
     );
     const { result, unmount } = renderHook(() =>

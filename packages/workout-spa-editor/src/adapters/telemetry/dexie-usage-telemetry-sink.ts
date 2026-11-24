@@ -1,12 +1,11 @@
 /**
- * createDexieUsageTelemetrySink — an `AiTelemetrySink` that folds each
- * `run_finished` event's provider-reported usage, and each chat turn's
- * (`chat_turn_finished`, whatever its status — a stopped or paused turn was
- * billed too), into the `usageEvents` log via the shared `appendUsageEvent`
- * writer. Persisting is best-effort and fire-and-forget: `emit` is synchronous
- * and MUST NOT block or fail the model run, so the async write's rejection is
- * swallowed (logged). `run_failed` and events without usage are ignored.
- * Redaction stays by construction — only ids and metrics cross this boundary.
+ * createDexieUsageTelemetrySink — an `AiTelemetrySink` that records every
+ * run's requests in the `usageEvents` log via the shared `appendUsageEvent`
+ * writer: a finished run, a failed run (its attempts were billed too) and a
+ * chat turn, whatever its status. Persisting is best-effort and
+ * fire-and-forget: `emit` is synchronous and MUST NOT block or fail the model
+ * run, so the async write's rejection is swallowed (logged). Redaction stays
+ * by construction — only ids and metrics cross this boundary.
  */
 import type {
   AiTelemetryEvent,
@@ -22,28 +21,16 @@ import { providerTypeFromSdk } from "../../application/usage/provider-type-from-
 import type { PersistencePort } from "../../ports/persistence-port";
 
 const WRITE_FAILED = "Usage telemetry event write failed";
-const UNMAPPED_PROVIDER = "Usage telemetry provider not mapped to a rate type";
+const UNMAPPED_PROVIDER =
+  "Usage telemetry provider not mapped to a provider type";
 
 type UsageFields = Omit<AppendUsageEventInput, "providerType">;
 
-const usageOf = (event: AiTelemetryEvent): UsageFields | undefined => {
-  if (event.type === "chat_turn_finished")
-    return {
-      purpose: "chat",
-      modelId: event.modelId,
-      traceId: event.traceId,
-      promptTokens: event.inputTokens,
-      completionTokens: event.outputTokens,
-    };
-  if (event.type !== "run_finished" || !event.usage) return undefined;
-  return {
-    purpose: event.purpose,
-    modelId: event.modelId,
-    traceId: event.traceId,
-    promptTokens: event.usage.promptTokens,
-    completionTokens: event.usage.completionTokens,
-  };
-};
+const usageOf = (event: AiTelemetryEvent): UsageFields => ({
+  purpose: event.type === "chat_turn_finished" ? "chat" : event.purpose,
+  modelId: event.modelId,
+  requests: event.requests,
+});
 
 export const createDexieUsageTelemetrySink = (
   persistence: PersistencePort,
@@ -51,7 +38,7 @@ export const createDexieUsageTelemetrySink = (
 ): AiTelemetrySink => ({
   emit: (event: AiTelemetryEvent) => {
     const usage = usageOf(event);
-    if (!usage) return;
+    if (usage.requests.length === 0) return;
     const providerType = providerTypeFromSdk(event.provider);
     if (!providerType)
       logger?.warn(UNMAPPED_PROVIDER, { provider: event.provider });

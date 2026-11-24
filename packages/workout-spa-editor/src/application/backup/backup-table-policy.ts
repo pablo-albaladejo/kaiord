@@ -62,7 +62,8 @@ export const BACKUP_TABLE_POLICY: Readonly<Record<string, BackupTableRule>> = {
   syncState: "exclude", // integration cursor: restoring it skips syncs
   templates: "include",
   tombstones: "exclude", // they travel in the file's own `tombstones` field
-  usageEvents: "include",
+  traces: "exclude", // the athlete's Traces never leave this device
+  usageEvents: "exclude", // the usage log stays on this device, as the Traces do
   userPreferences: "include",
   workouts: "include",
 };

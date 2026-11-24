@@ -30,7 +30,7 @@ No pre-built singleton is exported because `model` (a `LanguageModel` from the V
 - **`src/agents/`** — Declarative agents; the runtime validates and retries, and emits telemetry per run
 - **`src/chat/`** — Read tools auto-execute; action tools pause for user confirmation
 - **`src/providers/`** — Purpose→model resolution; the catalog is generated from the installed `@ai-sdk/*` type unions, so a hand-typed model id elsewhere is guarded by `check-model-ids-fresh.mjs`
-- **`src/observability/`** — Records usage telemetry; no quality signal is fed back
+- **`src/observability/`** — Records usage telemetry, every billed request of a run listed with its usage; no quality signal is fed back
 - **`src/prompts/`** — System prompts plus the untrusted-data fence, whose payload neutralization is the only defense against injection in synced coach text
 - **`src/adapters/`** — Strategy implementations for LLM integration
 - **`src/evals/`** — Assertions and fixtures, the keyless cassette replay lane, and the local-only live lane over the Claude Code CLI. **No live runner runs in CI**. What gates every commit is the assertion logic and the fixtures' own invariants
@@ -51,6 +51,8 @@ Architecture:
 Common operations:
 
 - **Add a new provider**: Extend `src/providers/`; regenerate the catalog with `pnpm generate:model-catalog` after bumping `@ai-sdk/*`. Do not hand-edit `src/providers/generated/model-catalog.ts`
+- **Prices change, or a model joins the catalog**: read the Provider's official pricing page and update `src/providers/pricing/model-prices.json` (prices per million tokens, `source`, `readOn`, `quote`). A model the page does not list gets an `unpriced` entry with a reason, and the App shows its cost as unknown; never guess a price. `pnpm lint:model-prices` fails on a catalog model with no entry and on an entry read more than 120 days ago
+- **Renewing `readOn` means reading the page again**: paste into `quote` the page's exact line(s) the entry's prices come from (one string per line, copied, not retyped). For a priced entry read after 2026-11-23, `pnpm lint:model-prices` fails when `quote` is null (`price-unquoted`) and when any number of its periods (input, output, cache read and write, the long-context prices and threshold) does not appear in the quote (`price-not-in-quote`). The entries read on 2026-11-23 carry `quote: null`, because the table kept no quotes then; their `readOn` stays frozen and they expire at 120 days like any other, after which renewing one requires its quote. An `unpriced` entry needs no quote. The check is offline: CI never fetches a pricing page, so the quote is the evidence a reviewer compares with the page
 - **A provider retires a model**: add the id to `retired` (answers 404) or `deprecated` (still answers, retirement announced) under its provider in `scripts/model-catalog-extract.mjs`, then regenerate. Retired ids leave the catalog and resolve to `getDefaultModel(type)`, which reads the curated `PREFERRED_DEFAULT_MODELS` — never the catalog's first entry, which is the oldest SDK id
 - **Re-record trigger**: a change to the prompt, a benchmark's text/`expectedSport`/`athleteZones`, the output/wire schema, or a new benchmark needs a local `EVAL_MODEL=claude-sonnet-5 pnpm --filter @kaiord/ai eval:live -- --record` by the maintainer before merge (an agent never runs it); scorer-only changes (`minSteps`, `zoneCheck`) re-score keylessly
 - **Tweak the system prompt**: Edit `src/prompts/parse-workout.md` and test via `pnpm --filter @kaiord/ai test`; see the re-record trigger above

@@ -27,6 +27,8 @@ import {
   backfillUsageRow,
 } from "./dexie-migrations";
 import { SCHEMAS } from "./dexie-schemas";
+import { registerV39 } from "./dexie-v39-migration";
+import { registerV38 } from "./register-kaiord-v38";
 import {
   registerV10ToV12,
   registerV13ToV15,
@@ -102,4 +104,6 @@ export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV27(db);
   registerV28(db);
   registerV29(db);
+  registerV38(db);
+  registerV39(db);
 };

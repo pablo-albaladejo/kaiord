@@ -7,6 +7,7 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useGenerationDeps } from "../../../hooks/use-generation-deps";
 import { useLatestRef } from "../../../hooks/use-latest-ref";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
@@ -35,6 +36,7 @@ export const useAiGeneration = () => {
   const localeRef = useLatestRef(useActiveLocale());
   const loadWorkout = useLoadWorkout();
   const analytics = useAnalytics();
+  const deps = useGenerationDeps();
 
   const generate = useCallback(
     async (text: string, sport?: Sport) => {
@@ -55,9 +57,11 @@ export const useAiGeneration = () => {
         setGeneration,
         loadWorkout,
         analytics,
+        deps,
       });
     },
     [
+      deps,
       providersRef,
       bindingsRef,
       customPromptRef,

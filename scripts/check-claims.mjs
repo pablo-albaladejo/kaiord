@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { duplicateProblems } from "./lib/claims-owners.mjs";
+import { roundTripCiProblems } from "./lib/claims-round-trip.mjs";
 import { registerProblems } from "./lib/claims-register.mjs";
 import { failIfAny } from "./lib/guard-failure.mjs";
 
@@ -13,6 +14,8 @@ import { failIfAny } from "./lib/guard-failure.mjs";
 // many times as it appears, each entry must still be on its surface, and
 // each claim that states a fact must be proven by a running test or pinned
 // code; a label states nothing, an external claim is read again in time.
+// A Round-trip claim names its formats and is proven by each one's contract
+// test, which the CI round-trip job runs (lib/claims-round-trip.mjs).
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const CLAIMS_DIR = join(ROOT, "claims");
@@ -71,7 +74,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   console.log(summary);
   failIfAny(
     "public-claim problem(s)",
-    problems,
+    [
+      ...problems,
+      ...roundTripCiProblems(repoReader(".github/workflows/ci.yml")),
+    ],
     "Each claim on a registered surface needs an entry in claims/*.json with a proof that holds; see claims/README.md."
   );
   console.log("✅ Every claim on a registered surface has a proof that holds");

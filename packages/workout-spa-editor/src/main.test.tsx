@@ -8,7 +8,7 @@ vi.mock("react-dom/client", () => ({
   createRoot: () => ({ render, unmount: vi.fn() }),
 }));
 
-const NATIVE_STALE = 380;
+const NATIVE_STALE = 400;
 const APP_DB = "kaiord-spa";
 
 const installNewerDatabase = (): Promise<void> =>

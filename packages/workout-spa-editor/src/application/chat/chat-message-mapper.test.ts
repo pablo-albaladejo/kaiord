@@ -266,4 +266,87 @@ describe("newChatMessage", () => {
     });
     expect(resultWithout).not.toHaveProperty("toolResult");
   });
+
+  describe("recordsToModelMessages without health data", () => {
+    it("should leave out the answers that read health data and keep the athlete's messages", () => {
+      // Arrange
+      const records = [
+        record("1", "user", "How did I sleep?"),
+        {
+          ...record("2", "assistant", "You slept 6 h 12 min."),
+          readHealth: true,
+        },
+        record("3", "user", "Plan tomorrow"),
+      ];
+
+      // Act
+      const shared = recordsToModelMessages(records);
+      const withheld = recordsToModelMessages(records, {
+        withholdHealth: true,
+      });
+
+      // Assert
+      expect(shared).toHaveLength(records.length);
+      expect(withheld).toEqual([
+        { role: "user", content: "How did I sleep?" },
+        { role: "user", content: "Plan tomorrow" },
+      ]);
+    });
+
+    it("should leave out a reply stored before replies said whether they read health data", () => {
+      // Arrange
+      const records = [
+        record("1", "user", "How did I sleep?"),
+        record("2", "assistant", "You slept 6 h 12 min, resting HR 47."),
+      ];
+
+      // Act
+      const withheld = recordsToModelMessages(records, {
+        withholdHealth: true,
+      });
+
+      // Assert
+      expect(withheld).toEqual([{ role: "user", content: "How did I sleep?" }]);
+    });
+
+    it("should leave out every later reply once one in the context read health data", () => {
+      // Arrange
+      const records = [
+        record("1", "user", "How did I sleep?"),
+        { ...record("2", "assistant", "Resting HR 47."), readHealth: true },
+        record("3", "user", "Say it again"),
+        { ...record("4", "assistant", "Again: 47."), readHealth: false },
+      ];
+
+      // Act
+      const withheld = recordsToModelMessages(records, {
+        withholdHealth: true,
+      });
+
+      // Assert
+      expect(withheld).toEqual([
+        { role: "user", content: "How did I sleep?" },
+        { role: "user", content: "Say it again" },
+      ]);
+    });
+
+    it("should keep the replies that said they read no health data", () => {
+      // Arrange
+      const records = [
+        record("1", "user", "Plan tomorrow"),
+        { ...record("2", "assistant", "An easy run."), readHealth: false },
+      ];
+
+      // Act
+      const withheld = recordsToModelMessages(records, {
+        withholdHealth: true,
+      });
+
+      // Assert
+      expect(withheld).toEqual([
+        { role: "user", content: "Plan tomorrow" },
+        { role: "assistant", content: "An easy run." },
+      ]);
+    });
+  });
 });

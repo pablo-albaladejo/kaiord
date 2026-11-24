@@ -24,8 +24,10 @@ const PASSPHRASE = "kaiord-spa-v1";
 // the legacy `usage` store, making `usageEvents` the synced usage source, v34
 // added the healthStrain + healthVitals stores (included), v35 added the
 // healthHeartRateSeries store (included), v36 normalized Garmin ledger rows
-// (no store change), and v37 backfilled the nutrition `updatedAt` sync clock.
-const SCHEMA_HEAD = 37;
+// (no store change), v37 backfilled the nutrition `updatedAt` sync clock,
+// v38 added the device-local `traces` store (excluded), and v39 made
+// `usageEvents` device-local (excluded) without Trace ids.
+const SCHEMA_HEAD = 39;
 
 describe("createDexieSnapshotPort", () => {
   const db = sharedKaiordDatabase("snapshot");
@@ -47,6 +49,21 @@ describe("createDexieSnapshotPort", () => {
   });
 
   it.each([
+    {
+      store: "usageEvents",
+      row: {
+        id: "evt-1",
+        yearMonth: "2026-07",
+        date: "2026-07-10",
+        purpose: "chat",
+        providerType: "anthropic",
+        promptTokens: 120,
+        completionTokens: 80,
+        tokens: 200,
+        cost: 0.0006,
+        createdAt: "2026-07-10T10:00:00.000Z",
+      },
+    },
     {
       store: "connections",
       row: {
@@ -75,21 +92,6 @@ describe("createDexieSnapshotPort", () => {
   );
 
   it.each([
-    {
-      store: "usageEvents",
-      row: {
-        id: "evt-1",
-        yearMonth: "2026-07",
-        date: "2026-07-10",
-        purpose: "chat",
-        providerType: "anthropic",
-        promptTokens: 120,
-        completionTokens: 80,
-        tokens: 200,
-        cost: 0.0006,
-        createdAt: "2026-07-10T10:00:00.000Z",
-      },
-    },
     {
       store: "chatMessages",
       row: {

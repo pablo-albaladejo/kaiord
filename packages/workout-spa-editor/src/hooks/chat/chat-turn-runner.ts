@@ -1,39 +1,61 @@
 /**
  * `sendTurn` for `useChatTurn`: ensures the conversation exists (persisting a
- * draft on its first message), appends the user message, builds the agent, and
- * runs the turn. `retryTurn` re-runs a failed turn whose user message is
- * already persisted, without appending it again.
+ * draft on its first message), appends the user message, asks, if the athlete
+ * has not answered for this Provider, whether the assistant may send their
+ * health data, builds the agent, and runs the turn. Without health data the
+ * health tools read nothing and the earlier answers that used them are not
+ * replayed. `retryTurn` re-runs a failed turn whose user message
+ * is already persisted, without appending it again.
  */
+import type { ChatTurnResult } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
 
 import { appendUserMessage } from "../../application/chat/append-turn-messages";
 import { recordsToModelMessages } from "../../application/chat/chat-message-mapper";
 import { ensureConversationForTurn } from "../../application/chat/ensure-conversation";
+import { firstHealthBearingReply } from "../../application/chat/turn-read-health";
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
-import { buildChatAgent } from "./build-chat-agent";
-import { buildDataRouteSignals } from "./build-data-route-signals";
+import { askHealth } from "./chat-health-share";
+import { closeChatTrace, openChatTrace } from "./chat-trace";
 import { runAgent } from "./chat-turn-context";
+import { buildAndSend } from "./chat-turn-send";
 import type { ChatTurnCtx } from "./chat-turn-types";
 
-const buildAndSend = async (
+/** What a turn stopped while the athlete was asked leaves: nothing sent. */
+const STOPPED_BEFORE_SENDING: ChatTurnResult = {
+  status: "aborted",
+  text: "",
+  messages: [],
+  toolNames: [],
+};
+
+/** Asks about health data, then replays the history it allows and sends. */
+const askAndSend = async (
   ctx: ChatTurnCtx,
-  messages: ModelMessage[],
+  history: ChatMessageRecord[],
+  tail: ModelMessage[],
   signal: AbortSignal
-) => {
-  const built = await buildChatAgent({
-    persistence: ctx.persistence,
-    profileId: ctx.profileId,
-    today: ctx.today,
-    provider: ctx.provider,
-    modelId: ctx.modelId,
-    actions: ctx.ops,
-    getMatrixSignals: () =>
-      buildDataRouteSignals(ctx.persistence, ctx.profileId),
-    onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
+): Promise<ChatTurnResult> => {
+  const trace = openChatTrace(ctx.traceRef, ctx.persistence);
+  let healthShared: boolean;
+  try {
+    healthShared = await askHealth(ctx, signal, trace);
+  } catch (error) {
+    if (!signal.aborted) throw error;
+    closeChatTrace(ctx.traceRef, "stopped");
+    return STOPPED_BEFORE_SENDING;
+  }
+  const replay = recordsToModelMessages(history, {
+    withholdHealth: !healthShared,
   });
-  ctx.agentRef.current = built.agent;
-  ctx.toolsRef.current = built.tools;
-  return built.agent.sendTurn(messages, { signal });
+  const historyHealth = healthShared && firstHealthBearingReply(history) >= 0;
+  return buildAndSend(ctx, {
+    messages: [...replay, ...tail],
+    signal,
+    healthShared,
+    historyHealth,
+    trace,
+  });
 };
 
 export const sendTurn = async (
@@ -56,11 +78,7 @@ export const sendTurn = async (
       ctx.conversationId,
       text
     );
-    return buildAndSend(
-      ctx,
-      [...recordsToModelMessages(history), { role: "user", content: text }],
-      signal
-    );
+    return askAndSend(ctx, history, [{ role: "user", content: text }], signal);
   });
 };
 
@@ -76,9 +94,8 @@ export const retryTurn = async (
   history: ChatMessageRecord[],
   text: string
 ): Promise<void> => {
-  const replay = recordsToModelMessages(history);
-  const last = replay.at(-1);
+  const last = recordsToModelMessages(history).at(-1);
   if (last?.role !== "user" || last.content !== text)
     return sendTurn(ctx, history, text);
-  await runAgent(ctx, (signal) => buildAndSend(ctx, replay, signal));
+  await runAgent(ctx, (signal) => askAndSend(ctx, history, [], signal));
 };

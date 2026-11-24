@@ -36,6 +36,56 @@ describe("convertStandardTcxDuration", () => {
     expect(result).toStrictEqual({ type: "open" });
   });
 
+  it("should convert UserInitiated_t, the TCX lap button, to an open duration", () => {
+    // Arrange
+    const tcxDuration = { "@_xsi:type": "UserInitiated_t" };
+
+    // Act
+    const result = convertStandardTcxDuration(tcxDuration);
+
+    // Assert
+    expect(result).toStrictEqual({ type: "open" });
+  });
+
+  it("should convert CaloriesBurned_t to a calories duration", () => {
+    // Arrange
+    const tcxDuration = { "@_xsi:type": "CaloriesBurned_t", Calories: 100 };
+
+    // Act
+    const result = convertStandardTcxDuration(tcxDuration);
+
+    // Assert
+    expect(result).toStrictEqual({ type: "calories", calories: 100 });
+  });
+
+  it("should convert HeartRateBelow_t in beats per minute to a heart_rate_less_than duration", () => {
+    // Arrange
+    const tcxDuration = {
+      "@_xsi:type": "HeartRateBelow_t",
+      HeartRate: { "@_xsi:type": "HeartRateInBeatsPerMinute_t", Value: 120 },
+    };
+
+    // Act
+    const result = convertStandardTcxDuration(tcxDuration);
+
+    // Assert
+    expect(result).toStrictEqual({ type: "heart_rate_less_than", bpm: 120 });
+  });
+
+  it("should not read HeartRateBelow_t as a share of maximum, which a KRD bpm end cannot hold", () => {
+    // Arrange
+    const tcxDuration = {
+      "@_xsi:type": "HeartRateBelow_t",
+      HeartRate: { "@_xsi:type": "HeartRateAsPercentOfMax_t", Value: 70 },
+    };
+
+    // Act
+    const result = convertStandardTcxDuration(tcxDuration);
+
+    // Assert
+    expect(result).toBeNull();
+  });
+
   it("should return null for unknown duration type", () => {
     // Arrange
     const tcxDuration = { "@_xsi:type": "HeartRateAbove_t" };

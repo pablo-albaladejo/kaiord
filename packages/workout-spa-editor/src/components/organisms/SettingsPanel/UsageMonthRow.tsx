@@ -7,9 +7,9 @@
 import type { UsageTotals } from "../../../application/usage/fold-usage-events";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
-import { formatUsageCost } from "./format-usage-cost";
 import type { MonthUsage, UsagePurpose } from "./usage-table-types";
 import { USAGE_PURPOSES } from "./usage-table-types";
+import { CostCell } from "./UsageCostCell";
 
 const PURPOSE_LABEL_KEY: Record<UsagePurpose, string> = {
   chat: "usage.purpose.chat",
@@ -31,7 +31,9 @@ const numericCells = (totals: UsageTotals, cls: string, locale: string) => (
       {totals.outputTokens.toLocaleString(locale)}
     </td>
     <td className={cls}>{totals.totalTokens.toLocaleString(locale)}</td>
-    <td className={cls}>{formatUsageCost(totals.totalCost, locale)}</td>
+    <td className={cls}>
+      <CostCell totals={totals} locale={locale} />
+    </td>
   </>
 );
 
@@ -62,7 +64,7 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
           {row.totals.totalTokens.toLocaleString(locale)}
         </td>
         <td className={CELL}>
-          {formatUsageCost(row.totals.totalCost, locale)}
+          <CostCell totals={row.totals} locale={locale} />
         </td>
       </tr>
       {active.map((p) => (

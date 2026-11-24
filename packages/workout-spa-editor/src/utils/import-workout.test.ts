@@ -394,7 +394,7 @@ describe("importWorkout", () => {
     it("should report each step the TCX reader had to skip", async () => {
       // Arrange
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const skipped = `<Step xsi:type="Step_t"><StepId>2</StepId><Duration xsi:type="CaloriesBurned_t"><Calories>100</Calories></Duration><Intensity>Active</Intensity><Target xsi:type="None_t"/></Step>`;
+      const skipped = `<Step xsi:type="Step_t"><StepId>2</StepId><Duration xsi:type="HeartRateAbove_t"><HeartRate xsi:type="HeartRateInBeatsPerMinute_t"><Value>160</Value></HeartRate></Duration><Intensity>Active</Intensity><Target xsi:type="None_t"/></Step>`;
       const xml = tcxWorkout(timeStep(1) + skipped);
       const onWarning = vi.fn();
 

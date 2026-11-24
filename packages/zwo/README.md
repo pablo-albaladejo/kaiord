@@ -70,13 +70,9 @@ Creates a strict XSD schema validator (Node.js only).
 
 ## Supported ZWO Features
 
-- SteadyState intervals
-- Warmup and Cooldown ramps
-- IntervalsT (structured intervals)
-- FreeRide segments
-- Power targets (FTP percentage)
-- Heart rate and cadence targets
-- Text events
+- Round-trip tested: converting KRD → ZWO → KRD keeps every value of a bike or run workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s); the ZWO test files were written by Kaiord, so a file from Zwift is not checked field by field.
+- Fields ZWO cannot carry: cadence and pace targets; calorie, power-above and
+  repeat-until durations; step notes; the sub-sport.
 
 ## License
 

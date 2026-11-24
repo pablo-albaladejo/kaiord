@@ -24,7 +24,8 @@
     "noProvider": "Ningún proveedor seleccionado",
     "tokens": "Tokens estimados",
     "cost": "Coste estimado",
-    "costValue": "${{amount}} USD"
+    "costValue": "${{amount}} USD",
+    "priceUnknown": "Precio desconocido para este modelo"
   },
   "batch": {
     "dismiss": "Descartar",

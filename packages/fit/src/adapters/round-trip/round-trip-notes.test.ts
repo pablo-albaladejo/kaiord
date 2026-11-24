@@ -7,6 +7,7 @@ import {
 } from "../../test-utils/constants";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
+import { FIT_STRING_MAX_BYTES } from "../shared/fit-string";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 
 describe("Round-trip: Workout step - notes field", () => {
@@ -122,7 +123,7 @@ describe("Round-trip: Workout step - notes field", () => {
     expect(() => convertKRDToMessages(krd, logger)).toThrow(/notes.*256/i);
   });
 
-  it("should accept notes at exactly 256 characters in round-trip", async () => {
+  it("should cut a 256-character note to the 254 bytes a FIT string holds in round-trip", async () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
@@ -154,8 +155,7 @@ describe("Round-trip: Workout step - notes field", () => {
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     // Assert
-    expect(stepMsg?.notes).toBe(maxNotes);
-    expect((stepMsg?.notes as string).length).toBe(FIT_NOTES_MAX_LENGTH);
+    expect(stepMsg?.notes).toBe(maxNotes.substring(0, FIT_STRING_MAX_BYTES));
   });
 
   it("should omit notes when undefined in round-trip", async () => {

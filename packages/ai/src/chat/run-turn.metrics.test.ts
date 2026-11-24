@@ -98,6 +98,10 @@ describe("runTurn metrics", () => {
       steps: 1,
       toolNames: ["get_data_routes"],
       usage: { promptTokens: 5, completionTokens: 2 },
+      requests: [
+        { outcome: "ok", usage: { promptTokens: 5, completionTokens: 2 } },
+        { outcome: "error" },
+      ],
     });
   });
 });

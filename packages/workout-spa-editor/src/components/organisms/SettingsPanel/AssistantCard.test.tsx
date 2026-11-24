@@ -75,6 +75,7 @@ const usage = (id: string, tokens: number, cost: number): UsageEventRecord => ({
   completionTokens: 0,
   tokens,
   cost,
+  costBasis: "price_table",
   createdAt: `2026-10-14T00:00:0${id}.000Z`,
 });
 
@@ -126,7 +127,54 @@ describe("AssistantCard", () => {
 
     // Assert
     expect(screen.getByTestId("assistant-usage")).toHaveTextContent(
-      "Total this month (all athletes): 2 requests · 1,500 tokens · ~$0.25"
+      "Total this month on this device (all athletes): 2 requests · 1,500 tokens · ~$0.25"
+    );
+  });
+
+  it("should show the prices the main model's cost is computed from", () => {
+    // Arrange
+    // Claude-opus-5 is $5 in, $25 out, $0.50 cached per 1M
+
+    // Act
+    renderWithProviders(<AssistantCard />);
+
+    // Assert
+    expect(screen.getByTestId("assistant-price")).toHaveTextContent(
+      "$5.00 input · $25.00 output · $0.50 cached input per million tokens, from the official price list read on 2026-11-23."
+    );
+  });
+
+  it("should say the main model's price is unknown when its Provider does not list it", () => {
+    // Arrange
+    live.providers = [{ ...gpt, isDefault: true, keyCheck: "valid" }];
+    live.bindings = [mainBinding("p-1", "gpt", "o1")];
+
+    // Act
+    renderWithProviders(<AssistantCard />);
+
+    // Assert
+    expect(screen.getByTestId("assistant-price")).toHaveTextContent(
+      "Price unknown"
+    );
+  });
+
+  it("should say how many runs the month's cost leaves out for an unknown price", () => {
+    // Arrange
+    const [priced, unpriced] = [
+      { tokens: 1000, cost: 0.2 },
+      { tokens: 500, cost: 0 },
+    ];
+    live.events = [
+      usage("1", priced.tokens, priced.cost),
+      { ...usage("2", unpriced.tokens, unpriced.cost), costBasis: "unknown" },
+    ];
+
+    // Act
+    renderWithProviders(<AssistantCard />);
+
+    // Assert
+    expect(screen.getByTestId("assistant-usage")).toHaveTextContent(
+      "~$0.20 · 1 run at an unknown price is not included."
     );
   });
 
@@ -138,7 +186,9 @@ describe("AssistantCard", () => {
 
     // Assert
     expect(
-      screen.getByText("No AI use yet this month, by any athlete.")
+      screen.getByText(
+        "No AI use yet this month on this device, by any athlete."
+      )
     ).toBeInTheDocument();
   });
 

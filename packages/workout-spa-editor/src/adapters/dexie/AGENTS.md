@@ -5,7 +5,7 @@
 
 ## Purpose
 
-The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 → v13), every per-table repository, the cascade-on-profile-delete logic, the storage probe, and the migration runner.
+The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 → v39), every per-table repository, the cascade-on-profile-delete logic, the storage probe, and the migration runner.
 
 ## Key Files
 
@@ -25,7 +25,7 @@ The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 →
 - `dexie-profile-repository.ts` — sport profiles.
 - `dexie-ai-provider-repository.ts` — AI provider configs + custom prompt meta-row.
 - `dexie-sync-state-repository.ts` — per-source sync state.
-- `dexie-usage-event-repository.ts` — append-only, synced per-run AI usage log (the single usage-accounting store after the v33 cutover); `listByMonth`/`listByMonths`/`listOlderThan` range-scan the `[yearMonth+purpose]` index, `delete(id)` is tombstoned for retention pruning.
+- `dexie-usage-event-repository.ts` — append-only per-run AI usage log (the single usage-accounting store after the v33 cutover), device-local since v39 (out of the sync snapshot and the backup file, no Trace id); `listByMonth`/`listByMonths`/`listOlderThan` range-scan the `[yearMonth+purpose]` index, `delete(id)` serves the retention prune and writes no tombstone.
 - `dexie-coaching-repository.ts` — coaching activities (composite key `${profileId}:${source}:${sourceId}`).
 - `dexie-coaching-sync-state-repository.ts` — per `[source+profileId]` sync state.
 - `dexie-session-match-repository.ts` + `dexie-session-match-append-executed.ts` + `dexie-session-match-update.ts` — links between coaching activities and executed workouts; enforces uniqueness per `(profileId, coachingActivityId)` and `(profileId, workoutId)`.
@@ -44,11 +44,12 @@ The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 →
 ### Working In This Directory
 
 1. **Version pruning.** `test-utils/kaiord-schema-history.json` is the frozen record of every version ever shipped; append an entry for each new version and never edit an old one. `registerKaiordVersions` declares only the versions with an upgrade function plus the head: Dexie diffs from the installed schema, and each extra declaration costs startup time (Dexie re-parses all earlier versions per `stores()` call). Never remove or edit a version that has an upgrade function. A schema-only version may be dropped once a later kept version restates it in full; `kaiord-schema-history.test.ts` and `kaiord-schema-history-upgrade.test.ts` enforce this.
-2. **Adding a new table = new schema version.** Bump to a new vN in `dexie-schemas.ts` (don't mutate an existing version — that breaks upgrade for users on the prior version). Add a `dexie-vN-migration.ts` if any backfill is needed.
-3. **Profile-scoped tables get cascade for free.** Index the new table on `profileId` and `is-per-profile-table.ts` picks it up automatically. Add a test to `is-per-profile-table.test.ts` so a future re-shape of the indexing scheme doesn't silently drop the table from the cascade.
-4. **Uniqueness errors are typed.** When a write violates an index uniqueness constraint, map it to a domain error (e.g. `SessionAlreadyMatchedError`) before throwing.
-5. **`transaction(fn)` is the only multi-write atom.** Per `persistence-port.ts`, application code cannot import `db` directly to open transactions — it goes through the port.
-6. **Session-match writes MUST construct `coachingActivityId` via `buildCoachingActivityId(...)` / `toPersistedCoachingActivityId(...)` / `CoachingActivityRecord.id`** — enforced by `check-session-match-id-shape.mjs` (R-SessionMatchIdShape). Bare string concatenation is a CI failure.
+2. **Adding a new table = new schema version.** Bump to a new vN (don't mutate an existing version — that breaks upgrade for users on the prior version). Add a `dexie-vN-migration.ts` if any backfill is needed.
+3. **A new version is a delta file.** Since v37, a version declares only the stores it changes, in its own file: `dexie-v37-migration.ts` exports `V37_STORES` (the three changed stores) and `applyV37Upgrade`; `register-kaiord-v38.ts` exports `V38_STORES` (the new `traces` store) and `registerV38`; `dexie-v39-migration.ts` exports an empty `V39_STORES` with a data-only `applyV39Upgrade` (strips `traceId` from `usageEvents`) and `registerV39`. Dexie carries every store the delta leaves out over from the previous declared version, so `SCHEMAS` is not restated and the previous kept version must stay declared. Register the new function last in `registerKaiordVersions`, append the version to `test-utils/kaiord-schema-history.json` (`stores` is the delta, `upgrade` whether it has an upgrade function), bump `HIGHEST_DECLARED` in `declared-verno.test.ts` and the `SCHEMA_HEAD` of the migration tests, and seed the migration's own test with the previous version's full stores (`{ ...SCHEMAS.v35, ...V37_STORES, ...V38_STORES }` for v39).
+4. **Profile-scoped tables get cascade for free.** Index the new table on `profileId` and `is-per-profile-table.ts` picks it up automatically. Add a test to `is-per-profile-table.test.ts` so a future re-shape of the indexing scheme doesn't silently drop the table from the cascade.
+5. **Uniqueness errors are typed.** When a write violates an index uniqueness constraint, map it to a domain error (e.g. `SessionAlreadyMatchedError`) before throwing.
+6. **`transaction(fn)` is the only multi-write atom.** Per `persistence-port.ts`, application code cannot import `db` directly to open transactions — it goes through the port.
+7. **Session-match writes MUST construct `coachingActivityId` via `buildCoachingActivityId(...)` / `toPersistedCoachingActivityId(...)` / `CoachingActivityRecord.id`** — enforced by `check-session-match-id-shape.mjs` (R-SessionMatchIdShape). Bare string concatenation is a CI failure.
 
 ### Testing Requirements
 

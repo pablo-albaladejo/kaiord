@@ -32,13 +32,14 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
 
   const workout: Workout = {
     name: truncateName(gcn.workoutName ?? "", logger),
+    ...(gcn.description ? { notes: gcn.description } : {}),
     sport,
     steps,
   };
 
   addPoolLength(gcn, workout);
 
-  const now = new Date().toISOString();
+  const created = createdOf(gcn.createdDate);
   const extensions: Record<string, unknown> = { structured_workout: workout };
   if (typeof gcn.isSessionTransitionEnabled === "boolean") {
     extensions.gcn = {
@@ -49,9 +50,17 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
   return {
     version: "1.0",
     type: "structured_workout",
-    metadata: { created: now, sport, manufacturer: "garmin-connect" },
+    metadata: { created, sport, manufacturer: "garmin-connect" },
     extensions,
   };
+};
+
+/** Garmin Connect stamps createdDate in UTC without a zone; a file without one is stamped now. */
+const createdOf = (createdDate: string | null | undefined): string => {
+  const stamped = createdDate ? new Date(`${createdDate}Z`) : undefined;
+  return stamped && !Number.isNaN(stamped.getTime())
+    ? stamped.toISOString()
+    : new Date().toISOString();
 };
 
 const truncateName = (name: string, logger: Logger): string => {

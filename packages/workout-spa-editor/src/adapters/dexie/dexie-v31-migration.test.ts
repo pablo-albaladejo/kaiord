@@ -15,7 +15,7 @@ import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
 
 const SEED_VERSION = 30;
-const SCHEMA_HEAD = 37;
+const SCHEMA_HEAD = 39;
 
 const seedV30 = async (name: string): Promise<void> => {
   const older = new Dexie(name);

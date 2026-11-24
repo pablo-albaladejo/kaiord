@@ -9,7 +9,9 @@ vi.mock("@kaiord/ai/agents", () => ({
   runGenerateAgent: (...args: unknown[]) => mockRunGenerateAgent(...args),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   resolveModelForPurpose: (...args: unknown[]) =>
     mockResolveModelForPurpose(...args),
   createLanguageModel: (...args: unknown[]) => mockCreateLanguageModel(...args),
@@ -17,6 +19,8 @@ vi.mock("@kaiord/ai/providers", () => ({
 
 import { labExtractorAgent } from "@kaiord/ai/agents";
 
+import { createInMemoryTraceRepository } from "../../../test-utils/in-memory-trace-repository";
+import { startTraceRun } from "../../trace/trace-run";
 import type { RunLabExtractionInput } from "./run-lab-extraction.use-case";
 import { runLabExtraction } from "./run-lab-extraction.use-case";
 
@@ -30,6 +34,7 @@ const makeInput = (): RunLabExtractionInput => ({
   file: { data: PDF_BYTES, mediaType: "application/pdf", filename: "labs.pdf" },
   providers: [],
   bindings: [],
+  askHealth: async () => "send",
 });
 
 describe("runLabExtraction", () => {
@@ -120,5 +125,126 @@ describe("runLabExtraction", () => {
 
     // Assert
     await expect(run).rejects.toThrow("model exploded");
+  });
+
+  it("should ask before the document goes, naming its Provider", async () => {
+    // Arrange
+    const askHealth = vi.fn(async () => "send" as const);
+
+    // Act
+    await runLabExtraction({ ...makeInput(), askHealth });
+
+    // Assert
+    expect(askHealth).toHaveBeenCalledWith("anthropic");
+    expect(mockRunGenerateAgent).toHaveBeenCalled();
+  });
+
+  it("should not send the document when the athlete does not share health data", async () => {
+    // Arrange
+    const input = {
+      ...makeInput(),
+      askHealth: async () => "withhold" as const,
+    };
+
+    // Act
+    const result = await runLabExtraction(input);
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "withheld" });
+    expect(mockCreateLanguageModel).not.toHaveBeenCalled();
+    expect(mockRunGenerateAgent).not.toHaveBeenCalled();
+  });
+
+  it("should leave one Trace naming the lab results sent to the Provider", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({ ...makeInput(), trace });
+    const stored = await traces.list();
+
+    // Assert
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({
+      feature: "lab_import",
+      outcome: "ok",
+      sent: [{ to: "anthropic", kinds: ["labResults"] }],
+    });
+  });
+
+  it("should leave no Trace when the athlete withholds the document", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({
+      ...makeInput(),
+      trace,
+      askHealth: async () => "withhold",
+    });
+
+    // Assert
+    expect(await traces.list()).toHaveLength(0);
+  });
+
+  it("should record a failed run in its Trace", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+    mockRunGenerateAgent.mockRejectedValueOnce(new Error("down"));
+
+    // Act
+    const run = runLabExtraction({ ...makeInput(), trace });
+
+    // Assert
+    await expect(run).rejects.toThrow("down");
+    expect((await traces.list())[0]?.outcome).toBe("failed");
+  });
+
+  it("should leave no Trace when the athlete withholds the document after the question waited", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({
+      ...makeInput(),
+      trace,
+      askHealth: async () => {
+        await trace.checkpoint();
+        return "withhold";
+      },
+    });
+
+    // Assert
+    expect(await traces.list()).toHaveLength(0);
+  });
+
+  it("should leave a stopped Trace and send nothing when stopped while the athlete is asked", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+    const stop = new AbortController();
+
+    // Act
+    const run = runLabExtraction({
+      ...makeInput(),
+      trace,
+      signal: stop.signal,
+      askHealth: async () => {
+        stop.abort();
+        throw new DOMException("Aborted", "AbortError");
+      },
+    });
+
+    // Assert
+    await expect(run).rejects.toThrow(/abort/i);
+    expect(mockCreateLanguageModel).not.toHaveBeenCalled();
+    expect((await traces.list())[0]).toMatchObject({
+      outcome: "stopped",
+      sent: [],
+    });
   });
 });

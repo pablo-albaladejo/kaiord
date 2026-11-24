@@ -270,6 +270,18 @@
         "intakePresets": "id, profileId, updatedAt",
         "energyTargets": "profileId, updatedAt"
       }
+    },
+    {
+      "version": 38,
+      "upgrade": false,
+      "stores": {
+        "traces": "id, startedAt"
+      }
+    },
+    {
+      "version": 39,
+      "upgrade": true,
+      "stores": {}
     }
   ]
 }

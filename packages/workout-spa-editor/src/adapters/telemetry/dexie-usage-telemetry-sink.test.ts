@@ -1,4 +1,5 @@
 import type {
+  AiRequest,
   AiTelemetryEvent,
   ChatTurnFinishedEvent,
 } from "@kaiord/ai/observability";
@@ -10,22 +11,42 @@ import { createInMemoryPersistence } from "../../test-utils/in-memory-persistenc
 import { createDexieUsageTelemetrySink } from "./dexie-usage-telemetry-sink";
 
 const YEAR_MONTH_LENGTH = 7;
+const DIGITS = 10;
+// claude-sonnet-5 at $2 input and $10 output per 1M: 300*2 + 120*10.
+const SONNET_5_ATTEMPT_USD = 0.0018;
+const ATTEMPT = {
+  outcome: "ok" as const,
+  usage: { promptTokens: 300, completionTokens: 120 },
+};
+const INVALID = { ...ATTEMPT, outcome: "invalid" as const };
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const currentMonth = () => new Date().toISOString().slice(0, YEAR_MONTH_LENGTH);
 
-const finished = (over: Partial<AiTelemetryEvent> = {}): AiTelemetryEvent => ({
-  type: "run_finished",
+const identity = {
   traceId: "t-1",
   agentId: "lab-extractor",
   agentVersion: "1.0.0",
   promptId: "lab-extractor/system",
   promptVersion: "1.0.0",
   provider: "anthropic.messages",
-  modelId: "claude",
+  modelId: "claude-sonnet-5",
   purpose: "lab_extraction",
   latencyMs: 42,
+};
+
+const finished = (over: Partial<AiTelemetryEvent> = {}): AiTelemetryEvent => ({
+  type: "run_finished",
+  ...identity,
   usage: { promptTokens: 300, completionTokens: 120 },
+  requests: [ATTEMPT],
   ...over,
+});
+
+const failedRun = (requests: AiRequest[]): AiTelemetryEvent => ({
+  type: "run_failed",
+  ...identity,
+  error: { name: "AiAgentError", retriable: true },
+  requests,
 });
 
 const chatTurn = (
@@ -35,68 +56,123 @@ const chatTurn = (
   traceId: "chat-1",
   promptVersion: "1.0.0",
   provider: "anthropic.messages",
-  modelId: "claude",
+  modelId: "claude-sonnet-5",
   steps: 2,
   toolNames: ["query_workouts"],
   status: "complete",
   inputTokens: 500,
   outputTokens: 80,
   latencyMs: 900,
+  requests: [
+    { outcome: "ok", usage: { promptTokens: 200, completionTokens: 30 } },
+    { outcome: "ok", usage: { promptTokens: 300, completionTokens: 50 } },
+  ],
   ...over,
 });
 
 const fakeLogger = () => ({ warn: vi.fn() }) as unknown as Logger;
 
+const rowsAfter = async (...events: AiTelemetryEvent[]) => {
+  const persistence = createInMemoryPersistence();
+  const sink = createDexieUsageTelemetrySink(persistence, fakeLogger());
+  for (const event of events) sink.emit(event);
+  await flush();
+  return persistence.usageEvents.listByMonth(currentMonth());
+};
+
 describe("createDexieUsageTelemetrySink", () => {
-  it("should append an event for a finished run carrying usage", async () => {
+  it("should append an event for a finished run, priced at its model's prices", async () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence);
+    const run = finished();
 
     // Act
-    sink.emit(finished());
-    await flush();
-    const [row] = await persistence.usageEvents.listByMonth(currentMonth());
+    const [row] = await rowsAfter(run);
 
     // Assert
-    expect(row).toMatchObject({ purpose: "lab_extraction", tokens: 420 });
-  });
-
-  it("should not append anything for a failed run", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence);
-
-    // Act
-    sink.emit({
-      type: "run_failed",
-      traceId: "t-1",
-      agentId: "lab-extractor",
-      agentVersion: "1.0.0",
-      promptId: "lab-extractor/system",
-      promptVersion: "1.0.0",
-      provider: "anthropic.messages",
-      modelId: "claude",
+    expect(row).toMatchObject({
       purpose: "lab_extraction",
-      latencyMs: 5,
-      error: { name: "AiAgentError", retriable: true },
+      providerType: "anthropic",
+      modelId: "claude-sonnet-5",
+      tokens: 420,
+      costBasis: "price_table",
     });
-    await flush();
-    const rows = await persistence.usageEvents.listByMonth(currentMonth());
-
-    // Assert
-    expect(rows).toHaveLength(0);
+    expect(row!.cost).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
   });
 
-  it("should not append anything for a finished run without usage", async () => {
+  it("should record a failed run with the usage of every billed attempt", async () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence);
+    const run = failedRun([INVALID, INVALID, INVALID]);
 
     // Act
-    sink.emit(finished({ usage: undefined }));
-    await flush();
-    const rows = await persistence.usageEvents.listByMonth(currentMonth());
+    const [row] = await rowsAfter(run);
+
+    // Assert
+    expect(row).toMatchObject({
+      purpose: "lab_extraction",
+      tokens: 1260,
+      requestCount: 3,
+      failedRequests: 3,
+    });
+  });
+
+  it("should make a run with a failed attempt cost more than the same run without it", async () => {
+    // Arrange
+    const clean = finished({ traceId: "clean", requests: [ATTEMPT] });
+    const retried = finished({
+      traceId: "retried",
+      requests: [INVALID, ATTEMPT],
+    });
+
+    // Act
+    const rows = await rowsAfter(clean, retried);
+    const cost = (requests: number) =>
+      rows.find((r) => r.requestCount === requests)!.cost!;
+
+    // Assert
+    expect(cost(1)).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
+    expect(cost(2)).toBeCloseTo(2 * SONNET_5_ATTEMPT_USD, DIGITS);
+    expect(cost(2)).toBeGreaterThan(cost(1));
+  });
+
+  it("should record a failed attempt with no usage as unmeasured, not as zero", async () => {
+    // Arrange
+    const run = finished({ requests: [{ outcome: "error" }, ATTEMPT] });
+
+    // Act
+    const [row] = await rowsAfter(run);
+
+    // Assert
+    expect(row).toMatchObject({ unmeasuredRequests: 1, tokens: 420 });
+  });
+
+  it("should record the cost as unknown for a model with no price", async () => {
+    // Arrange
+    const run = finished({ provider: "openai.responses", modelId: "o1" });
+
+    // Act
+    const [row] = await rowsAfter(run);
+
+    // Assert
+    expect(row).toMatchObject({ costBasis: "unknown", tokens: 420 });
+  });
+
+  it("should record usage with an unknown cost when the provider is unmapped", async () => {
+    // Arrange
+    const run = finished({ provider: "mystery.model" });
+
+    // Act
+    const [row] = await rowsAfter(run);
+
+    // Assert
+    expect(row).toMatchObject({ costBasis: "unknown", tokens: 420 });
+  });
+
+  it("should not append anything for a run that made no request", async () => {
+    // Arrange
+    const run = finished({ usage: undefined, requests: [] });
+
+    // Act
+    const rows = await rowsAfter(run);
 
     // Assert
     expect(rows).toHaveLength(0);
@@ -127,51 +203,37 @@ describe("createDexieUsageTelemetrySink", () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it("should record usage with zero cost when the provider is unmapped", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence, fakeLogger());
-
-    // Act
-    sink.emit(finished({ provider: "mystery.model" }));
-    await flush();
-    const [row] = await persistence.usageEvents.listByMonth(currentMonth());
-
-    // Assert
-    expect(row).toMatchObject({ cost: 0, tokens: 420 });
-  });
-
   it("should append a chat usage row for a chat turn, stopped turns included", async () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence);
+    const turn = chatTurn({ status: "aborted" });
 
     // Act
-    sink.emit(chatTurn({ status: "aborted" }));
-    await flush();
-    const [row] = await persistence.usageEvents.listByMonth(currentMonth());
+    const [row] = await rowsAfter(turn);
 
     // Assert
     expect(row).toMatchObject({
       purpose: "chat",
       providerType: "anthropic",
-      modelId: "claude",
-      traceId: "chat-1",
+      modelId: "claude-sonnet-5",
       promptTokens: 500,
       completionTokens: 80,
       tokens: 580,
+      requestCount: 2,
     });
+    expect(row).not.toHaveProperty("traceId");
   });
 
-  it("should skip a chat turn that reported no tokens", async () => {
+  it("should skip a chat turn that made no request", async () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const sink = createDexieUsageTelemetrySink(persistence);
+    const turn = chatTurn({
+      status: "error",
+      inputTokens: 0,
+      outputTokens: 0,
+      requests: [],
+    });
 
     // Act
-    sink.emit(chatTurn({ status: "error", inputTokens: 0, outputTokens: 0 }));
-    await flush();
-    const rows = await persistence.usageEvents.listByMonth(currentMonth());
+    const rows = await rowsAfter(turn);
 
     // Assert
     expect(rows).toHaveLength(0);

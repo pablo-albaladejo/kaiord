@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import { estimateCost } from "../cost-estimation";
-import { getProviderRate } from "../provider-rates";
 import { appendUsageEvent } from "./append-usage-event";
 
-const fixedNow = () => new Date("2026-07-10T10:00:00.000Z");
+const fixedNow = () => new Date("2026-11-23T10:00:00.000Z");
 let counter = 0;
 const seqId = () => `evt-${(counter += 1)}`;
+const DIGITS = 10;
+// claude-sonnet-5: $2 input, $10 output per 1M (read 2026-11-23).
+const SONNET_5_120_IN_80_OUT_USD = 0.00104;
+const ok = (usage: { promptTokens: number; completionTokens: number }) => ({
+  outcome: "ok" as const,
+  usage,
+});
 
 describe("appendUsageEvent", () => {
-  it("should append one event with the provider-rate cost formula", async () => {
+  it("should price the run at the model's own input and output prices", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -20,20 +25,28 @@ describe("appendUsageEvent", () => {
       {
         purpose: "chat",
         providerType: "anthropic",
-        promptTokens: 120,
-        completionTokens: 80,
+        modelId: "claude-sonnet-5",
+        requests: [ok({ promptTokens: 120, completionTokens: 80 })],
       },
       fixedNow,
       seqId
     );
-    const rows = await persistence.usageEvents.listByMonth("2026-07");
+    const [row] = await persistence.usageEvents.listByMonth("2026-11");
 
     // Assert
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.cost).toBe(estimateCost(200, getProviderRate("anthropic")));
+
+    // 120*2 + 80*10 = 1040 micro-dollars
+    expect(row?.cost).toBeCloseTo(SONNET_5_120_IN_80_OUT_USD, DIGITS);
+    expect(row).toMatchObject({
+      costBasis: "price_table",
+      priceReadOn: "2026-11-23",
+      requestCount: 1,
+      failedRequests: 0,
+      unmeasuredRequests: 0,
+    });
   });
 
-  it("should derive yearMonth, date, and tokens from the injected clock", async () => {
+  it("should derive yearMonth, date, and tokens from the injected clock and requests", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -43,51 +56,117 @@ describe("appendUsageEvent", () => {
       {
         purpose: "workout_generation",
         providerType: "google",
-        promptTokens: 30,
-        completionTokens: 10,
+        modelId: "gemini-2.5-flash",
+        requests: [ok({ promptTokens: 30, completionTokens: 10 })],
       },
       fixedNow,
       seqId
     );
-    const [row] = await persistence.usageEvents.listByMonth("2026-07");
+    const [row] = await persistence.usageEvents.listByMonth("2026-11");
 
     // Assert
     expect(row).toMatchObject({
-      yearMonth: "2026-07",
-      date: "2026-07-10",
+      yearMonth: "2026-11",
+      date: "2026-11-23",
+      promptTokens: 30,
+      completionTokens: 10,
       tokens: 40,
     });
   });
 
-  it("should record zero cost when the provider type is absent", async () => {
+  it("should record the cost as unknown, not zero, when the provider type is absent", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
     // Act
     await appendUsageEvent(
       persistence,
-      { purpose: "lab_extraction", promptTokens: 100, completionTokens: 20 },
+      {
+        purpose: "lab_extraction",
+        modelId: "claude-sonnet-5",
+        requests: [ok({ promptTokens: 100, completionTokens: 20 })],
+      },
       fixedNow,
       seqId
     );
-    const [row] = await persistence.usageEvents.listByMonth("2026-07");
+    const [row] = await persistence.usageEvents.listByMonth("2026-11");
 
     // Assert
-    expect(row?.cost).toBe(0);
+    expect(row).toMatchObject({ costBasis: "unknown", tokens: 120 });
+    expect(row).not.toHaveProperty("cost");
   });
 
-  it("should skip a zero-token run", async () => {
+  it("should keep cache read and write tokens on the row", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
     // Act
     await appendUsageEvent(
       persistence,
-      { purpose: "chat", promptTokens: 0, completionTokens: 0 },
+      {
+        purpose: "chat",
+        providerType: "anthropic",
+        modelId: "claude-sonnet-5",
+        requests: [
+          {
+            outcome: "ok",
+            usage: {
+              promptTokens: 100,
+              completionTokens: 5,
+              cacheReadTokens: 60,
+              cacheWriteTokens: 30,
+            },
+          },
+        ],
+      },
       fixedNow,
       seqId
     );
-    const rows = await persistence.usageEvents.listByMonth("2026-07");
+    const [row] = await persistence.usageEvents.listByMonth("2026-11");
+
+    // Assert
+    expect(row).toMatchObject({ cacheReadTokens: 60, cacheWriteTokens: 30 });
+  });
+
+  it("should record a run whose only request reported no usage, as unmeasured", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    await appendUsageEvent(
+      persistence,
+      {
+        purpose: "chat",
+        providerType: "anthropic",
+        modelId: "claude-sonnet-5",
+        requests: [{ outcome: "error" }],
+      },
+      fixedNow,
+      seqId
+    );
+    const [row] = await persistence.usageEvents.listByMonth("2026-11");
+
+    // Assert
+    expect(row).toMatchObject({
+      tokens: 0,
+      requestCount: 1,
+      failedRequests: 1,
+      unmeasuredRequests: 1,
+    });
+  });
+
+  it("should skip a run that made no request", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    await appendUsageEvent(
+      persistence,
+      { purpose: "chat", modelId: "claude-sonnet-5", requests: [] },
+      fixedNow,
+      seqId
+    );
+    const rows = await persistence.usageEvents.listByMonth("2026-11");
 
     // Assert
     expect(rows).toHaveLength(0);

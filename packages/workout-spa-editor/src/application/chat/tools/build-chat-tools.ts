@@ -15,12 +15,14 @@ import { createQueryEnergyBalanceTool } from "./query-energy-balance-tool";
 import { createQueryHealthTool } from "./query-health-tool";
 import { createQueryWorkoutsTool } from "./query-workouts-tool";
 import { createSetDataRouteTool } from "./set-data-route-tool";
+import { withholdHealth } from "./withhold-health";
 
 /**
  * Assembles the full chat tool registry for one conversation. Read tools
  * are bound to profile-scoped persistence; action tools are bound to the
- * injected, confirmation-gated operations. Passed straight to
- * `createChatAgent({ tools })`.
+ * injected, confirmation-gated operations. Unless the athlete shares their
+ * health data with this Provider, the health tools read nothing. Passed
+ * straight to `createChatAgent({ tools })`.
  */
 export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
   const read = {
@@ -28,7 +30,7 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     profileId: deps.profileId,
     today: deps.today,
   };
-  return [
+  const tools = [
     createGetTodayTool({ today: deps.today }),
     createQueryWorkoutsTool(read),
     createQueryHealthTool(read),
@@ -45,4 +47,5 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     createPushToGarminTool(deps.actions),
     createSetDataRouteTool(deps.actions),
   ];
+  return withholdHealth(tools, deps.healthShared === true);
 };

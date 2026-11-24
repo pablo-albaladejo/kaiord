@@ -66,11 +66,12 @@ Creates an XSD schema validator for TCX files.
 
 ## Supported TCX Features
 
-- Workout definitions with structured steps
-- Heart rate, speed, and cadence targets
-- Time-based and distance-based durations
-- Repeat blocks (intervals)
-- Multiple sport types
+- Round-trip tested: converting TCX → KRD → TCX keeps every value of a
+  Running, Biking or Other workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm,
+  cadence ±1 rpm, pace ±0.01 m/s).
+- Fields TCX cannot carry: power targets other than a single watt value; a
+  single heart rate, which comes back as a range from that value to itself;
+  heart rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities; a step that ends when heart rate rises above a value, which is skipped.
 
 ## License
 

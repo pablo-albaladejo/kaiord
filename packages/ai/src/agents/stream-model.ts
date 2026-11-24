@@ -1,7 +1,9 @@
 import { streamText } from "ai";
+import type { AiUsage } from "../observability/telemetry-types";
+import { sdkErrorUsage, toUsage, withUsage } from "./attempt-usage";
+import { cutUsage, requestChars, streamedChars } from "./cut-request";
 import {
   callSettings,
-  toUsage,
   validateOutput,
   type CallModelArgs,
   type GenerateOutcome,
@@ -13,8 +15,14 @@ type Streamed = ReturnType<typeof streamText>;
 
 // Reasoning arrives as its own stream parts, before any output: without
 // reading them a run that thinks for a minute looks stalled.
-const watchReasoning = async (result: Streamed, report: ReportPhase) => {
+// Also counts the output streamed so far, for the estimate of a cut attempt.
+const watchReasoning = async (
+  result: Streamed,
+  report: ReportPhase,
+  received: { chars: number }
+) => {
   for await (const part of result.fullStream) {
+    received.chars += streamedChars(part);
     if (part.type === "reasoning-start" || part.type === "reasoning-delta") {
       report("reasoning");
     }
@@ -47,15 +55,34 @@ export const streamModel = async <TOutput>(
   report: ReportPhase
 ): Promise<GenerateOutcome<TOutput>> => {
   let streamError: unknown;
+  // The finished step's usage, captured synchronously: an attempt that fails
+  // after it (truncated, invalid) was billed for it, and reading it here never
+  // waits on a result promise a failed stream may leave unsettled.
+  let billed: AiUsage | undefined;
+  const settings = callSettings(args, feedback);
+  const received = { chars: 0 };
+  // Cut before the final chunk (a Stop, a dropped stream once output began):
+  // billed but unreported, so estimated. An error before any output is an
+  // answer the Provider does not bill, and stays unmeasured.
+  const cut = () =>
+    billed === undefined && (args.signal?.aborted || received.chars > 0)
+      ? cutUsage(
+          requestChars(settings.system, settings.messages),
+          received.chars
+        )
+      : undefined;
   const result = streamText({
-    ...callSettings(args, feedback),
+    ...settings,
+    onStepEnd: (step) => {
+      billed = toUsage(step.usage);
+    },
     onError: ({ error }) => {
       streamError ??= error;
     },
   });
   const settled = async () => {
     await Promise.all([
-      watchReasoning(result, report),
+      watchReasoning(result, report, received),
       watchOutput(result, args, report),
     ]);
     const done = streamError === undefined && !args.signal?.aborted;
@@ -66,11 +93,22 @@ export const streamModel = async <TOutput>(
     return Promise.all([result.output, result.usage]);
   };
   const [raw, usage] = await settled().catch((e: unknown) => {
-    throw streamError ?? toOutputError(e);
+    const reported = billed ?? sdkErrorUsage(e);
+    const estimate = reported ? undefined : cut();
+    throw withUsage(
+      streamError ?? toOutputError(e),
+      reported ?? estimate,
+      estimate !== undefined
+    );
   });
-  if (streamError !== undefined) throw streamError;
-  return {
-    output: validateOutput(args.definition, raw),
-    usage: toUsage(usage),
-  };
+  if (streamError !== undefined)
+    throw withUsage(streamError, billed ?? cut(), billed === undefined);
+  try {
+    return {
+      output: validateOutput(args.definition, raw),
+      usage: toUsage(usage),
+    };
+  } catch (error) {
+    throw withUsage(error, billed ?? toUsage(usage));
+  }
 };

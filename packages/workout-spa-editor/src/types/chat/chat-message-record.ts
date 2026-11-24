@@ -44,4 +44,13 @@ export type ChatMessageRecord = {
    * to the model appends a fixed marker (see `recordsToModelMessages`).
    */
   stopReason?: ChatStopReason;
+  /**
+   * On an assistant reply: whether its turn ran a tool that reads stored
+   * health data (stopped or not), so it may quote it. Every new reply stores
+   * it, `false` included; absent (a reply stored or synced by an older build)
+   * means unknown and counts as true. A replay to a Provider the athlete does
+   * not share health data with leaves out every reply from the first one that
+   * may quote it.
+   */
+  readHealth?: boolean;
 };

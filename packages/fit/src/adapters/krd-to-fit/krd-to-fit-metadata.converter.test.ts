@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { convertMetadataToFileId } from "./krd-to-fit-metadata.converter";
 
+const HRM_FIT_SINGLE_BYTE_PRODUCT_ID = 22;
+
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
   info: vi.fn(),
@@ -128,6 +130,30 @@ describe("convertMetadataToFileId - NaN validation", () => {
 
     // Assert
     expect(result.product).toBe(validProduct);
+  });
+
+  it("should write a Garmin product name as its FIT product number", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const krd: KRD = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: {
+        created: faker.date.recent().toISOString(),
+        sport: "cycling",
+        manufacturer: "dynastream",
+        product: "hrmFitSingleByteProductId",
+      },
+      extensions: {
+        structured_workout: { name: "W", sport: "cycling", steps: [] },
+      },
+    };
+
+    // Act
+    const result = convertMetadataToFileId(krd, logger);
+
+    // Assert
+    expect(result.product).toBe(HRM_FIT_SINGLE_BYTE_PRODUCT_ID);
   });
 
   it("should handle empty string serialNumber", () => {

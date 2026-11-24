@@ -60,13 +60,13 @@ Creates a FIT file writer using the Garmin FIT SDK.
 
 ## Supported FIT Features
 
-- Workout files (structured workout steps)
-- Activity files (recorded activity data)
-- Course files (GPS routes)
-- Lap messages
-- Record messages (time-series data)
-- Event messages
-- Session/activity metadata
+- Reads FIT workout, activity and health files into KRD, and writes FIT
+  workouts.
+- Round-trip tested: converting FIT → KRD → FIT keeps every value of a
+  workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm,
+  cadence ±1 rpm, pace ±0.01 m/s), for every duration, target,
+  intensity and sport.
+- Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string; the name of a repeat step; a custom heart-rate range given as a share of maximum, which is read as bpm.
 
 ## License
 

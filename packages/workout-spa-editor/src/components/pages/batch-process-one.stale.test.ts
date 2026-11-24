@@ -47,7 +47,9 @@ describe("createProcessOne with a row changed during the AI call", () => {
         { workoutId: "w", targetDay: THU }
       );
     });
-    const processOne = createProcessOne(PROVIDER, "m", persistence);
+    const processOne = createProcessOne(PROVIDER, "m", persistence, {
+      deps: { persistence, usage: { emit: () => undefined } },
+    });
 
     // Act
     const result = await processOne(snapshot!, false);
@@ -70,7 +72,9 @@ describe("createProcessOne with a row changed during the AI call", () => {
       await persistence.workouts.put({ ...snapshot!, state: "skipped" });
     });
     const put = vi.spyOn(persistence.workouts, "put");
-    const processOne = createProcessOne(PROVIDER, "m", persistence);
+    const processOne = createProcessOne(PROVIDER, "m", persistence, {
+      deps: { persistence, usage: { emit: () => undefined } },
+    });
 
     // Act
     const result = await processOne(snapshot!, false);

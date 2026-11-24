@@ -61,13 +61,13 @@ export const SINKS = [
     tool: "query_health",
     status: "clean",
     provenance:
-      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; sleep and stress startTime/endTime only as a local HH:MM clock derived from the instant in health-clock.ts; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded",
+      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; sleep and stress startTime/endTime only as a local HH:MM clock derived from the instant in health-clock.ts; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded. When the athlete does not share health data with the Provider, withhold-health.ts answers the app literal HEALTH_WITHHELD instead",
   },
   {
     tool: "query_energy_balance",
     status: "clean",
     provenance:
-      "EnergyTargetRecord is .strict() with no free-text field; capReason is one of three app literals",
+      "EnergyTargetRecord is .strict() with no free-text field; capReason is one of three app literals. When the athlete does not share health data with the Provider, withhold-health.ts answers the app literal HEALTH_WITHHELD instead",
   },
   {
     tool: "get_data_routes",
@@ -85,7 +85,7 @@ export const SINKS = [
     tool: "create_workout",
     status: "clean",
     provenance:
-      "returns ids the app generated; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
+      "returns ids the app generated; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text. A description refused because the athlete keeps health data from the generation Provider answers health-withheld.ts's app-authored literal, whose only variable is the Provider's fixed name.",
   },
   {
     tool: "log_health_metric",

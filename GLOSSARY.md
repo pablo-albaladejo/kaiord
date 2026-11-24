@@ -121,4 +121,5 @@ _Avoid_: Skill, plugin, function
 
 **Trace**:
 The record the Kaiord App keeps, on the athlete's device, of what a run of the assistant did: what, when, with what result and at what cost.
-_Avoid_: Log, usage event, telemetry
+The athlete reads "Trace" in English and "Traza" in Spanish.
+_Avoid_: Log, usage event, telemetry, "registro"

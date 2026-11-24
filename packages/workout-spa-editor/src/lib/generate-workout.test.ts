@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { startTraceRun } from "../application/trace/trace-run";
+import { createInMemoryTraceRepository } from "../test-utils/in-memory-trace-repository";
+
 const mockTextToWorkout = vi.fn();
 
 vi.mock("@kaiord/ai", () => ({
@@ -13,13 +16,16 @@ vi.mock("@kaiord/core", () => ({
   })),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
 const mockSink = { emit: vi.fn() };
 
 const mockPersistence = {
+  traces: createInMemoryTraceRepository(),
   profiles: {
     getActiveId: vi.fn(),
     getById: vi.fn(),
@@ -27,19 +33,10 @@ const mockPersistence = {
   aiProviders: { getCustomPrompt: vi.fn() },
 };
 
-vi.mock("../adapters/dexie/dexie-persistence-adapter", () => ({
-  createDexiePersistence: vi.fn(() => mockPersistence),
-}));
-
-vi.mock("../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
-  createDexieUsageTelemetrySink: vi.fn(() => mockSink),
-}));
-
 import { createTextToWorkout } from "@kaiord/ai";
 import { createLanguageModel } from "@kaiord/ai/providers";
 import { createWorkoutKRD } from "@kaiord/core";
 
-import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { Profile } from "../types/profile";
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
@@ -79,6 +76,7 @@ const sentOptions = (): SentOptions =>
   mockTextToWorkout.mock.calls[0]![1] as SentOptions;
 
 const baseOptions: GenerateWorkoutOptions = {
+  deps: { persistence: mockPersistence as never, usage: mockSink },
   text: "30 minute endurance ride",
   modelId: "claude-sonnet-4-5-20241022",
   provider: {
@@ -124,10 +122,10 @@ describe("generateWorkoutKrd", () => {
     );
   });
 
-  it("should build and forward a default usage-telemetry sink so the run is accounted", async () => {
+  it("should leave one Trace of its own and forward usage without its id", async () => {
     // Arrange
-    const event = { type: "run_finished" } as never;
-    const debug = vi.spyOn(console, "debug").mockImplementation(() => {});
+    await mockPersistence.traces.clear();
+    const event = { type: "run_finished", requests: [] } as never;
     await generateWorkoutKrd(baseOptions);
     const [[config]] = vi.mocked(createTextToWorkout).mock.calls as unknown as [
       [{ telemetry: { emit: (e: never) => void } }],
@@ -135,25 +133,44 @@ describe("generateWorkoutKrd", () => {
 
     // Act
     config.telemetry.emit(event);
+    const traces = await mockPersistence.traces.list();
 
     // Assert
-    expect(createDexieUsageTelemetrySink).toHaveBeenCalled();
+    expect(traces).toHaveLength(1);
+    expect(traces[0]).toMatchObject({ feature: "generation", outcome: "ok" });
+    expect(traces[0]?.sent).toEqual([
+      { to: "anthropic", kinds: ["workoutDescription"] },
+    ]);
     expect(mockSink.emit).toHaveBeenCalledWith(event);
-    expect(debug).toHaveBeenCalledOnce();
-    debug.mockRestore();
   });
 
-  it("should prefer an explicitly supplied telemetry sink over the default", async () => {
+  it("should report into the run it is given and leave no Trace of its own", async () => {
     // Arrange
-    const explicit = { emit: vi.fn() };
+    await mockPersistence.traces.clear();
+    const trace = startTraceRun({
+      feature: "batch",
+      traces: mockPersistence.traces,
+    });
 
     // Act
-    await generateWorkoutKrd({ ...baseOptions, telemetry: explicit });
+    await generateWorkoutKrd({ ...baseOptions, trace });
 
     // Assert
-    expect(createTextToWorkout).toHaveBeenCalledWith(
-      expect.objectContaining({ telemetry: explicit })
-    );
+    expect(await mockPersistence.traces.list()).toHaveLength(0);
+  });
+
+  it("should record a failed run in its Trace and still throw", async () => {
+    // Arrange
+    await mockPersistence.traces.clear();
+    mockTextToWorkout.mockRejectedValueOnce(new Error("provider down"));
+
+    // Act
+    const run = generateWorkoutKrd(baseOptions);
+
+    // Assert
+    await expect(run).rejects.toThrow("provider down");
+    const [trace] = await mockPersistence.traces.list();
+    expect(trace?.outcome).toBe("failed");
   });
 
   it("should pass user text as prompt", async () => {

@@ -6,6 +6,7 @@ import { mapLengthUnitToKrd } from "../length-unit/length-unit.mapper";
 import { mapSportType } from "../shared/type-guards";
 import type { FitWorkoutMessage, FitWorkoutStep } from "../shared/types";
 import { mapSubSportToKrd } from "../sub-sport/sub-sport.mapper";
+import { dropAttachedWorkoutNotes } from "./attached-notes.converter";
 import {
   buildWorkoutSteps,
   findRepetitionStepIndices,
@@ -21,10 +22,15 @@ export const mapWorkout = (
   });
 
   const repetitionStepIndices = findRepetitionStepIndices(workoutSteps);
-  const steps = buildWorkoutSteps(workoutSteps, repetitionStepIndices, logger);
+  const notes = workoutMsg?.wktDescription;
+  const steps = dropAttachedWorkoutNotes(
+    buildWorkoutSteps(workoutSteps, repetitionStepIndices, logger),
+    notes
+  );
 
   const workout: Workout = {
     name: workoutMsg?.wktName,
+    ...(notes ? { notes } : {}),
     sport: mapSportType(workoutMsg?.sport),
     steps,
   };

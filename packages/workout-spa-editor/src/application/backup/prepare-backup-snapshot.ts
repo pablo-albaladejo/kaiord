@@ -14,6 +14,7 @@
 import type { KaiordBackup } from "../../types/backup";
 import type { Snapshot } from "../../types/snapshot";
 import { isAutoProfile } from "../profile/helpers/claim-profile";
+import { withoutDeviceLocal } from "../sync/device-local-tables";
 import { dropDeletedProfileRows } from "../sync/drop-deleted-profile-rows";
 import { mergeSnapshots } from "../sync/merge-snapshots";
 import {
@@ -31,11 +32,12 @@ const ACTIVE = "activeProfileId";
 const rowsOf = (s: Snapshot, table: string): Row[] =>
   (s.tables[table] ?? []) as Row[];
 
-export const backupSnapshot = (backup: KaiordBackup): Snapshot => ({
-  manifest: backup.manifest,
-  tables: applyBackupTablePolicy(backup.tables),
-  tombstones: backup.tombstones,
-});
+export const backupSnapshot = (backup: KaiordBackup): Snapshot =>
+  withoutDeviceLocal({
+    manifest: backup.manifest,
+    tables: applyBackupTablePolicy(backup.tables),
+    tombstones: backup.tombstones,
+  });
 
 const keepLocalMeta = (merged: Snapshot, local: Snapshot): Snapshot => ({
   ...merged,

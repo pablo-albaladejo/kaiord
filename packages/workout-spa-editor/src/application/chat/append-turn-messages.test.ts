@@ -23,6 +23,7 @@ const result = (over: Partial<TextResult> = {}): TextResult =>
     status: "complete",
     text: "Here is your plan.",
     messages: [],
+    toolNames: [],
     ...over,
   }) as TextResult;
 
@@ -128,5 +129,49 @@ describe("appendAssistantTurn", () => {
 
     // Assert
     expect(row?.stopReason).toBeUndefined();
+  });
+
+  describe("appendAssistantTurn and health data", () => {
+    it("should mark a reply whose turn ran a health-reading tool", async () => {
+      // Arrange
+      const messages = [
+        { role: "user", content: "How did I sleep?" },
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "t1",
+              toolName: "query_health",
+              input: { metric: "sleep" },
+            },
+          ],
+        },
+      ];
+
+      // Act
+      const health = await persisted(result({ messages } as never));
+      const plain = await persisted(result());
+
+      // Assert
+      expect(health?.readHealth).toBe(true);
+      expect(plain?.readHealth).toBe(false);
+    });
+
+    it("should mark a reply stopped after a health read, though the stop dropped the tool call", async () => {
+      // Arrange
+      const stopped = result({
+        status: "aborted",
+        text: "Your HRV was 48 ms and",
+        messages: [{ role: "assistant", content: "Your HRV was 48 ms and" }],
+        toolNames: ["get_today", "query_health"],
+      });
+
+      // Act
+      const row = await persisted(stopped);
+
+      // Assert
+      expect(row).toMatchObject({ stopReason: "aborted", readHealth: true });
+    });
   });
 });

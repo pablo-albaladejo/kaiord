@@ -5,22 +5,22 @@ import {
   DESCRIPTION_LEN_10,
   DESCRIPTION_LEN_300,
   DESCRIPTION_LEN_600,
-  EXPECTED_COST_USD_3,
-  EXPECTED_COST_USD_FRACTIONAL,
   EXPECTED_TOKENS_300_CHARS,
   EXPECTED_TOKENS_300_PLUS_150,
   EXPECTED_TOKENS_900_CHARS,
   EXPECTED_TOKENS_BASELINE_PLUS_10,
   EXPECTED_TOKENS_ZERO,
-  ONE_MILLION_TOKENS,
-  RATE_USD_PER_MTOK_3,
-  RATE_USD_PER_MTOK_5,
-  RATE_USD_PER_MTOK_10,
-  TOKENS_500,
-  TOKENS_ZERO,
 } from "../test-utils/application-fixtures";
-import { estimateCost, estimateTokens } from "./cost-estimation";
+import { estimateWorkoutRequests } from "./cost-estimation";
 import { makeWorkoutRecord } from "./test-helpers";
+
+const estimateTokens = (
+  workouts: Parameters<typeof estimateWorkoutRequests>[0]
+) =>
+  estimateWorkoutRequests(workouts, 0).reduce(
+    (sum, r) => sum + r.input + r.output,
+    0
+  );
 
 describe("estimateTokens", () => {
   it("should estimate tokens from description length", () => {
@@ -136,34 +136,32 @@ describe("estimateTokens", () => {
   });
 });
 
-describe("estimateCost", () => {
-  it("should calculate cost at given rate per million", () => {
+describe("estimateWorkoutRequests", () => {
+  it("should estimate each workout as its own request, the system prompt included", () => {
     // Arrange
+    const raw = (description: string) => ({
+      title: "Run",
+      description,
+      comments: [],
+      distance: null,
+      duration: null,
+      prescribedRpe: null,
+      rawHash: "h",
+    });
+    const workouts = [
+      makeWorkoutRecord({ raw: raw("A".repeat(DESCRIPTION_LEN_300)) }),
+      makeWorkoutRecord({ raw: raw("B".repeat(DESCRIPTION_LEN_600)) }),
+    ];
+    const systemChars = 3000;
 
     // Act
-    const result = estimateCost(ONE_MILLION_TOKENS, RATE_USD_PER_MTOK_3);
+    const requests = estimateWorkoutRequests(workouts, systemChars);
 
     // Assert
-    expect(result).toBe(EXPECTED_COST_USD_3);
-  });
-
-  it("should calculate fractional cost", () => {
-    // Arrange
-
-    // Act
-    const result = estimateCost(TOKENS_500, RATE_USD_PER_MTOK_10);
-
-    // Assert
-    expect(result).toBeCloseTo(EXPECTED_COST_USD_FRACTIONAL);
-  });
-
-  it("should return zero for zero tokens", () => {
-    // Arrange
-
-    // Act
-    const result = estimateCost(TOKENS_ZERO, RATE_USD_PER_MTOK_5);
-
-    // Assert
-    expect(result).toBe(EXPECTED_TOKENS_ZERO);
+    // (3000 + 300) / 3 and (3000 + 600) / 3 of input, 500 of output each
+    expect(requests).toEqual([
+      { input: 1100, output: 500 },
+      { input: 1200, output: 500 },
+    ]);
   });
 });

@@ -42,6 +42,7 @@ export const emitChatTurn = (
     inputTokens: metrics?.usage?.promptTokens ?? 0,
     outputTokens: metrics?.usage?.completionTokens ?? 0,
     latencyMs: Date.now() - trace.startedAt,
+    requests: metrics?.requests ?? [],
   };
   emitBestEffort(sink, event, logger);
 };

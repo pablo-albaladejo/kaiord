@@ -3,8 +3,8 @@
  *
  * IndexedDB-backed implementation of UsageEventRepository. Append-only log;
  * month reads range-scan the `[yearMonth+purpose]` compound index. `delete(id)`
- * removes a single event by uuid (the tombstone decorator wraps it so a pruned
- * event's removal propagates cross-device).
+ * removes a single event by uuid for the retention prune. The log stays on this
+ * device, so no tombstone is written.
  */
 
 import type { UsageEventRepository } from "../../ports/simple-repositories";

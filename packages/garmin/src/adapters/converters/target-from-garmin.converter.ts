@@ -20,6 +20,7 @@ export const convertGarminTargetToKrd = (
     case "speed.zone":
       return mapRangeOnly("pace", valueOne, valueTwo);
     case "cadence":
+    case "cadence.zone":
       return mapRangeOnly("cadence", valueOne, valueTwo);
     case "no.target":
     default:

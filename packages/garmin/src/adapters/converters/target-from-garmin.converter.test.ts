@@ -176,3 +176,24 @@ describe("single-value power, heart-rate and cadence round-trip", () => {
     }
   );
 });
+
+describe("cadence.zone", () => {
+  it("should read a cadence.zone target as the cadence range it holds", () => {
+    // Arrange
+    const zone = { key: "cadence.zone", low: 85, high: 95 };
+
+    // Act
+    const result = convertGarminTargetToKrd(
+      zone.key,
+      zone.low,
+      zone.high,
+      null
+    );
+
+    // Assert
+    expect(result).toStrictEqual({
+      targetType: "cadence",
+      target: { type: "cadence", value: { unit: "range", min: 85, max: 95 } },
+    });
+  });
+});

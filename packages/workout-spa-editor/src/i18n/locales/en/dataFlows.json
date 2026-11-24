@@ -1,0 +1,84 @@
+{
+  "kinds": {
+    "sleep": "sleep",
+    "restingHeartRate": "resting heart rate",
+    "weight": "weight",
+    "hrv": "HRV",
+    "dailyActivity": "steps and daily calories",
+    "bodyComposition": "body composition",
+    "stress": "stress",
+    "meals": "the meals you log",
+    "energyBalance": "energy balance and goal",
+    "heartRateZones": "heart-rate threshold and zones",
+    "labResults": "lab results",
+    "messages": "your messages",
+    "workouts": "workouts",
+    "coachingPlan": "your coach's plan and comments",
+    "dataSources": "which source feeds each kind of data",
+    "workoutDescription": "the workout you describe",
+    "aiInstructions": "your instructions for the AI",
+    "powerPaceZones": "power and pace zones",
+    "providerKey": "the key",
+    "intervalsKey": "the API key",
+    "readRequests": "requests for the data Kaiord reads",
+    "syncSnapshot": "a copy of your data in this browser, AI keys included",
+    "pageViews": "page views",
+    "productEvents": "product events, never your data"
+  },
+  "flows": {
+    "assistant": "While you chat with the assistant, what it reads to answer you",
+    "generation": "When you generate a workout with AI",
+    "assistantWorkout": "When the assistant creates a workout after reading your health data",
+    "labImport": "When you read a lab document with AI",
+    "providerKeyCheck": "When you save a key, to check it",
+    "garminWorkouts": "When you send a workout to Garmin Connect",
+    "garminBody": "When you send a body-composition measurement to Garmin Connect",
+    "trainingpeaksWorkouts": "When you send a workout to TrainingPeaks",
+    "platformReads": "When Kaiord reads your data there",
+    "intervalsKeyCheck": "When you save your API key, to check it",
+    "driveSync": "While cross-device sync is on",
+    "analytics": "On every page"
+  },
+  "groups": {
+    "provider": "AI providers",
+    "platform": "Platforms, through their extensions",
+    "service": "Services you connect",
+    "analytics": "Analytics"
+  },
+  "notice": {
+    "title": "Send your health data to {{provider}}?",
+    "assistant": "To answer you, the assistant can read this health data and send it to {{provider}}: {{kinds}}.",
+    "generation": "To generate this workout, Kaiord sends this health data to {{provider}}: {{kinds}}.",
+    "assistantWorkout": "The assistant wrote this workout's description after reading your health data, so it may quote it. To create the workout, Kaiord sends the description to {{provider}}, and it may hold: {{kinds}}.",
+    "labImport": "To read this document, Kaiord sends this health data to {{provider}}: {{kinds}}.",
+    "terms": "It goes from your browser straight to {{provider}}, which handles it under its own terms. Kaiord never receives it.",
+    "once": "Send this time",
+    "onceResult": "Kaiord asks again next time.",
+    "always": "Always allow {{provider}}",
+    "alwaysResult": "From now on {{provider}} can receive, without asking: {{kinds}}.",
+    "never": "Don't send",
+    "neverResult": {
+      "assistant": "The assistant answers without your health data.",
+      "generation": "The workout is generated without your heart-rate threshold and zones.",
+      "labImport": "The document is not sent; you can enter the results by hand.",
+      "assistantWorkout": "The workout is not created."
+    },
+    "neverStays": "Kaiord won't ask again for {{provider}}.",
+    "changeLater": "You can change this in Settings, Privacy."
+  },
+  "inventory": {
+    "title": "Where your data goes",
+    "intro": "Your data stays in this browser except what is listed here: each destination, what it can receive and when.",
+    "active": "Active",
+    "notSetUp": "Not set up",
+    "healthLabel": "Health data to {{provider}}",
+    "healthAsk": "Ask first",
+    "healthAlways": "Always send",
+    "healthNever": "Don't send"
+  },
+  "kept": {
+    "title": "Kept on this device",
+    "traces": "Traces: what each run of the assistant did, when, with what result and at what cost. They never leave this browser: not to an AI provider, not to Drive sync, not in a backup. The newest 200 are kept, none older than 90 days.",
+    "usageEvents": "Usage log: for each run of the assistant, when, for which feature, with which provider and model, how many tokens and requests and at what cost, for the usage in Settings, AI. It never leaves this browser: not to an AI provider, not to Drive sync, not in a backup, so each device shows its own usage. Runs older than 12 months are removed."
+  }
+}

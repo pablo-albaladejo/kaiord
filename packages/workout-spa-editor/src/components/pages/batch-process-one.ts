@@ -11,29 +11,53 @@ import type {
   ProcessOneOutcome,
 } from "../../application/batch-processor";
 import { updateWorkoutRecord } from "../../application/save-workout-edits";
+import type { TraceRun } from "../../application/trace/trace-run";
 import { transitionToStructured } from "../../application/workout-transitions";
-import { generateWorkoutKrd } from "../../lib/generate-workout";
+import {
+  generateWorkoutKrd,
+  type GenerationDeps,
+} from "../../lib/generate-workout";
+import { askGenerationHealth, askOnce } from "../../lib/health-sharing-gate";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
+export type BatchRunDeps = {
+  deps: GenerationDeps;
+  trace?: TraceRun;
+  /** Cancels the batch, and its heart-rate question while it waits. */
+  signal?: AbortSignal;
+};
+
 export function createProcessOne(
   provider: LlmProviderConfig,
   modelId: string,
-  persistence: Pick<PersistencePort, "workouts" | "transaction">
+  persistence: Pick<PersistencePort, "workouts" | "transaction">,
+  { deps, trace, signal }: BatchRunDeps
 ): ProcessOneFn {
+  // One question for the whole batch, asked when heart-rate data would first go.
+  const askHealth = askOnce(() =>
+    askGenerationHealth(provider.type, {
+      signal,
+      onWait: () => void trace?.checkpoint(),
+    })
+  );
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
   ): Promise<ProcessOneOutcome> => {
-    // Usage telemetry, the athlete's zones and their custom AI instructions
-    // all come from `generateWorkoutKrd`'s app-db defaults.
+    // Usage, the athlete's zones and their custom AI instructions come from
+    // `generateWorkoutKrd`'s app-db defaults; every generation joins the
+    // batch's one Trace.
     const generateFn = (prompt: string, sport: string) =>
       generateWorkoutKrd({
+        deps,
         text: prompt,
         provider,
         modelId,
         profileId: workout.profileId,
+        askHealth,
+        trace,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
       });
 
