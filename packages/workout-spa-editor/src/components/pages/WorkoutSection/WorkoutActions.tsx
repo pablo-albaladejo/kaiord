@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
+import { CapabilityGate } from "../../atoms/CapabilityGate/CapabilityGate";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
 import { useDiscardConfirmation } from "./use-discard-confirmation";
@@ -35,7 +36,9 @@ export function WorkoutActions({
   const label = editDiscard ? t("edits.discardAction") : t("actions.discard");
   return (
     <div className="flex flex-wrap items-center gap-2.5">
-      <SaveToLibraryButton workout={krd} />
+      <CapabilityGate surface="workout-save-as-template">
+        <SaveToLibraryButton workout={krd} />
+      </CapabilityGate>
       <SaveButton workout={krd} ownerProfileId={ownerProfileId} />
       <span className="hidden flex-1 sm:block" />
       <Button

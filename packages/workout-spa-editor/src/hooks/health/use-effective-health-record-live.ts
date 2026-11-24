@@ -3,9 +3,9 @@
  * (F3.2) effective record for (profileId, dataType, day).
  *
  * Backed by the real import-policy repo (reconciliation invariant) and the
- * real Dexie-backed `dataTypeSourcePolicy` companion table (F3.1): an
- * absent row resolves as the "union" default, i.e. "nobody has set a
- * multi-source preference yet".
+ * real Dexie-backed `dataTypeSourcePolicy` companion table (F3.1), honoured
+ * while the matrix Capability is not off (`userPreferences`); otherwise the
+ * automatic Authority decides.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -29,6 +29,7 @@ export function useEffectiveHealthRecordLive<T>(
         {
           sourcePolicyRepo: persistence.dataTypeSourcePolicy,
           policyRepo: persistence.integrationPolicy,
+          capabilityDecisions: persistence.capabilityDecisions,
           getRecordsForDay: (input) =>
             getHealthRecordsForDay<T>(persistence, input),
         },

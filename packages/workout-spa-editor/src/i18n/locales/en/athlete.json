@@ -44,8 +44,8 @@
     "keep": "Keep {{value}}"
   },
   "autoImport": {
-    "title": "Let a connected source update these numbers",
-    "hint": "Off means nothing overwrites a number you typed yourself."
+    "title": "Bring in new numbers from a connected Platform by itself",
+    "hint": "Numbers you set yourself are always kept."
   },
   "connections": {
     "title": "Connections",

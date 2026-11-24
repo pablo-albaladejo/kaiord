@@ -5,21 +5,23 @@ import { DATA_TYPE_GROUPS } from "../../../application/connections/data-type-gro
 import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useDataTypeRouting } from "../../../hooks/connections/use-data-type-routing";
 import { useTranslate } from "../../../i18n/use-translate";
+import { AuthorityMatrixLink } from "./AuthorityMatrixLink";
 import { DataTypeRoutingGroup } from "./DataTypeRoutingGroup";
 
 type Props = { profileId: string; byDataType: DataFlowsByType };
 
 /**
- * Rows report what the stored policies already decide, and — where the row has
- * a decision to make — offer the source of truth to be changed. The section
- * still claims nothing about fallbacks: `usedFallback` is priority-mode only,
- * is per-(type, day), and means "no record that day" rather than "this source
- * broke".
+ * Rows report which source decides each type (the App's rule, or the
+ * athlete's choice while the Authority matrix is on) and let each source be
+ * switched on or off. Choosing which one decides lives only in the matrix,
+ * reached from the link below while it is on.
  */
 export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
   const t = useTranslate("connections");
-  const { rows, lastSyncedAt, options, toggles, exportToggles } =
-    useDataTypeRouting(profileId, byDataType);
+  const { rows, lastSyncedAt, toggles, exportToggles } = useDataTypeRouting(
+    profileId,
+    byDataType
+  );
   const byType = useMemo(
     () =>
       new Map<ManagedDataType, (typeof rows)[number]>(
@@ -46,12 +48,12 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
             profileId={profileId}
             byType={byType}
             lastSyncedAt={lastSyncedAt}
-            options={options}
             toggles={toggles}
             exportToggles={exportToggles}
           />
         ))}
       </div>
+      <AuthorityMatrixLink />
     </section>
   );
 }

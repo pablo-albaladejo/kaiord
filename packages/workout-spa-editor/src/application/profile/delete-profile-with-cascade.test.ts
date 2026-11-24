@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { createInMemoryAiModelBindingRepository } from "../../test-utils/in-memory-ai-model-binding-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
+import { createInMemoryCapabilityDecisionRepository } from "../../test-utils/in-memory-capability-decision-repository";
 import { createInMemoryChatConversationRepository } from "../../test-utils/in-memory-chat-conversation-repository";
 import { createInMemoryChatMessageRepository } from "../../test-utils/in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
@@ -81,6 +82,9 @@ const makeDeps = (
     createInMemoryAutoMatchDismissalRepository(),
   userPreferences:
     overrides.userPreferences ?? createInMemoryUserPreferencesRepository(),
+  capabilityDecisions:
+    overrides.capabilityDecisions ??
+    createInMemoryCapabilityDecisionRepository(),
   healthCleanup: overrides.healthCleanup ?? {
     // No in-memory health data exists yet; the cascade still calls
     // this so the future per-metric repositories pick it up.
@@ -330,6 +334,26 @@ describe("deleteProfileWithCascade", () => {
     // Assert
     expect(await deps.userPreferences.get("p1")).toBeUndefined();
     expect(await deps.userPreferences.get("p2")).toBeDefined();
+  });
+
+  it("should cascade the Capability decisions of the deleted profile only", async () => {
+    // Arrange
+    const deps = makeDeps();
+    for (const profileId of ["p1", "p2"]) {
+      await deps.capabilityDecisions.put({
+        profileId,
+        capabilityId: "templates",
+        on: true,
+        updatedAt: NOW,
+      });
+    }
+
+    // Act
+    await deleteProfileWithCascade(deps, "p1");
+
+    // Assert
+    expect(await deps.capabilityDecisions.listByProfile("p1")).toEqual([]);
+    expect(await deps.capabilityDecisions.listByProfile("p2")).toHaveLength(1);
   });
 
   it("should cascade both lab stores for the deleted profile only", async () => {

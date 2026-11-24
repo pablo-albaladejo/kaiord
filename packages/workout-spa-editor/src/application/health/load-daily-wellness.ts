@@ -5,12 +5,15 @@
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { HealthDailyRecord } from "../../types/health/health-records";
-import { loadPriorityReadPolicy } from "../data-source-policy/effective-source-order";
+import { loadPriorityReadPolicy } from "../data-source-policy/authority-in-force";
 import { mergeDailyWellnessByDay } from "./merge-daily-wellness";
 
 export type DailyWellnessReadDeps = Pick<
   PersistencePort,
-  "healthDaily" | "dataTypeSourcePolicy" | "integrationPolicy"
+  | "healthDaily"
+  | "dataTypeSourcePolicy"
+  | "integrationPolicy"
+  | "capabilityDecisions"
 >;
 
 export const loadDailyWellness = async (
@@ -28,6 +31,7 @@ export const loadDailyWellness = async (
       {
         sourcePolicyRepo: deps.dataTypeSourcePolicy,
         policyRepo: deps.integrationPolicy,
+        capabilityDecisions: deps.capabilityDecisions,
       },
       { profileId, dataType: "daily-wellness" }
     ),

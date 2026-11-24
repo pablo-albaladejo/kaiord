@@ -3,8 +3,15 @@
  * flows from `openspec/changes/archive/2026-05-03-train2go-zones-sync/`:
  *
  *   (a) toggle-off-link        → manual sync MUST NOT issue `read-details`
- *   (b) toggle-on, empty       → silent fills, no conflict dialog
- *   (c) toggle-on, manual FTP  → conflict dialog opens with the diff
+ *   (b) toggle-on, empty       → silent fills, nothing offered
+ *   (c) toggle-on, manual FTP  → nothing asks: the athlete's FTP stays, and
+ *                                one notice naming the thresholds offers
+ *                                "Use Train2Go's"; using it says what changed
+ *   (e) own weigh-in today     → the weight is never offered: Train2Go's is
+ *                                stored as its own weigh-in and the Athlete
+ *                                page still reads the athlete's
+ *   (f) notice gone            → the offer stays on the Athlete page, after a
+ *                                reload, until it is used
  *
  * Closes #478. Bridge stub at `helpers/train2go-bridge-stub.ts` paves over
  * the missing Chrome extension (Playwright Chromium runs unloaded), so the
@@ -26,7 +33,7 @@ const NOW_ISO = "2026-04-28T10:00:00.000Z";
 
 // Fixture-derived zone values from FIXTURE_ZONES_PAYLOAD (see
 // helpers/train2go-bridge-stub.ts). Hoisted to named constants so the
-// e2e assertions self-document which threshold the dialog and Dexie
+// e2e assertions self-document which threshold the notice and Dexie
 // row are expected to expose after a successful sync.
 const FIXTURE_CYCLING_FTP = 268;
 const FIXTURE_CYCLING_LTHR_BPM = 174;
@@ -37,6 +44,11 @@ const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
 const MANUAL_HR_BAND_ZONE = 4;
 const STABILITY_REREAD_TICK_MS = 50;
 const ORCHESTRATOR_PUT_SETTLE_MS = 150;
+const OWN_WEIGHT_KG = 75;
+const KEPT_THRESHOLDS =
+  "Train2Go has different thresholds from the ones you set. Kaiord kept yours.";
+// Long enough for a manual re-sync to read Train2Go and return its conflicts.
+const RESYNC_SETTLE_MS = 600;
 // The first bridge action (read-week) only fires once bridge discovery has
 // resolved. On a cold CI runner the SPA's discovery machinery can lag: the
 // self-healing KAIORD_BRIDGE_DISCOVER handshake is emitted 3 s after
@@ -290,8 +302,8 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       { timeout: 10_000 }
     );
 
-    // Assert: dialog NOT visible (no conflicts → orchestrator stays idle).
-    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    // Assert: nothing offered (no conflicts → orchestrator stays idle).
+    await expect(page.getByTestId("zones-use-theirs")).toHaveCount(0);
 
     // Assert: the persisted profile got every fixture-derived value.
     const profile = await page.evaluate(async (id) => {
@@ -381,11 +393,11 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     );
 
     // Assert
-    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    await expect(page.getByTestId("zones-use-theirs")).toHaveCount(0);
     expect(await readWeighIns(page)).toEqual([]);
   });
 
-  test("(c) toggle-on with manual FTP — conflict dialog opens", async ({
+  test("(c) toggle-on with manual FTP — nothing asks, the FTP stays, one notice offers Train2Go's", async ({
     page,
   }) => {
     // Arrange: linked account with syncZones=true, profile has a manual
@@ -395,54 +407,99 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     await waitForSyncButton(page);
 
     // The auto-sync hook fires on calendar mount → runs syncZones →
-    // detects FTP conflict (200 vs 268) → orchestrator stashes pending
-    // → provider renders ZonesConflictDialog.
-    // Assert: ZonesConflictDialog opens with the FTP row.
-    const dialog = page.getByTestId("zones-conflict-dialog");
-    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    // detects the FTP conflict (200 vs 268) → keeps 200 and offers 268.
+    const offer = page.getByTestId("zones-use-theirs");
+    await expect(offer).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(
-      page.getByTestId("zones-conflict-row-cycling.thresholds.ftp")
+      page.getByText(KEPT_THRESHOLDS, { exact: true })
     ).toBeVisible();
+    expect(await readCyclingFtp(page)).toBe(200);
 
-    // The static label map keys "cycling.thresholds.ftp" → "FTP".
-    await expect(dialog).toContainText("FTP");
-    // Both old and new values render as React children.
-    await expect(dialog).toContainText("200");
-    await expect(dialog).toContainText("268");
+    // Act: take Train2Go's numbers from the notice.
+    await offer.click();
 
-    // Assert: profile FTP is STILL 200 (conflict, not silently overwritten).
-    const ftpBeforeDecision = await page.evaluate(async (id) => {
-      type Db = {
-        table: (n: string) => { get: (k: string) => Promise<unknown> };
-      };
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db;
-      const p = (await db.table("profiles").get(id)) as {
-        sportZones: { cycling?: { thresholds: { ftp?: number } } };
-      };
-      return p.sportZones.cycling?.thresholds.ftp;
-    }, PROFILE_ID);
-    expect(ftpBeforeDecision).toBe(200);
-
-    // Act: cancel the dialog → leaves manual value intact.
-    await page.getByRole("button", { name: /^cancel$/i }).click();
-    await expect(dialog).not.toBeVisible();
-
-    const ftpAfterCancel = await page.evaluate(async (id) => {
-      type Db = {
-        table: (n: string) => { get: (k: string) => Promise<unknown> };
-      };
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db;
-      const p = (await db.table("profiles").get(id)) as {
-        sportZones: { cycling?: { thresholds: { ftp?: number } } };
-      };
-      return p.sportZones.cycling?.thresholds.ftp;
-    }, PROFILE_ID);
-    expect(ftpAfterCancel).toBe(200);
+    // Assert: the FTP changed, and the App says so.
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+    await expect(
+      page.getByText("Kaiord now uses Train2Go's thresholds.", { exact: true })
+    ).toBeVisible();
   });
 
-  test("(d) FTP scalar + cycling.powerZones bands → coupled group row (D-MA6)", async ({
+  test("(e) own weigh-in today — the weight is never offered, Train2Go's is its own weigh-in", async ({
+    page,
+  }) => {
+    // Arrange: the athlete weighed in by hand today; their FTP differs.
+    await seedProfile(page, true, 200);
+    const today = await localToday(page);
+    await seedOwnWeighIn(page, today, OWN_WEIGHT_KG);
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+
+    // Act: the mount-time sync offers the thresholds; take them.
+    const offer = page.getByTestId("zones-use-theirs");
+    await expect(offer).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText(KEPT_THRESHOLDS, { exact: true })
+    ).toBeVisible();
+    await offer.click();
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+
+    // Assert: both weigh-ins are stored, the athlete's untouched, and the
+    // Athlete page reads the athlete's own entry for today.
+    const weighIns = (await readWeighIns(page)).sort((a, b) =>
+      (a.source ?? "").localeCompare(b.source ?? "")
+    );
+    expect(weighIns).toEqual([
+      { date: today, kg: OWN_WEIGHT_KG, source: "manual" },
+      {
+        date: today,
+        kg: FIXTURE_ZONES_PAYLOAD.physiological.weight,
+        source: "train2go-bridge",
+      },
+    ]);
+    await page.goto("/athlete");
+    await expect(page.getByLabel("Current weight (kg)")).toHaveValue(
+      String(OWN_WEIGHT_KG)
+    );
+  });
+
+  test("(f) the notice is gone — the offer stays on the Athlete page until it is used", async ({
+    page,
+  }) => {
+    // Arrange: the notice is shown once and closed.
+    await seedProfile(page, true, 200);
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+    const notice = page.getByTestId("zones-use-theirs");
+    await expect(notice).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: /close/i }).first().click();
+    await expect(notice).toHaveCount(0);
+
+    // Act: come back later, after a reload, to the Athlete page.
+    await page.reload();
+    await page.goto("/athlete");
+    const row = page.getByTestId("athlete-zones-offer");
+    await expect(row).toBeVisible({ timeout: 10_000 });
+    await expect(row.getByText(KEPT_THRESHOLDS, { exact: true })).toBeVisible();
+    expect(await readCyclingFtp(page)).toBe(200);
+    await row.getByRole("button", { name: "Use Train2Go's" }).click();
+
+    // Assert: the FTP changed, the App says so, and the offer is closed.
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+    await expect(
+      page.getByText("Kaiord now uses Train2Go's thresholds.", { exact: true })
+    ).toBeVisible();
+    await expect(row).toHaveCount(0);
+  });
+
+  test("(d) FTP scalar + cycling.powerZones bands → taken together in one action", async ({
     page,
   }) => {
     // Arrange — profile with manual FTP=200 AND user-customized cycling
@@ -555,21 +612,20 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     await waitForSyncButton(page);
 
     // The auto-sync hook fires on calendar mount. With FTP=200 and
-    // power bands user-customized, the reconcile emits FTP scalar
-    // conflict + 10 cycling power band conflicts → dialog couples them
-    // into a single group.
-    const dialog = page.getByTestId("zones-conflict-dialog");
-    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    // power bands user-customized, the reconcile emits an FTP scalar
+    // conflict + 10 cycling power band conflicts; nothing asks.
+    const offer = page.getByTestId("zones-use-theirs");
+    await expect(offer).toBeVisible({ timeout: 10_000 });
+    expect(await readCyclingFtp(page)).toBe(200);
 
-    // Assert: the coupled group renders (NOT a standalone FTP row).
-    await expect(
-      page.getByTestId("zones-conflict-group-cycling.threshold-and-zones")
-    ).toBeVisible();
-    await expect(dialog).toContainText("Cycling threshold + zones");
+    // Act
+    await offer.click();
 
-    // Cancel out — the actual decision flow is covered by unit tests.
-    await page.getByRole("button", { name: /^cancel$/i }).click();
-    await expect(dialog).not.toBeVisible();
+    // Assert: FTP and its power bands move together (no partial accept).
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+    expect(await readCyclingPowerMethod(page)).toBe("train2go");
   });
 
   // (g)/(h)/(i) — issue #508: regression-safety flows for the
@@ -594,8 +650,8 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
 
     await waitForCyclingFtp(page);
 
-    // Assert: dialog NEVER opened (the entire reason this issue exists).
-    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    // Assert: nothing offered (the entire reason this issue exists).
+    await expect(page.getByTestId("zones-use-theirs")).toHaveCount(0);
 
     // Assert: bands silent-replaced and method flipped to "train2go"
     // for tables that received bands. Only HR is asserted in detail —
@@ -656,9 +712,9 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // One extra tick so the orchestrator's repo.put (if any) settles.
     await page.waitForTimeout(ORCHESTRATOR_PUT_SETTLE_MS);
 
-    // Assert: no dialog (every table classifies as
+    // Assert: nothing offered (every table classifies as
     // train2go-synced-clean → silent no-op).
-    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    await expect(page.getByTestId("zones-use-theirs")).toHaveCount(0);
 
     // Assert: full sportZones tree is byte-identical (covers HR,
     // power, pace across all sports — not just cycling). Method +
@@ -672,52 +728,62 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     );
   });
 
-  test("(i) manual band edit → next sync surfaces ONE group row, not per-band rows", async ({
+  test("(i) manual band edit → kept, and the same difference is offered once", async ({
     page,
   }) => {
     // Arrange: the profile is seeded already carrying the manual edit —
     // one cycling HR band changed and the method flipped to "user", as
-    // ZoneEditor's `updateSportZones` leaves it (D-MA3, unit-tested in
-    // update-sport-zones.test.ts). The edit cannot be written after the
-    // page mounts: the zones import runs once per mount, gated only on the
-    // training-zones policy (the recent coachingSyncState gates the week
-    // sync, not this), and when its read landed after a late edit it found
-    // the conflict itself and opened the modal over the Sync button.
+    // ZoneEditor's `updateSportZones` leaves it (D-MA3).
     await seedTrain2GoSyncedProfile(page, MANUAL_HR_BAND_Z4_MAX_BPM);
     await navigateToWeek(page);
     await waitForSyncButton(page);
 
-    // That mount-time import is the first sync to see the edit, so its
-    // dialog is the barrier: once it is up, no other sync is in flight.
-    const dialog = page.getByTestId("zones-conflict-dialog");
-    await expect(dialog).toBeVisible({ timeout: 10_000 });
-    await page.getByRole("button", { name: /^cancel$/i }).click();
-    await expect(dialog).not.toBeVisible();
+    // The mount-time import is the first sync to see the edit: it offers once.
+    const offer = page.getByTestId("zones-use-theirs");
+    await expect(offer).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: /close/i }).first().click();
+    await expect(offer).toHaveCount(0);
 
-    // Act: trigger sync via the manual button.
+    // Act: sync again by hand; Train2Go still reports the same numbers.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
+    await page.waitForTimeout(RESYNC_SETTLE_MS);
 
-    // Assert: dialog renders ONE group row for the cycling HR table
-    // (D-MA5 — per-band rows live behind the [▼ Detail] disclosure,
-    // not in the default rendering).
-    await expect(dialog).toBeVisible({ timeout: 10_000 });
-    await expect(
-      page.getByTestId("zones-conflict-group-cycling.heartRateZones")
-    ).toBeVisible();
-
-    // The 5 individual band rows MUST NOT be visible by default —
-    // they're inside the collapsed Detail. The most reliable check
-    // is that the per-band testid query returns 0 visible matches at
-    // the top of the dialog tree.
-    await expect(
-      page.getByTestId("zones-conflict-row-cycling.heartRateZones.z4.maxBpm")
-    ).not.toBeVisible();
-
-    // Cancel — decision flow is unit-tested.
-    await page.getByRole("button", { name: /^cancel$/i }).click();
-    await expect(dialog).not.toBeVisible();
+    // Assert: nothing is asked or offered again, and the edit is kept.
+    await expect(offer).toHaveCount(0);
+    expect(await readCyclingHrZ4Max(page)).toBe(MANUAL_HR_BAND_Z4_MAX_BPM);
   });
 });
+
+const readZonesProfile = (page: Page) =>
+  page.evaluate(async (id) => {
+    type Db = {
+      table: (n: string) => { get: (k: string) => Promise<unknown> };
+    };
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    return (await db.table("profiles").get(id)) as {
+      sportZones: {
+        cycling?: {
+          thresholds: { ftp?: number };
+          powerZones?: { method?: string };
+          heartRateZones?: { zones?: Array<{ zone: number; maxBpm?: number }> };
+        };
+      };
+    };
+  }, PROFILE_ID);
+
+const readCyclingFtp = async (page: Page) =>
+  (await readZonesProfile(page)).sportZones.cycling?.thresholds.ftp;
+
+const readCyclingPowerMethod = async (page: Page) =>
+  (await readZonesProfile(page)).sportZones.cycling?.powerZones?.method;
+
+const readCyclingHrZ4Max = async (page: Page) =>
+  (
+    await readZonesProfile(page)
+  ).sportZones.cycling?.heartRateZones?.zones?.find(
+    (z) => z.zone === MANUAL_HR_BAND_ZONE
+  )?.maxBpm;
 
 const seedTemplateDefaultsProfile = async (page: Page): Promise<void> => {
   await page.evaluate(
@@ -1115,6 +1181,36 @@ const readWeighIns = async (
         source: r.sourceBridgeId,
       }));
   }, PROFILE_ID);
+
+// A weigh-in the athlete typed today, measured this morning.
+const seedOwnWeighIn = async (
+  page: Page,
+  date: string,
+  kg: number
+): Promise<void> => {
+  await page.evaluate(
+    async ({ profileId, day, weight }) => {
+      type Db = {
+        table: (n: string) => { put: (r: unknown) => Promise<unknown> };
+      };
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as Db;
+      await db.table("healthWeight").put({
+        id: "zones-sync-own-weigh-in",
+        profileId,
+        date: day,
+        sourceBridgeId: "manual",
+        krd: {
+          kind: "weight",
+          version: "2.0",
+          measuredAt: `${day}T00:00:01.000Z`,
+          weightKilograms: weight,
+        },
+      });
+    },
+    { profileId: PROFILE_ID, day: date, weight: kg }
+  );
+};
 
 // The browser's local calendar day, the day the SPA stamps a weigh-in with.
 const localToday = async (page: Page): Promise<string> =>

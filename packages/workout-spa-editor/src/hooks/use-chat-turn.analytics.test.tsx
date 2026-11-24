@@ -4,8 +4,10 @@
  * analytics (spa-ai-chat usage rule — count-only events).
  */
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CapabilitiesFixture } from "../contexts/capabilities-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { useChatTurn } from "./use-chat-turn";
 
@@ -53,6 +55,10 @@ const args = {
   messages: [],
 };
 
+const NoCapabilities = ({ children }: { children: ReactNode }) => (
+  <CapabilitiesFixture on={[]}>{children}</CapabilitiesFixture>
+);
+
 describe("useChatTurn analytics", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,7 +66,9 @@ describe("useChatTurn analytics", () => {
 
   it("should emit a count-only chat-message-sent event on send", () => {
     // Arrange
-    const { result } = renderHook(() => useChatTurn(args));
+    const { result } = renderHook(() => useChatTurn(args), {
+      wrapper: NoCapabilities,
+    });
 
     // Act
     act(() => result.current.send("how far did I run last week?"));
@@ -72,7 +80,9 @@ describe("useChatTurn analytics", () => {
 
   it("should not emit for a blank message", () => {
     // Arrange
-    const { result } = renderHook(() => useChatTurn(args));
+    const { result } = renderHook(() => useChatTurn(args), {
+      wrapper: NoCapabilities,
+    });
 
     // Act
     act(() => result.current.send("   "));
@@ -92,7 +102,9 @@ describe("useChatTurn analytics", () => {
         });
       }
     );
-    const { result } = renderHook(() => useChatTurn(args));
+    const { result } = renderHook(() => useChatTurn(args), {
+      wrapper: NoCapabilities,
+    });
     act(() => result.current.send("make me a recovery ride"));
 
     // Act
@@ -107,7 +119,9 @@ describe("useChatTurn analytics", () => {
 
   it("should retry through retryTurn and count it as a retry, not a new message", () => {
     // Arrange
-    const { result } = renderHook(() => useChatTurn(args));
+    const { result } = renderHook(() => useChatTurn(args), {
+      wrapper: NoCapabilities,
+    });
     act(() => result.current.send("hola"));
 
     // Act

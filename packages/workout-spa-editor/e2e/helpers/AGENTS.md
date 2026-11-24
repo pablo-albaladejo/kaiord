@@ -11,6 +11,7 @@ Flow-specific Playwright helpers. Distinguished from `e2e/test-utils/` (generic 
 
 - `e2e-defaults.ts` — common timeouts + selectors.
 - `kaiord-idb.ts` — raw IndexedDB reads/writes of `kaiord-spa` for production-bundle specs (no dev hooks). Never creates the database (aborts on `oldVersion 0`), closes on `versionchange` and on every path; `pollKaiordStore` returns `undefined` while the database is absent, the others throw. Use it instead of a hand-written `indexedDB.open("kaiord-spa")`.
+- `turn-on-capability.ts` — `turnOnCapability` turns a Capability on through Settings, Capabilities, as the athlete does. Specs against the production build use it because that build exposes no database handle to seed decisions with.
 - `kaiord-idb-version.ts` — `kaiordNativeVersion` reads the installed native version of `kaiord-spa` the same safe way; `nextMajorNative` turns it into the next major. A spec that simulates a newer deploy derives its version from these, never a hard-coded number that the next schema bump makes stale.
 - `seed-dexie.ts` — talks to `window.__KAIORD_DB__` (the dev-mode hook from `adapters/dexie/dexie-database.ts`) to seed and clear IndexedDB.
 - `dexie-factories.ts` — factory functions producing canonical Dexie rows (workout, profile, coaching activity, session match).

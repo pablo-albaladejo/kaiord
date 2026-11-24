@@ -22,6 +22,7 @@ import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-d
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
+import { createInMemoryCapabilityDecisionRepository } from "./in-memory-capability-decision-repository";
 import { createInMemoryDataTypeSourcePolicyRepository } from "./in-memory-data-type-source-policy-repository";
 import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-balance-repositories";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
@@ -114,6 +115,7 @@ export function createInMemoryPersistence(): PersistencePort {
     userPreferences: createInMemoryUserPreferencesRepository(
       stores.userPreferences
     ),
+    capabilityDecisions: createInMemoryCapabilityDecisionRepository(),
     healthCleanup: {
       deleteByProfile: async (profileId: string) => {
         const healthMaps = [

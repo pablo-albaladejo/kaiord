@@ -22,8 +22,10 @@ const actionToolNames = () =>
       logIntake: vi.fn(),
       pushToGarmin: vi.fn(),
       setDataRoute: vi.fn(),
+      setAuthority: vi.fn(),
     },
     getMatrixSignals: vi.fn(),
+    offersTool: () => true,
   })
     .filter((tool) => tool.requiresConfirmation)
     .map((tool) => tool.name);

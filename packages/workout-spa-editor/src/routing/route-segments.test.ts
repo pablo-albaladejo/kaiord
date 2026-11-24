@@ -6,8 +6,9 @@
  * `https://kaiord.com/app/#/<segment>` links in the built site, so a
  * route added to or removed from `AppRoutes.tsx` without updating the
  * registry would let a dead deep link ship (or reject a live one).
- * The routes are read straight from the router source instead of a
- * hand-kept mirror.
+ * The routes are read straight from the router source, plus the
+ * Capability catalogue whose routes it mounts by `capabilityHome(id)`,
+ * instead of a hand-kept mirror.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -15,6 +16,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { CAPABILITY_ROUTES } from "../lib/capabilities/capability-catalogue";
 import routeSegments from "./route-segments.json";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -23,6 +25,9 @@ function firstSegmentsIn(source: string): string[] {
   const segments = new Set<string>();
   for (const match of source.matchAll(/\bpath="\/([^/"?:*]+)/g)) {
     segments.add(match[1]);
+  }
+  if (source.includes("capabilityHome(")) {
+    for (const route of CAPABILITY_ROUTES) segments.add(route.split("/")[1]);
   }
   return [...segments].sort();
 }

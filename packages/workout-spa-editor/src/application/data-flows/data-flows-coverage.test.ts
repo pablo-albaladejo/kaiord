@@ -270,6 +270,7 @@ describe("data-flows coverage", () => {
       today: "2026-11-23",
       actions: {} as never,
       getMatrixSignals: async () => ({}) as never,
+      offersTool: () => true,
     }).map((tool) => tool.name);
 
     // Act

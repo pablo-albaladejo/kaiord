@@ -1,4 +1,3 @@
-import { asSchema } from "ai";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ChatActionOps } from "./chat-tool-deps";
@@ -11,6 +10,7 @@ const makeOps = (over: Partial<ChatActionOps> = {}): ChatActionOps => ({
   logIntake: vi.fn(),
   pushToGarmin: vi.fn(),
   setDataRoute: over.setDataRoute ?? vi.fn().mockResolvedValue({ ok: true }),
+  setAuthority: vi.fn(),
 });
 
 describe("createSetDataRouteTool", () => {
@@ -44,24 +44,6 @@ describe("createSetDataRouteTool", () => {
     expect(result).toEqual({ enabled: true });
   });
 
-  it("should delegate a set_source_policy call with a single-source priority order", async () => {
-    // Arrange
-    const setDataRoute = vi.fn().mockResolvedValue({ mode: "priority" });
-    const tool = createSetDataRouteTool(makeOps({ setDataRoute }));
-    const input = {
-      action: "set_source_policy",
-      dataType: "sleep",
-      mode: "priority",
-      sourceOrder: ["whoop"],
-    };
-
-    // Act
-    await tool.execute(input);
-
-    // Assert
-    expect(setDataRoute).toHaveBeenCalledWith(input);
-  });
-
   it("should reject an input with an unknown action", () => {
     // Arrange
     const tool = createSetDataRouteTool(makeOps());
@@ -76,25 +58,6 @@ describe("createSetDataRouteTool", () => {
 
     // Assert
     expect(parsed.success).toBe(false);
-  });
-
-  it("should reject a priority policy with an empty sourceOrder", () => {
-    // Arrange
-    const setDataRoute = vi.fn();
-    const tool = createSetDataRouteTool(makeOps({ setDataRoute }));
-
-    // Act
-    const act = () =>
-      tool.execute({
-        action: "set_source_policy",
-        dataType: "sleep",
-        mode: "priority",
-        sourceOrder: [],
-      });
-
-    // Assert
-    expect(act).toThrow();
-    expect(setDataRoute).not.toHaveBeenCalled();
   });
 
   it("should reject enable_route input missing the direction field", () => {
@@ -112,47 +75,33 @@ describe("createSetDataRouteTool", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("should reject set_source_policy input missing the mode field", () => {
+  it("should refuse choosing which source decides, which only set_authority does", () => {
     // Arrange
-    const tool = createSetDataRouteTool(makeOps());
+    const setDataRoute = vi.fn();
+    const tool = createSetDataRouteTool(makeOps({ setDataRoute }));
 
     // Act
-    const parsed = tool.inputSchema.safeParse({
-      action: "set_source_policy",
-      dataType: "sleep",
-    });
+    const act = () =>
+      tool.execute({
+        action: "set_source_policy",
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: ["whoop"],
+      });
 
     // Assert
-    expect(parsed.success).toBe(false);
+    expect(act).toThrow();
+    expect(setDataRoute).not.toHaveBeenCalled();
   });
 
-  it("should reject a priority policy with no sourceOrder at the input schema", () => {
+  it("should not tell the model of any default for which source decides", () => {
     // Arrange
     const tool = createSetDataRouteTool(makeOps());
 
     // Act
-    const parsed = tool.inputSchema.safeParse({
-      action: "set_source_policy",
-      dataType: "sleep",
-      mode: "priority",
-    });
+    const description = tool.description;
 
     // Assert
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should tell the model which fields each action requires", async () => {
-    // Arrange
-    const tool = createSetDataRouteTool(makeOps());
-
-    // Act
-    const jsonSchema = (await asSchema(tool.inputSchema).jsonSchema) as {
-      properties: Record<string, { description?: string }>;
-    };
-
-    // Assert
-    expect(jsonSchema.properties.action?.description).toMatch(
-      /integrationId.*direction.*mode/s
-    );
+    expect(description).not.toMatch(/default|union|priority/);
   });
 });

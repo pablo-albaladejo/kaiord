@@ -31,7 +31,10 @@ const rewriteConfig = (app, edit) => {
   const source = readFileSync(path, "utf8");
   const [line, ...rest] = source.split("\n");
   const config = edit(JSON.parse(line.slice("const SW = ".length, -1)));
-  writeFileSync(path, [`const SW = ${JSON.stringify(config)};`, ...rest].join("\n"));
+  writeFileSync(
+    path,
+    [`const SW = ${JSON.stringify(config)};`, ...rest].join("\n")
+  );
 };
 
 describe("check-spa-service-worker", () => {
@@ -108,7 +111,9 @@ describe("check-spa-service-worker", () => {
     const problems = checkServiceWorker(app, normal);
 
     // Assert
-    assert.deepEqual(problems, ["assets/Daily-BBBB2222.js: shipped but not precached"]);
+    assert.deepEqual(problems, [
+      "assets/Daily-BBBB2222.js: shipped but not precached",
+    ]);
   });
 
   it("should fail when a listed file is missing", () => {
@@ -120,7 +125,9 @@ describe("check-spa-service-worker", () => {
     const problems = checkServiceWorker(app, normal);
 
     // Assert
-    assert.deepEqual(problems, ["assets/index-AAAA1111.js: listed but not shipped"]);
+    assert.deepEqual(problems, [
+      "assets/index-AAAA1111.js: listed but not shipped",
+    ]);
   });
 
   it("should fail when an excluded file is listed", () => {
@@ -130,7 +137,11 @@ describe("check-spa-service-worker", () => {
       ...config,
       manifest: [
         ...config.manifest,
-        { url: "/app/assets/index-AAAA1111.js.map", revision: "0", key: "/app/assets/index-AAAA1111.js.map" },
+        {
+          url: "/app/assets/index-AAAA1111.js.map",
+          revision: "0",
+          key: "/app/assets/index-AAAA1111.js.map",
+        },
       ],
     }));
 
@@ -138,7 +149,9 @@ describe("check-spa-service-worker", () => {
     const problems = checkServiceWorker(app, normal);
 
     // Assert
-    assert.ok(problems.includes("assets/index-AAAA1111.js.map: excluded but listed"));
+    assert.ok(
+      problems.includes("assets/index-AAAA1111.js.map: excluded but listed")
+    );
   });
 
   it("should fail when the shell or an icon is not keyed by its revision", () => {
@@ -179,11 +192,16 @@ describe("check-spa-service-worker", () => {
     emitServiceWorker(app, { scope: "/app/" });
 
     // Act
-    const normalAsKill = checkServiceWorker(app, { base: "/app/", mode: "kill" });
+    const normalAsKill = checkServiceWorker(app, {
+      base: "/app/",
+      mode: "kill",
+    });
 
     // Assert
     assert.deepEqual(killed, ["mode is kill but the deploy asked for normal"]);
-    assert.deepEqual(normalAsKill, ["mode is normal but the deploy asked for kill"]);
+    assert.deepEqual(normalAsKill, [
+      "mode is normal but the deploy asked for kill",
+    ]);
   });
 
   it("should pass a kill worker when kill was requested, and fail one that grew a fetch handler", () => {
@@ -210,10 +228,14 @@ describe("check-spa-service-worker", () => {
   it("should exit 1 from the command line on a problem and 0 on a clean tree", () => {
     // Arrange
     const run = () =>
-      spawnSync(process.execPath, [
-        "scripts/check-spa-service-worker.mjs",
-        ...["--app", app, "--base", "/app/", "--mode", "normal"],
-      ], { cwd: ROOT });
+      spawnSync(
+        process.execPath,
+        [
+          "scripts/check-spa-service-worker.mjs",
+          ...["--app", app, "--base", "/app/", "--mode", "normal"],
+        ],
+        { cwd: ROOT }
+      );
     const missing = run();
     emitServiceWorker(app, { scope: "/app/" });
 

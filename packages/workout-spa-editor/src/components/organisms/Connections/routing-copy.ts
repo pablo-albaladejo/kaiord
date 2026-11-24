@@ -19,7 +19,9 @@ export const sourceName = (integrationId: string, t: Translate): string =>
  * showing none beats showing whichever happens to be first.
  */
 export const originSourceId = (origin: RoutingOrigin): string | undefined =>
-  origin.kind === "only" || origin.kind === "primary"
+  origin.kind === "only" ||
+  origin.kind === "primary" ||
+  origin.kind === "automatic"
     ? origin.sourceId
     : undefined;
 
@@ -54,6 +56,7 @@ export const originNote = (
   t: Translate
 ): string | undefined => {
   if (origin.kind === "unranked") return t("routing.unrankedNote");
+  if (origin.kind === "automatic") return t("routing.automaticNote");
   if (origin.kind === "rankedUnavailable")
     return t("routing.rankedUnavailableNote");
   return undefined;

@@ -8,6 +8,7 @@ import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
 import type { TraceRun } from "../../application/trace/trace-run";
+import type { ActiveCapabilities } from "../../lib/capabilities/resolve-capabilities";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 
@@ -44,6 +45,8 @@ export type ChatTurnDeps = {
   pinModel: boolean;
   today: string;
   ops: ChatActionOps;
+  /** The read API's answer, so the turn offers no Tool of an off Capability. */
+  offers: ActiveCapabilities["offers"];
 };
 
 export type ChatTurnCtx = Omit<
@@ -76,14 +79,11 @@ export const makeChatTurnCtx = (
   )
     return null;
   return {
-    persistence: deps.persistence,
+    ...deps,
     profileId: deps.profileId,
     conversationId: deps.conversationId,
     provider: deps.provider,
     modelId: deps.modelId,
-    pinModel: deps.pinModel,
-    today: deps.today,
-    ops: deps.ops,
     ...refs,
     set: {
       state: setters.setState,

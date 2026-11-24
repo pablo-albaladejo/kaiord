@@ -1,5 +1,6 @@
 import { useLocation, useSearch } from "wouter";
 
+import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { athleteSportOptions } from "../../../lib/athlete";
@@ -51,10 +52,15 @@ export function CreateInputPhase({
   const [, navigate] = useLocation();
   const context = { ...sheetContext(useSearch()), sport };
   const clearWorkout = useClearWorkout();
+  const { offers } = useCapabilities();
   const startFrom = (
     <CreateStartFrom
       lead={!provider}
-      onTemplate={() => navigate(buildNewSessionHref("template", context))}
+      onTemplate={
+        offers("inScreen", "create-from-template")
+          ? () => navigate(buildNewSessionHref("template", context))
+          : undefined
+      }
       onBlank={() => {
         // "Blank" means blank: a draft left in the store would otherwise
         // be reopened and the scratch seed (and its sport) skipped.

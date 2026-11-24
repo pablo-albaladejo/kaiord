@@ -5,7 +5,7 @@ import { ESLint } from "eslint";
 
 const SPA = "packages/workout-spa-editor/src";
 const IN_SCOPE = `${SPA}/components/molecules/WellnessEntryDialog/WellnessEntryForm.tsx`;
-const ANY_COMPONENT = `${SPA}/components/organisms/ZonesConflictDialog/ConflictGroup.tsx`;
+const ANY_COMPONENT = `${SPA}/components/organisms/AuthorityMatrix/AuthorityRow.tsx`;
 const HOOK = `${SPA}/hooks/use-push-to-garmin-op.ts`;
 const USE_CASE = `${SPA}/application/ai-workout-processor.ts`;
 

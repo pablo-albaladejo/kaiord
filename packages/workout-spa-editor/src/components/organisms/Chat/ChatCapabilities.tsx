@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 
 import { chatCapabilitySections } from "../../../application/chat/chat-capabilities";
+import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { ChatCapabilityGroup } from "./ChatCapabilityGroup";
@@ -15,8 +16,6 @@ export type ChatCapabilitiesProps = {
   focusOnMount?: boolean;
 };
 
-const SECTIONS = chatCapabilitySections();
-
 /** What the assistant can look up, log and do, rendered from the local
  * capability catalog (no model call). Example chips fill the composer. */
 export function ChatCapabilities({
@@ -26,6 +25,11 @@ export function ChatCapabilities({
   focusOnMount,
 }: ChatCapabilitiesProps) {
   const t = useTranslate("chat");
+  const { offers } = useCapabilities();
+  const sections = useMemo(
+    () => chatCapabilitySections((name) => offers("tool", name)),
+    [offers]
+  );
   const titleId = useId();
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -54,7 +58,7 @@ export function ChatCapabilities({
         )}
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        {SECTIONS.map((section) => (
+        {sections.map((section) => (
           <ChatCapabilityGroup
             key={section.group}
             section={section}

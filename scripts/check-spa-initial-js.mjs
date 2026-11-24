@@ -51,10 +51,9 @@ import { gzipSync } from "node:zlib";
 // in code that only runs on a user action or on an editor route:
 // - `src/hooks/use-app-keyboard-handlers.ts` (`AppKeyboardShortcuts`, which
 //   drags the whole workout store and its actions)
-// - `src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx`
-//   (`LazyZonesConflictDialog`, loaded the first time a conflict opens it)
 // - `src/application/coaching/{sync-zones,commit-conflict-resolution,
-//   sync-week,attempt-link,expand-day}.ts` (dynamic imports inside the
+//   sync-week,attempt-link,expand-day}.ts` and
+//   `src/adapters/train2go/zones-offer-{memo,store}.ts` (dynamic imports inside the
 //   Train2Go action callbacks)
 // - `src/lib/week-dominant-zone.ts` (loaded by the header's
 //   `useWeekDominantZone` after its read)
@@ -91,9 +90,10 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/new-workout-route.tsx",
   "src/components/pages/ConvertPage/ConvertPage.tsx",
   "src/hooks/use-app-keyboard-handlers.ts",
-  "src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx",
   "src/application/coaching/sync-zones.ts",
   "src/application/coaching/commit-conflict-resolution.ts",
+  "src/adapters/train2go/zones-offer-memo.ts",
+  "src/adapters/train2go/zones-offer-store.ts",
   "src/application/coaching/sync-week.ts",
   "src/application/coaching/attempt-link.ts",
   "src/application/coaching/expand-day.ts",

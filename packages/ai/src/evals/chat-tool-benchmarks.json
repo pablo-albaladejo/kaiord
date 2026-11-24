@@ -10,9 +10,8 @@
     "id": "hub-action-sleep-whoop-only",
     "userText": "Lee el sueño solo de Whoop a partir de ahora.",
     "category": "action",
-    "expectedTool": "set_data_route",
+    "expectedTool": "set_authority",
     "expectedActionInput": {
-      "action": "set_source_policy",
       "dataType": "sleep",
       "mode": "priority"
     }

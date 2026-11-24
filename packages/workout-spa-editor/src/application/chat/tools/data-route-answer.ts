@@ -1,7 +1,6 @@
 /**
- * buildDataRouteAnswer — one managed-data-type's routing state, shared by
- * the `get_data_routes` read tool and the `set_data_route` confirmation
- * result. Reuses the exact cell derivation the retired routing matrix was built
+ * buildDataRouteAnswer — one managed-data-type's routing state, as the
+ * `get_data_routes` read tool answers it. Reuses the exact cell derivation the retired routing matrix was built
  * on (application/data-hub) plus the F3.2 multi-source resolver — the chat
  * answer is never a second source of truth against the Connections page.
  */
@@ -16,6 +15,10 @@ import type {
   DataHubCellState,
   DataHubRow,
 } from "../../data-hub/build-data-hub-matrix";
+import {
+  type AuthorityInForce,
+  loadAuthorityInForce,
+} from "../../data-source-policy/authority-in-force";
 import {
   type EffectiveSourceAnswer,
   getEffectiveSourceToday,
@@ -34,7 +37,9 @@ export type DataRouteAnswer = {
   dataType: ManagedDataType;
   label: string;
   routes: DataRouteEntry[];
-  sourcePolicy: { mode: "union" | "priority"; sourceOrder: string[] };
+  /** What decides the type today: the athlete's choice while the matrix is
+      on, else the automatic Authority, else every source kept. */
+  sourcePolicy: Pick<AuthorityInForce, "mode" | "sourceOrder">;
   effectiveSourceToday?: EffectiveSourceAnswer;
 };
 
@@ -48,11 +53,14 @@ export const buildDataRouteAnswer = async (
   row: DataHubRow,
   deps: DataRouteAnswerDeps
 ): Promise<DataRouteAnswer> => {
-  const sourcePolicy =
-    await deps.persistence.dataTypeSourcePolicy.findByProfileAndType({
-      profileId: deps.profileId,
-      dataType: row.dataType,
-    });
+  const { mode, sourceOrder } = await loadAuthorityInForce(
+    {
+      sourcePolicyRepo: deps.persistence.dataTypeSourcePolicy,
+      capabilityDecisions: deps.persistence.capabilityDecisions,
+      policyRepo: deps.persistence.integrationPolicy,
+    },
+    { profileId: deps.profileId, dataType: row.dataType }
+  );
   return {
     dataType: row.dataType,
     label: row.label,
@@ -66,10 +74,7 @@ export const buildDataRouteAnswer = async (
         mode: cell.routeMode,
         lastSyncedAt: cell.lastSyncedAt,
       })),
-    sourcePolicy: {
-      mode: sourcePolicy?.mode ?? "union",
-      sourceOrder: sourcePolicy?.sourceOrder ?? [],
-    },
+    sourcePolicy: { mode, sourceOrder },
     effectiveSourceToday: await getEffectiveSourceToday(
       deps.persistence,
       deps.profileId,

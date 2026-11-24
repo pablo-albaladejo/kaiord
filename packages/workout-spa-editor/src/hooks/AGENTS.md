@@ -64,9 +64,13 @@ Custom React hooks. This is where the SPA bridges the persistence layer (Dexie v
 - `use-storage-probe.ts` — wires `storage-probe.ts` into the React tree.
 - `use-user-preferences.ts` / `.test.tsx` — user-preferences read+write.
 - `use-v10-migration-toast.ts` / `.test.tsx` — surfaces the v10 migration toast (UX from #602).
+- `use-capability-inputs-live.ts` — `readCapabilityInputs` / `observeCapabilityInputs`: the active athlete's Capability decisions (the `capabilityDecisions` store) and which adopting tables hold their data, read live once for the whole App.
+- `use-offered-nav-destinations.ts` — the navigation destinations, minus those an off Capability owns (the nav registry's one gate reader).
 
 ## Subdirectories
 
+- `capabilities/` — `capability-store.ts`: the handle `CapabilitiesProvider` carries (one shared live read, the last answer kept so a later screen never starts from loading) and the fixed store behind `CapabilitiesFixture`.
+- `connections/` — Connections and Authority hooks, among them `use-authority-choice-editor.ts`: the Authority matrix's two writes (`pick`, and `automatic`, which stores `automaticChoiceRow`).
 - `focus/` — focus-after-action hook + helpers (`apply-focus-target`, `apply-focus-to-element`, `is-form-field-focused`, `use-focus-after-action`, `use-focus-after-action-telemetry`, `use-focus-registration`, `use-focus-telemetry-emitter`, `use-overlay-focus-stash`).
 
 ## For AI Agents

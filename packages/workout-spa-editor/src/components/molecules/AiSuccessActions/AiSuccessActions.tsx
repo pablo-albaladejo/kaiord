@@ -3,6 +3,7 @@ import { Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
+import { CapabilityGate } from "../../atoms/CapabilityGate/CapabilityGate";
 import { SaveToLibraryButton } from "../SaveToLibraryButton/SaveToLibraryButton";
 
 export type AiSuccessActionsProps = {
@@ -51,7 +52,9 @@ export function AiSuccessActions({
         <Trash2 className="h-4 w-4" />
         {t("result.discard")}
       </Button>
-      <SaveToLibraryButton workout={workout} />
+      <CapabilityGate surface="ai-result-save-as-template">
+        <SaveToLibraryButton workout={workout} />
+      </CapabilityGate>
     </div>
   );
 }

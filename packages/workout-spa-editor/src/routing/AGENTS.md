@@ -9,7 +9,7 @@ Routing constants and pure routing helpers (back-origin contract, href builders,
 
 ## Key Files
 
-- `constants.ts` — route path constants (`/calendar`, `/library`, `/workout/new`, `/workout/:id`).
+- `constants.ts` — route path constants (`DAILY_PATH`, `SETTINGS_PATH`, `CONNECTIONS_PATH`, `ATHLETE_PATH`, …).
 - `nav-destinations.ts` — single source of truth for header/bottom-nav destinations (parity-tested).
 - `back-origin.ts` / `resolve-back-target.ts` — `?from=` origin contract for back navigation.
 - `adjust-with-ai-href.ts` — chat prefill deep-link for the "adjust with AI" action.

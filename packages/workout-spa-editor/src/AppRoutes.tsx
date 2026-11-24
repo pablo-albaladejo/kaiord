@@ -22,6 +22,7 @@ import {
   WorkoutDetail,
   ZonesPage,
 } from "./lazy-pages";
+import { capabilityHome } from "./lib/capabilities/capability-catalogue";
 import { LegacyTodayRedirect } from "./routing/legacy-today-redirect";
 import { getCurrentWeekId } from "./utils/week-utils";
 
@@ -32,6 +33,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
     <RouteErrorBoundary analytics={analytics}>{node}</RouteErrorBoundary>
   );
 
+  // The default view, where unknown routes settle too (the last route).
   const toCurrentWeek = (
     <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
   );
@@ -58,7 +60,9 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
             guard(<ChatPage conversationId={params.conversationId} />)
           }
         </Route>
-        <Route path="/library">{guard(<LibraryPage />)}</Route>
+        <Route path={capabilityHome("templates")}>
+          {guard(<LibraryPage />)}
+        </Route>
         <Route path="/workout/new">{guard(<NewWorkoutRoute />)}</Route>
         <Route path="/workout/view/:id">
           {(params) => guard(<WorkoutDetail id={params.id} />)}
@@ -79,7 +83,6 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         <Route path="/health/*?">
           {guard(<HealthSubRouter analytics={analytics} />)}
         </Route>
-        {/* Unknown routes settle on the default view (calendar). */}
         <Route>{toCurrentWeek}</Route>
       </Switch>
     </Suspense>

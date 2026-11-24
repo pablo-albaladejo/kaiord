@@ -82,15 +82,60 @@ describe("buildDataTypeRoutingRows", () => {
     expect(origin).toEqual({ kind: "none" });
   });
 
-  it("should count sources rather than name one in the default union mode", () => {
+  it("should name the Platform the App picks when nobody chose", () => {
     // Arrange
-    // WHOOP is the ONLY bridge announcing `read:sleep`, so this is the whole
-    // reachable source set for sleep: one bridge plus the always-present manual
-    // path. Union — the DEFAULT with no policy row — keeps both records with
-    // nothing ranking them. Writer: the Data Hub sleep/WHOOP import toggle.
+    // WHOOP is the ONLY bridge announcing `read:sleep`, plus the always-present
+    // manual path. With no choice stored the App's rule decides: what the
+    // athlete enters wins its day, WHOOP decides the rest.
     const rows = buildDataTypeRoutingRows(
       flows({ sleep: { import: [route("whoop-bridge")] } }),
       []
+    );
+
+    // Act
+    const origin = rowFor(rows, "sleep").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "automatic", sourceId: "whoop", count: 2 });
+  });
+
+  it("should let the scale decide weight over a Platform connected before it", () => {
+    // Arrange
+    const rows = buildDataTypeRoutingRows(
+      flows({
+        weight: {
+          import: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+        },
+      }),
+      []
+    );
+
+    // Act
+    const origin = rowFor(rows, "weight").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "automatic", sourceId: "tanita", count: 3 });
+  });
+
+  it("should count the sources of a kind that keeps every one side by side", () => {
+    // Arrange
+    const rows = buildDataTypeRoutingRows(
+      flows({ activity: { import: [route("garmin-bridge")] } }),
+      []
+    );
+
+    // Act
+    const origin = rowFor(rows, "activity").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "unranked", count: 2 });
+  });
+
+  it("should count sources rather than name one when the athlete chose to keep every source", () => {
+    // Arrange
+    const rows = buildDataTypeRoutingRows(
+      flows({ sleep: { import: [route("whoop-bridge")] } }),
+      [{ dataType: "sleep", mode: "union", sourceOrder: [] } as never]
     );
 
     // Act

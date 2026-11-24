@@ -7,9 +7,11 @@
 import "fake-indexeddb/auto";
 
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { CapabilitiesFixture } from "../contexts/capabilities-context";
 import type { ConnectionRecord } from "../types/connection";
 import type { Profile } from "../types/profile";
 import {
@@ -32,6 +34,13 @@ const ONE_BRIDGE: readonly DiscoveredBridge[] = [
 ];
 
 const PROFILE_ID = "33333333-3333-3333-3333-333333333333";
+
+const TemplatesOn = ({ children }: { children: ReactNode }) => (
+  <CapabilitiesFixture on={["templates"]}>{children}</CapabilitiesFixture>
+);
+const TemplatesOff = ({ children }: { children: ReactNode }) => (
+  <CapabilitiesFixture on={[]}>{children}</CapabilitiesFixture>
+);
 const TOTAL_ITEMS = 4;
 
 const DEFAULT_CYCLING_ZONES = {
@@ -91,12 +100,34 @@ describe("useSetupChecklist", () => {
   });
   afterEach(clearTables);
 
+  it("should leave the Templates step out while Templates is off", async () => {
+    // Arrange
+    await seedProfile();
+
+    // Act
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOff,
+    });
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current.dismissed).toBe(false);
+    });
+    expect(result.current.items.map((item) => item.id)).toEqual([
+      "create-workout",
+      "set-thresholds",
+      "log-wellness",
+    ]);
+  });
+
   it("should report nothing done for a fresh profile", async () => {
     // Arrange
     await seedProfile();
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -112,7 +143,9 @@ describe("useSetupChecklist", () => {
     await seedProfile();
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -127,7 +160,9 @@ describe("useSetupChecklist", () => {
     await seedProfile(PROFILE_WITH_FTP);
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -148,7 +183,9 @@ describe("useSetupChecklist", () => {
     });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -164,7 +201,9 @@ describe("useSetupChecklist", () => {
       .put({ id: "w1", profileId: PROFILE_ID, date: "2026-07-28" });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -180,7 +219,9 @@ describe("useSetupChecklist", () => {
       .put({ id: "w2", profileId: "other-profile", date: "2026-07-28" });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -199,7 +240,9 @@ describe("useSetupChecklist", () => {
     });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -217,7 +260,9 @@ describe("useSetupChecklist", () => {
     });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -232,7 +277,9 @@ describe("useSetupChecklist", () => {
     await db.table("templates").put({ id: "t1", sport: "running", tags: [] });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -254,7 +301,9 @@ describe("useSetupChecklist", () => {
     await db.table<ConnectionRecord>("connections").put(record);
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -266,7 +315,9 @@ describe("useSetupChecklist", () => {
   it("should tick an item written after mount, without a re-render from the caller", async () => {
     // Arrange
     await seedProfile();
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
     await waitFor(() => {
       expect(result.current.dismissed).toBe(false);
     });
@@ -295,7 +346,9 @@ describe("useSetupChecklist", () => {
     await db.table<UserPreferences>("userPreferences").put(prefs);
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -306,7 +359,9 @@ describe("useSetupChecklist", () => {
   it("should persist the dismissal to the userPreferences row", async () => {
     // Arrange
     await seedProfile();
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
     await waitFor(() => {
       expect(result.current.dismissed).toBe(false);
     });
@@ -330,7 +385,9 @@ describe("useSetupChecklist", () => {
     // Arrange
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {
@@ -353,7 +410,9 @@ describe("useSetupChecklist", () => {
     await db.table("templates").put({ id: "t2", sport: "cycling", tags: [] });
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOn,
+    });
 
     // Assert
     await waitFor(() => {

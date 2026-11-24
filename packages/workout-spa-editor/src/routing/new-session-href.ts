@@ -1,3 +1,4 @@
+import { capabilityHome } from "../lib/capabilities/capability-catalogue";
 import { isValidCalendarDate } from "../utils/is-valid-calendar-date";
 import { parseBackOrigin } from "./back-origin";
 import { calendarWeekHref } from "./calendar-week-href";
@@ -37,7 +38,8 @@ export function buildNewSessionHref(
   if (week) params.set("week", week);
   if (from) params.set("from", from);
   if (mode === "blank" && sport) params.set("sport", sport);
-  const path = mode === "template" ? "/library" : "/workout/new";
+  const path =
+    mode === "template" ? capabilityHome("templates") : "/workout/new";
   const query = params.toString();
   return query ? `${path}?${query}` : path;
 }

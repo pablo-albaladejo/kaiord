@@ -7,9 +7,9 @@ import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes"
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import type { SourceCapabilitySignals } from "./authority-options";
 import type { RouteToggleSignals } from "./data-type-route-toggles";
 import { optionsByType, togglesByType } from "./routing-by-type";
-import type { SourceCapabilitySignals } from "./source-of-truth-options";
 
 const signals = (
   announced: Record<string, readonly string[]> = {}
@@ -68,7 +68,7 @@ describe("optionsByType", () => {
 
     // Assert
     expect(options.get("weight")?.mode).toBe("priority");
-    expect(options.get("sleep")?.mode).toBe("union");
+    expect(options.get("sleep")?.mode).toBe("automatic");
   });
 });
 

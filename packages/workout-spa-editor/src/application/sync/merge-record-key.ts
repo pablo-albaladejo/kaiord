@@ -14,6 +14,7 @@ const PRIMARY_KEYS: Readonly<Record<string, ReadonlyArray<string>>> = {
   meta: ["key"],
   syncState: ["source"],
   userPreferences: ["profileId"],
+  capabilityDecisions: ["profileId", "capabilityId"],
   autoMatchDismissals: ["profileId", "weekStart"],
   coachingSyncState: ["source", "profileId"],
   bridges: ["extensionId"],

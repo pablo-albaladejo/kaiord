@@ -20,6 +20,7 @@ React contexts that scope shared runtime state across the tree. Used for cross-c
 - `focus-telemetry-context.tsx` / `.test.tsx` — re-exports the telemetry context from `store/providers` and provides a no-op default.
 - `athlete-zones-context.tsx` / `.test.tsx` — the active `Profile`, published by the Calendar and Daily pages so every card resolves training thresholds from the one live query the page already runs. Answers `null` outside a provider (the consumer degrades to zone/percent-FTP targets) rather than throwing, because cards render in storybook and in unit tests without one.
 - `train2go-zones-sync-context.tsx` — zones-sync orchestration state.
+- `capabilities-context.tsx` / `.test.tsx` — the Capabilities read API: `CapabilitiesProvider` (carries a store handle from `hooks/capabilities/capability-store.ts`, writes through `usePersistence()`), `useCapabilities()` (throws outside its provider) and `CapabilitiesFixture` for stories and tests. Holds no persisted data: the decisions are read live from Dexie.
 - `index.ts` — module export surface for the most-used providers (`AnalyticsProvider`, `GarminBridgeProvider`, `SettingsDialogProvider`, `ThemeProvider` + `useTheme`).
 
 ## For AI Agents

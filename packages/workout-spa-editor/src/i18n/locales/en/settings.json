@@ -12,6 +12,8 @@
   },
   "tabs": {
     "general": "General",
+    "capabilities": "Capabilities",
+    "authority": "Which Platform decides",
     "ai": "AI",
     "sync": "Sync",
     "data": "Data & backup",
@@ -293,5 +295,31 @@
     "estimated_other": "{{count}} requests were cut before their Provider reported the tokens used (a Stop, a timeout or a dropped connection); their cost is an estimate from the length of each request and of the text received.",
     "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
     "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost."
+  },
+  "capabilities": {
+    "intro": "Turn on the parts of Kaiord you use beyond your days and your calendar. Turning one off again hides it and keeps its data.",
+    "grade": {
+      "advanced": "Advanced"
+    },
+    "items": {
+      "templates": {
+        "name": "Templates",
+        "hint": "Keep a Workout as a Template in the Library and schedule it on any Day."
+      },
+      "authority-matrix": {
+        "name": "Choose which Platform decides",
+        "hint": "When more than one Platform reports the same kind of data, Kaiord picks the one that decides. Turn this on to choose it yourself for each kind."
+      }
+    }
+  },
+  "authority": {
+    "intro": "When more than one Platform reports the same kind of data, Kaiord picks the one that decides. A choice here overrides Kaiord's while this stays on; turned off, Kaiord decides again and your choices are kept for next time.",
+    "empty": "Only one source reports each kind of data, so there is nothing to choose.",
+    "choose": "Which source decides {{type}}",
+    "automatic": "Automatic",
+    "automaticNow": "Kaiord picks {{name}} for {{type}}; a value you enter yourself wins on its day.",
+    "picked": "{{name}} decides {{type}}; the others are used on days it has nothing.",
+    "keepsAll": "Kaiord keeps every source's {{type}} side by side.",
+    "stalled": "Nothing is being read for {{type}}: the source you chose is switched off. Pick another, or Automatic."
   }
 }

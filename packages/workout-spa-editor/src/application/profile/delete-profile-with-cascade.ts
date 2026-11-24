@@ -8,7 +8,7 @@
  *
  * The cascade covers every per-profile repository: workouts, coaching
  * activities, coaching day notes, coaching sync state, session matches,
- * auto-match dismissals, and user preferences. Each repository's deletion method
+ * auto-match dismissals, user preferences and Capability decisions. Each repository's deletion method
  * is called once with the deleted profile id. As of Dexie v13 workouts
  * are profile-scoped 1–1 (see `dexie-v13-migration.ts`), so they are
  * included in the cascade — `isPerProfileTable` also auto-discovers
@@ -27,6 +27,7 @@
 
 import type { AiModelBindingRepository } from "../../ports/ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
+import type { CapabilityDecisionRepository } from "../../ports/capability-decision-repository";
 import type { ChatConversationRepository } from "../../ports/chat-conversation-repository";
 import type { ChatMessageRepository } from "../../ports/chat-message-repository";
 import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
@@ -55,6 +56,7 @@ export type DeleteProfileWithCascadeDeps = {
   sessionMatch: SessionMatchRepository;
   autoMatchDismissal: AutoMatchDismissalRepository;
   userPreferences: UserPreferencesRepository;
+  capabilityDecisions: CapabilityDecisionRepository;
   // Cross-table cleanup for the six v16 health-domain stores.
   // Per-metric typed repositories ship in follow-up commits.
   healthCleanup: HealthCleanupRepository;
@@ -92,6 +94,7 @@ export const deleteProfileWithCascade = async (
     deps.sessionMatch.deleteByProfile(deletedProfileId),
     deps.autoMatchDismissal.deleteByProfile(deletedProfileId),
     deps.userPreferences.delete(deletedProfileId),
+    deps.capabilityDecisions.deleteByProfile(deletedProfileId),
     deps.healthCleanup.deleteByProfile(deletedProfileId),
     deps.chatMessages.deleteByProfile(deletedProfileId),
     deps.chatConversations.deleteByProfile(deletedProfileId),

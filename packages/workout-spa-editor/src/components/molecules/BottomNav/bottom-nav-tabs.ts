@@ -1,5 +1,5 @@
 import { ATHLETE_PATH, ATHLETES_PATH } from "../../../routing/constants";
-import { NAV_DESTINATIONS } from "../../../routing/nav-destinations";
+import type { NavDestination } from "../../../routing/nav-destinations";
 import type { IconName } from "../../atoms/Icon";
 
 export type BottomNavTab = {
@@ -10,21 +10,31 @@ export type BottomNavTab = {
 };
 
 /**
- * Tab order matches the floating bottom-nav layout: the FAB occupies a
- * visual notch between Library and Nutrition (the central slot of the
- * five tabs), keeping the raised create button centered on the bar.
+ * Tab order is registry order; the FAB sits in a notch at the bar's middle
+ * (see `notchIndexOf`).
  *
  * Derived from the single nav-destinations registry
- * (`src/routing/nav-destinations.ts`) — add or remove a destination's
- * `surfaces.bottomNav` flag there instead of hand-editing this list.
+ * (`src/routing/nav-destinations.ts`) among the destinations the athlete is
+ * offered — add or remove a destination's `surfaces.bottomNav` flag there
+ * instead of hand-editing a list.
  */
-export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = NAV_DESTINATIONS.filter(
-  (destination) => destination.surfaces.bottomNav
-).map((destination) => ({
-  id: destination.id,
-  icon: destination.icon,
-  path: destination.path,
-}));
+export const bottomNavTabsOf = (
+  destinations: readonly NavDestination[]
+): readonly BottomNavTab[] =>
+  destinations
+    .filter((destination) => destination.surfaces.bottomNav)
+    .map((destination) => ({
+      id: destination.id,
+      icon: destination.icon,
+      path: destination.path,
+    }));
+
+/**
+ * The tab the FAB notch renders before: the middle of the bar, rounding to
+ * the right, so five tabs read 3 + FAB + 2 and four read 2 + FAB + 2.
+ */
+export const notchIndexOf = (tabCount: number): number =>
+  Math.ceil(tabCount / 2);
 
 /**
  * Derives whether a tab is active for the current location.

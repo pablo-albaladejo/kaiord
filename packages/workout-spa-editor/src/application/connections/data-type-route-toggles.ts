@@ -2,7 +2,7 @@
  * Which sources MAY send one data type (or, for `export`, which destinations
  * MAY receive it), and whether each is switched on.
  *
- * This is a different question from `source-of-truth-options`, and conflating
+ * This is a different question from `authority-options`, and conflating
  * them is what left the capability unreachable: that module ranks the sources
  * a type already has, while this one decides whether a route exists at all.
  * A type with no enabled route has nothing to rank, so a ranking control alone
@@ -16,7 +16,7 @@
  *  - A route that is OFF is listed only when its bridge is connected AND is
  *    announcing the wire token for this type right now. `announces` answers
  *    false while a bridge is unverified, which is the conservative half of the
- *    same asymmetry `source-of-truth-options` documents: offering to switch on
+ *    same asymmetry `authority-options` documents: offering to switch on
  *    a route that cannot carry anything would create exactly the phantom the
  *    retired matrix rendered as `na`.
  */

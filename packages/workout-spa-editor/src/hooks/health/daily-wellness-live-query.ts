@@ -3,6 +3,7 @@
  * across sources by `loadDailyWellness`. Reads the source policy too, so
  * a change to it re-runs the subscribing `useLiveQuery`.
  */
+import { createDexieCapabilityDecisionRepository } from "../../adapters/dexie/dexie-capability-decision-repository";
 import { createDexieDataTypeSourcePolicyRepository } from "../../adapters/dexie/dexie-data-type-source-policy-repository";
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexieHealthRecordRepository } from "../../adapters/dexie/dexie-health-record-repository";
@@ -21,6 +22,7 @@ const deps: DailyWellnessReadDeps = {
   ),
   dataTypeSourcePolicy: createDexieDataTypeSourcePolicyRepository(db),
   integrationPolicy: createDexieIntegrationPolicyRepository(db),
+  capabilityDecisions: createDexieCapabilityDecisionRepository(db),
 };
 
 export const queryDailyWellnessRangeAsync = (

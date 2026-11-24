@@ -46,9 +46,19 @@ describe("buildDataRouteAnswer", () => {
     expect(answer.sourcePolicy).toEqual({ mode: "union", sourceOrder: [] });
   });
 
-  it("should surface a persisted source policy's mode and order", async () => {
+  it("should surface a persisted source policy's mode and the order it reads", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
+    await persistence.integrationPolicy.put({
+      id: "ip-1",
+      profileId: PROFILE_ID,
+      dataType: "planned-session",
+      bridgeId: "train2go-bridge",
+      direction: "import",
+      mode: "auto",
+      enabled: true,
+      updatedAt: "2026-07-01T00:00:00.000Z",
+    });
     await persistence.dataTypeSourcePolicy.put({
       profileId: PROFILE_ID,
       dataType: "planned-session",
@@ -106,7 +116,7 @@ describe("buildDataRouteAnswer", () => {
     expect(answer.effectiveSourceToday).toBeUndefined();
   });
 
-  it("should summarize union sources for a health data type", async () => {
+  it("should summarize the automatic Authority for a health data type nobody chose for", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.healthSleep.put({
@@ -132,9 +142,14 @@ describe("buildDataRouteAnswer", () => {
     });
 
     // Assert
+    expect(answer.sourcePolicy).toEqual({
+      mode: "automatic",
+      sourceOrder: ["manual", "fit-import", "whoop-bridge", "garmin-bridge"],
+    });
     expect(answer.effectiveSourceToday).toEqual({
-      mode: "union",
-      sources: ["whoop-bridge", "garmin-bridge"],
+      mode: "automatic",
+      effectiveSource: "whoop-bridge",
+      usedFallback: false,
     });
   });
 

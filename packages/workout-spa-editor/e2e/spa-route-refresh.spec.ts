@@ -16,6 +16,7 @@ import {
   type MergedDist,
   startMergedDist,
 } from "./fixtures/merged-dist-server";
+import { turnOnCapability } from "./helpers/turn-on-capability";
 
 const ENABLED = process.env.E2E_PROD_BASE === "1";
 const RENDER_TIMEOUT_MS = 15_000;
@@ -103,6 +104,8 @@ test.describe("@spa-route-refresh SPA routes on the static host", () => {
   test("keeps the route across a refresh, one document request each time", async ({
     page,
   }) => {
+    // Templates owns /library and is off for a new athlete: turn it on first.
+    await turnOnCapability(page, (r) => dist.routeUrl(r), /templates/i);
     const statuses = documentStatuses(page);
 
     await page.goto(dist.routeUrl("/library"), { waitUntil: "load" });

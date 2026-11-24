@@ -1,7 +1,5 @@
 import type { DataTypeRouteToggle } from "../../../application/connections/data-type-route-toggles";
 import type { DataTypeRoutingRow as RoutingRow } from "../../../application/connections/data-type-routing";
-import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
-import { canChooseSource } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
 import { RoutingExportTargets } from "./RoutingExportTargets";
 import { RoutingOriginLine } from "./RoutingOriginLine";
@@ -11,7 +9,6 @@ type Props = {
   row: RoutingRow;
   profileId: string;
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
-  options: SourceOfTruthOptions | undefined;
   toggles: readonly DataTypeRouteToggle[];
   exportToggles: readonly DataTypeRouteToggle[];
 };
@@ -32,17 +29,12 @@ export function DataTypeRoutingRow({
   row,
   profileId,
   lastSyncedAt,
-  options,
   toggles,
   exportToggles,
 }: Props) {
   const t = useTranslate("connections");
   const stalled = row.origin.kind === "rankedUnavailable";
-  // Either decision is enough to open the panel. Gating on `canChooseSource`
-  // alone is what made switching a route on unreachable: a type with no source
-  // has nothing to rank, which is exactly when it most needs a source.
-  const canChange =
-    options !== undefined && (toggles.length > 0 || canChooseSource(options));
+  const canChange = toggles.length > 0;
 
   return (
     <div
@@ -74,11 +66,10 @@ export function DataTypeRoutingRow({
         />
       )}
 
-      {canChange && options !== undefined && (
+      {canChange && (
         <RoutingSourcePicker
           dataType={row.dataType}
           profileId={profileId}
-          options={options}
           toggles={toggles}
         />
       )}

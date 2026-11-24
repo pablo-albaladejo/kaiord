@@ -7,13 +7,15 @@
  * sync, workout-generation, and manual-health use cases) so the
  * application layer never reaches into React or Dexie directly.
  */
-import type { ManagedDataType, MealSlot } from "@kaiord/core";
+import type { MealSlot } from "@kaiord/core";
 
 import type { PersistencePort } from "../../../ports/persistence-port";
-import type { DataTypeSourceMode } from "../../../types/data-type-source-policy";
-import type { IntegrationPolicyDirection } from "../../../types/integration-policy";
 import type { DataHubMatrixSignals } from "../../data-hub/build-data-hub-matrix";
 import type { ManualHealthMetric } from "../../health/manual-health-metric";
+import type {
+  SetAuthorityInput,
+  SetDataRouteInput,
+} from "./source-tool-inputs";
 
 export type ReadToolDeps = {
   persistence: PersistencePort;
@@ -48,29 +50,6 @@ export type PushToGarminInput = {
   workoutId: string;
 };
 
-/**
- * `set_data_route` input (F6). `integrationId` is the chat-facing
- * INTEGRATION_REGISTRY id (e.g. "whoop", "train2go"), resolved to the
- * IntegrationPolicy/DataTypeSourcePolicy storage key (the bridge id) by
- * the op implementation — see hooks/chat/do-set-data-route.ts. A
- * `set_source_policy` sourceOrder of a single integration id means "read
- * only from that source" (the resolver's reconciliation invariant already
- * ignores sources outside the order).
- */
-export type SetDataRouteInput =
-  | {
-      action: "enable_route" | "disable_route";
-      dataType: ManagedDataType;
-      integrationId: string;
-      direction: IntegrationPolicyDirection;
-    }
-  | {
-      action: "set_source_policy";
-      dataType: ManagedDataType;
-      mode: DataTypeSourceMode;
-      sourceOrder?: string[];
-    };
-
 export type ChatActionOps = {
   syncCoaching: () => Promise<unknown>;
   createWorkout: (input: CreateWorkoutInput) => Promise<unknown>;
@@ -78,6 +57,7 @@ export type ChatActionOps = {
   logIntake: (input: LogIntakeInput) => Promise<unknown>;
   pushToGarmin: (input: PushToGarminInput) => Promise<unknown>;
   setDataRoute: (input: SetDataRouteInput) => Promise<unknown>;
+  setAuthority: (input: SetAuthorityInput) => Promise<unknown>;
 };
 
 export type ChatToolDeps = ReadToolDeps & {
@@ -86,4 +66,6 @@ export type ChatToolDeps = ReadToolDeps & {
   healthShared?: boolean;
   /** One-shot snapshot provider for the get_data_routes read tool. */
   getMatrixSignals: () => Promise<DataHubMatrixSignals>;
+  /** False for a Tool an off Capability owns: it is not offered at all. */
+  offersTool: (toolName: string) => boolean;
 };

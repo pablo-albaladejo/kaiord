@@ -2,6 +2,7 @@ import { Suspense, useEffect } from "react";
 import { useLocation } from "wouter";
 
 import { AppRoutes } from "./AppRoutes";
+import { CapabilityRouteGate } from "./components/atoms/CapabilityGate/CapabilityRouteGate";
 import { MigrationBoot } from "./components/MigrationBoot";
 import { DefaultProfileNotice } from "./components/molecules/DefaultProfileNotice/DefaultProfileNotice";
 import { ProfileChoiceBanner } from "./components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
@@ -9,6 +10,7 @@ import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary"
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
+import { CapabilitiesProvider } from "./contexts/capabilities-context";
 import { useActiveProfileLive } from "./hooks/use-active-profile-live";
 import { useBridgeThemePush } from "./hooks/use-bridge-theme-push";
 import { useMatchDatesHeal } from "./hooks/use-match-dates-heal";
@@ -40,17 +42,22 @@ function App() {
 
   return (
     <AppToastProvider>
-      <MigrationBoot />
-      <SilentErrorBoundary name="keyboard-shortcuts">
-        <Suspense fallback={null}>
-          <AppKeyboardShortcuts />
-        </Suspense>
-      </SilentErrorBoundary>
-      <MainLayout>
-        <ProfileChoiceBanner />
-        <DefaultProfileNotice />
-        <AppRoutes analytics={analytics} />
-      </MainLayout>
+      <CapabilitiesProvider>
+        <MigrationBoot />
+        <SilentErrorBoundary name="keyboard-shortcuts">
+          <Suspense fallback={null}>
+            <AppKeyboardShortcuts />
+          </Suspense>
+        </SilentErrorBoundary>
+        <MainLayout>
+          <ProfileChoiceBanner />
+          <DefaultProfileNotice />
+          {/* A route an off Capability owns redirects to the Day. */}
+          <CapabilityRouteGate>
+            <AppRoutes analytics={analytics} />
+          </CapabilityRouteGate>
+        </MainLayout>
+      </CapabilitiesProvider>
     </AppToastProvider>
   );
 }

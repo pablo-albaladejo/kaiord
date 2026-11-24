@@ -169,7 +169,20 @@
   "zonesSync": {
     "shapeMismatch": "Train2Go sent zones Kaiord cannot read, so they were not synced.",
     "unsupported": "This coaching platform does not share zones.",
-    "notSynced": "Your zones were not synced."
+    "notSynced": "Your zones were not synced.",
+    "kept": {
+      "thresholds": "Train2Go has different thresholds from the ones you set. Kaiord kept yours.",
+      "zones": "Train2Go has different zones from the ones you set. Kaiord kept yours.",
+      "both": "Train2Go has different zones and thresholds from the ones you set. Kaiord kept yours."
+    },
+    "keptHint": "You can still use them later from the Athlete page.",
+    "takeTheirs": "Use Train2Go's",
+    "keepYours": "Keep mine",
+    "taken": {
+      "thresholds": "Kaiord now uses Train2Go's thresholds.",
+      "zones": "Kaiord now uses Train2Go's zones.",
+      "both": "Kaiord now uses Train2Go's zones and thresholds."
+    }
   },
   "sync": {
     "defaultLabel": "Coach",

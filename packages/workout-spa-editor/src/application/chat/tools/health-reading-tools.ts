@@ -20,5 +20,6 @@ export const NO_HEALTH_TOOLS: Readonly<Record<string, string>> = {
   log_health_metric: "the id of a value the athlete just gave",
   log_intake: "the id of a meal the athlete just gave",
   push_to_garmin: "the outcome of a send",
-  set_data_route: "the routing state of one kind of data",
+  set_data_route: "whether one source of one kind of data is on",
+  set_authority: "the Authority chosen for one kind of data",
 };

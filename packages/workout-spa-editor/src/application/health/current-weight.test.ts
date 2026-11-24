@@ -163,3 +163,98 @@ describe("loadLatestWeighIn — two weigh-ins on the same day", () => {
     }
   );
 });
+
+describe("loadLatestWeighIn — the Authority rule decides a day two sources weighed", () => {
+  const DAY = "2026-10-14";
+  const PROFILE_UUID = "00000000-0000-4000-8000-000000000001";
+  const SCALE_KG = 70.4;
+  const RELAYED_KG = 83;
+  const OWN_KG = 75;
+  const from = (
+    sourceBridgeId: string,
+    kg: number,
+    time: string,
+    date = DAY
+  ): HealthWeightRecord => ({
+    id: `${sourceBridgeId}-${date}`,
+    profileId: PROFILE_UUID,
+    date,
+    sourceBridgeId,
+    krd: {
+      kind: "weight",
+      version: "2.0",
+      measuredAt: `${date}T${time}.000Z`,
+      weightKilograms: kg,
+    },
+  });
+  const load = async (rows: HealthWeightRecord[]) => {
+    const persistence = createInMemoryPersistence();
+    for (const row of rows) await persistence.healthWeight.put(row);
+    return persistence;
+  };
+
+  it.each([
+    {
+      case: "the athlete's own entry over a later Train2Go weigh-in",
+      rows: [
+        from("manual", OWN_KG, "07:00:00"),
+        from("train2go-bridge", RELAYED_KG, "09:00:00"),
+      ],
+      expected: OWN_KG,
+    },
+    {
+      case: "the scale over a later Train2Go weigh-in",
+      rows: [
+        from("train2go-bridge", RELAYED_KG, "09:00:00"),
+        from("tanita-bridge", SCALE_KG, "07:00:00"),
+      ],
+      expected: SCALE_KG,
+    },
+    {
+      case: "the later of the athlete's own two entries",
+      rows: [
+        from("manual", OWN_KG, "07:00:00"),
+        { ...from("manual", SCALE_KG, "10:00:00"), id: "manual-later" },
+        from("train2go-bridge", RELAYED_KG, "09:00:00"),
+      ],
+      expected: SCALE_KG,
+    },
+    {
+      case: "the most recent day, even when only Train2Go reported it",
+      rows: [
+        from("tanita-bridge", SCALE_KG, "07:00:00", "2026-10-13"),
+        from("train2go-bridge", RELAYED_KG, "09:00:00"),
+      ],
+      expected: RELAYED_KG,
+    },
+  ])("should read $case", async ({ rows, expected }) => {
+    // Arrange
+    const persistence = await load(rows);
+
+    // Act
+    const latest = await loadLatestWeighIn(persistence, PROFILE_UUID, DAY);
+
+    // Assert
+    expect(latest?.krd.weightKilograms).toBe(expected);
+  });
+
+  it("should follow the athlete's matrix choice while it is in force", async () => {
+    // Arrange
+    const persistence = await load([
+      from("tanita-bridge", SCALE_KG, "07:00:00"),
+      from("train2go-bridge", RELAYED_KG, "09:00:00"),
+    ]);
+    await persistence.dataTypeSourcePolicy.put({
+      profileId: PROFILE_UUID,
+      dataType: "weight",
+      mode: "priority",
+      sourceOrder: ["train2go-bridge", "tanita-bridge"],
+    });
+
+    // Act
+    const latest = await loadLatestWeighIn(persistence, PROFILE_UUID, DAY);
+
+    // Assert
+    expect(latest?.krd.weightKilograms).toBe(RELAYED_KG);
+  });
+});

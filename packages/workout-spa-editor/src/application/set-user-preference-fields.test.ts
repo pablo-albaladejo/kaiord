@@ -163,6 +163,32 @@ describe("setUserPreferenceFields", () => {
     expect(row?.calendarView).toBe("list");
   });
 
+  it("should keep a field this build does not know when it writes another", async () => {
+    // Arrange
+    const repository = createInMemoryUserPreferencesRepository();
+    const profileRepository = stubProfileRepo([stubProfile()]);
+    const newerRow = {
+      profileId: "p1",
+      calendarView: "grid" as const,
+      writtenByANewerBuild: { kept: true },
+      updatedAt: "2026-05-21T12:00:00.000Z",
+    };
+    await repository.put(newerRow);
+
+    // Act
+    await setUserPreferenceFields(
+      { profileId: "p1", patch: { calendarView: "list" } },
+      { clock: fixedClock, repository, profileRepository }
+    );
+
+    // Assert
+    expect(await repository.get("p1")).toEqual({
+      ...newerRow,
+      calendarView: "list",
+      updatedAt: "2026-05-22T12:00:00.000Z",
+    });
+  });
+
   it("should throw ProfileNotFoundError when profile is missing", async () => {
     // Arrange
     const repository = createInMemoryUserPreferencesRepository();

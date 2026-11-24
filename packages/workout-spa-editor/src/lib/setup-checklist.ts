@@ -11,6 +11,10 @@
 
 import { withOrigin } from "../routing/with-origin";
 import type { Profile } from "../types/profile";
+import {
+  capabilityHome,
+  type InScreenSurfaceId,
+} from "./capabilities/capability-catalogue";
 
 export type SetupChecklistItemId =
   "create-workout" | "set-thresholds" | "log-wellness" | "save-to-library";
@@ -21,6 +25,8 @@ export type SetupChecklistItem = {
   readonly hintKey: string;
   readonly done: boolean;
   readonly href: string;
+  /** Shown only while the Capability owning this part is on. */
+  readonly surface?: InScreenSurfaceId;
 };
 
 export type SetupChecklistSignals = {
@@ -80,6 +86,7 @@ export const buildSetupChecklistItems = (
     titleKey: "items.saveToLibrary.title",
     hintKey: "items.saveToLibrary.hint",
     done: signals.hasTemplate,
-    href: "/library",
+    href: capabilityHome("templates"),
+    surface: "setup-save-to-library",
   },
 ];

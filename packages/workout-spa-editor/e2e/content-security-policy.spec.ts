@@ -13,6 +13,7 @@ import {
   type MergedDist,
   startMergedDist,
 } from "./fixtures/merged-dist-server";
+import { turnOnCapability } from "./helpers/turn-on-capability";
 
 const ENABLED = process.env.E2E_PROD_BASE === "1";
 const BOOT_TIMEOUT_MS = 15_000;
@@ -147,7 +148,8 @@ test.describe("@csp content security policy on the built App", () => {
 
     const seen: Violation[] = [];
 
-    // Act
+    // Act: Templates owns /library and is off for a new athlete.
+    await turnOnCapability(page, (r) => dist.routeUrl(r), /templates/i);
     for (const { route, testId } of PAGES) {
       await page.goto(dist.routeUrl(route));
       await expect(page.getByTestId(testId)).toBeVisible({

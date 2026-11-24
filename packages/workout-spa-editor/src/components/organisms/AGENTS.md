@@ -10,6 +10,7 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 ## Subdirectories
 
 - `AiWorkoutInput/` — AI workout generation form. Natural-language prompt + provider picker + zones context indicator + cost preview.
+- `AuthorityMatrix/` — the advanced Capability "Choose which Platform decides" (Settings section `authority`): per kind of data, Automatic or a source.
 - `AutoMatchBanner/` — top-of-calendar banner suggesting auto-match opportunities.
 - `BatchCostConfirmation/` — confirmation dialog for AI batch conversion with rolled-up cost estimate.
 - `CoachingSidebar/` — left-side coaching list on the calendar.
@@ -19,7 +20,6 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 - `WorkoutList/` — the editor's main list (steps + blocks), with `@dnd-kit/sortable` reordering.
 - `WorkoutStats/` — duration / distance / TSS panel.
 - `ZoneEditor/` — sport-specific zone editor used by `AthleteZonesPage`.
-- `ZonesConflictDialog/` — surface conflicts when pushing zones to Train2Go.
 
 ## For AI Agents
 

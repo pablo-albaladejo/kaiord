@@ -41,6 +41,7 @@ const TOOLS = buildChatTools({
   today: "2026-11-23",
   actions: {} as never,
   getMatrixSignals: async () => ({}) as never,
+  offersTool: () => true,
 }).map((tool) => tool.name);
 
 describe("chatToolKinds", () => {

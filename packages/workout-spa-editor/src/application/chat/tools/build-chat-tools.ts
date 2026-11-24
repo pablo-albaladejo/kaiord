@@ -14,6 +14,7 @@ import { createQueryCoachingTool } from "./query-coaching-tool";
 import { createQueryEnergyBalanceTool } from "./query-energy-balance-tool";
 import { createQueryHealthTool } from "./query-health-tool";
 import { createQueryWorkoutsTool } from "./query-workouts-tool";
+import { createSetAuthorityTool } from "./set-authority-tool";
 import { createSetDataRouteTool } from "./set-data-route-tool";
 import { withholdHealth } from "./withhold-health";
 
@@ -21,7 +22,8 @@ import { withholdHealth } from "./withhold-health";
  * Assembles the full chat tool registry for one conversation. Read tools
  * are bound to profile-scoped persistence; action tools are bound to the
  * injected, confirmation-gated operations. Unless the athlete shares their
- * health data with this Provider, the health tools read nothing. Passed
+ * health data with this Provider, the health tools read nothing. A Tool an
+ * off Capability owns is not offered, so the model never sees it. Passed
  * straight to `createChatAgent({ tools })`.
  */
 export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
@@ -46,6 +48,10 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     createLogIntakeTool(deps.actions),
     createPushToGarminTool(deps.actions),
     createSetDataRouteTool(deps.actions),
+    createSetAuthorityTool(deps.actions),
   ];
-  return withholdHealth(tools, deps.healthShared === true);
+  return withholdHealth(
+    tools.filter((tool) => deps.offersTool(tool.name)),
+    deps.healthShared === true
+  );
 };

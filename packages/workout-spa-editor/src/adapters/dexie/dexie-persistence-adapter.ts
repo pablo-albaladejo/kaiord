@@ -9,6 +9,7 @@ import { createDexieActivityRepository } from "./dexie-activity-repository";
 import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
+import { createDexieCapabilityDecisionRepository } from "./dexie-capability-decision-repository";
 import { createDexieChatConversationRepository } from "./dexie-chat-conversation-repository";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-notes-repository";
@@ -55,6 +56,7 @@ export function createDexiePersistence(
     matchedSessionsReadModel: createDexieMatchedSessionsReadModel(database),
     autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
     userPreferences: createDexieUserPreferencesRepository(database),
+    capabilityDecisions: createDexieCapabilityDecisionRepository(database),
     healthCleanup: createDexieHealthCleanupRepository(database),
     activities: createDexieActivityRepository(database),
     importedRecords: createDexieImportedRecordRepository(database),

@@ -1,29 +1,44 @@
 /**
- * DataTypeSourcePolicy — per-(profile, dataType) multi-source semantics.
+ * DataTypeSourcePolicy — the athlete's own choice of Authority for one
+ * (profile, dataType), made in the matrix Capability or through the
+ * assistant's `set_authority`.
  *
  * Companion to IntegrationPolicy, not an extension of it: IntegrationPolicy
  * is keyed per-bridge ([profileId+dataType+direction+bridgeId]); this is
  * keyed per-type ([profileId+dataType]) and says how to reconcile MULTIPLE
- * bridges importing the same data type — "union" (show every source) or
- * "priority" (one winner, ranked by `sourceOrder`). Extending
+ * sources of the same data type — "union" (keep and show every source),
+ * "priority" (one winner, ranked by `sourceOrder`) or "automatic" (the
+ * athlete handed the type back to the App's rule). Extending
  * IntegrationPolicy would denormalize the per-type semantic across every
  * per-bridge row (update anomaly) — see F3.1 decision.
  *
- * No row for a (profileId, dataType) pair means the default: "union".
+ * No row, a row marked `automatic`, or a row while the matrix is off means
+ * the App's automatic Authority
+ * (`application/data-source-policy/automatic-authority.ts`).
  */
 import { managedDataTypes } from "@kaiord/core";
 import { z } from "zod";
 
+/** What the assistant may ask for. */
 export const dataTypeSourceModeSchema = z.enum(["union", "priority"]);
 export type DataTypeSourceMode = z.infer<typeof dataTypeSourceModeSchema>;
 
-export const DEFAULT_DATA_TYPE_SOURCE_MODE: DataTypeSourceMode = "union";
+/* "automatic" is only read: rows written before the `automatic` marker. */
+const storedSourceModeSchema = z.enum(["union", "priority", "automatic"]);
+export type StoredSourceMode = z.infer<typeof storedSourceModeSchema>;
 
 export const dataTypeSourcePolicySchema = z.object({
   profileId: z.string().uuid(),
   dataType: z.enum(managedDataTypes),
-  mode: dataTypeSourceModeSchema,
+  mode: storedSourceModeSchema,
   /** Bridge ids in priority order (only meaningful when mode="priority"). */
   sourceOrder: z.array(z.string()),
+  /**
+   * The athlete handed the kind back to the App's rule ("Automatic" in the
+   * matrix). The row then carries the rule's own order (`priority`, or
+   * `union` for a kind kept side by side), which a build that predates this
+   * marker reads with the same result.
+   */
+  automatic: z.literal(true).optional(),
 });
 export type DataTypeSourcePolicy = z.infer<typeof dataTypeSourcePolicySchema>;
