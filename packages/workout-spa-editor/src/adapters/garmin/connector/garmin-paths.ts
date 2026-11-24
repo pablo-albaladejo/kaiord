@@ -13,6 +13,9 @@ export const GARMIN_ACTIVITIES_PATH =
 export const garminSchedulePath = (id: string): string =>
   `/workout-service/schedule/${id}`;
 
+export const garminLibraryWorkoutPath = (id: string): string =>
+  `${GARMIN_WORKOUT_PATH}/${id}`;
+
 // Garmin's month parameter is 0-based: October is month 9.
 export const garminMonthPath = (date: string): string =>
   `/calendar-service/year/${date.slice(0, 4)}/month/${Number(date.slice(5, 7)) - 1}`;

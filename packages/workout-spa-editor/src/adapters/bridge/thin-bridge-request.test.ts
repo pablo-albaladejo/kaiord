@@ -83,6 +83,24 @@ describe("callThroughBridge", () => {
     expect(res).toBe(legacyAnswer);
   });
 
+  it("should send nothing more to an extension one protocol behind when the call has no legacy action", async () => {
+    // Arrange
+    const send = vi.fn(async () => OLDER);
+    const current = {
+      method: call.method,
+      path: call.path,
+      body: call.body,
+      read: call.read,
+    };
+
+    // Act
+    const res = await callThroughBridge(send, current);
+
+    // Assert
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(res).toBe(OLDER);
+  });
+
   it("should not fall back when a current extension refuses", async () => {
     // Arrange
     const refusal = {

@@ -208,6 +208,63 @@ describe("mergeGarminLedgerRows", () => {
     expect(merged.updatedAt).toBe(NEWER_AT);
   });
 
+  it("should join the library versions Kaiord created, a deletion outranking a superseded one", () => {
+    // Arrange
+    const V1 = "1707800001";
+    const V2 = "1707800002";
+    const older = row("id-a", OLDER_AT, {
+      libraryVersions: [
+        { workoutId: V1, created: true, state: "deleted" },
+        { workoutId: V2, created: true, state: "superseded" },
+      ],
+    });
+    const newer = row("id-b", NEWER_AT, {
+      libraryVersions: [{ workoutId: V1, created: true, state: "superseded" }],
+    });
+
+    // Act
+    const merged = mergeBothWays(older, newer);
+
+    // Assert
+    expect(merged.libraryVersions).toEqual([
+      { workoutId: V1, created: true, state: "deleted" },
+      { workoutId: V2, created: true, state: "superseded" },
+    ]);
+    expect(mergeBothWays(older, merged)).toStrictEqual(merged);
+  });
+
+  it("should keep the older row's library workout as a superseded version when the newer row's wins", () => {
+    // Arrange
+    const OTHER = "1707800009";
+    const older = row("id-a", OLDER_AT, {
+      library: { kind: "confirmed", workoutId: OTHER },
+    });
+    const newer = row("id-b", NEWER_AT);
+
+    // Act
+    const merged = mergeBothWays(older, newer);
+
+    // Assert
+    expect(merged.library).toEqual({ kind: "confirmed", workoutId: W });
+    expect(merged.libraryVersions).toEqual([
+      { workoutId: OTHER, created: true, state: "superseded" },
+    ]);
+    expect(mergeBothWays(merged, older)).toStrictEqual(merged);
+    expect(mergeBothWays(merged, newer)).toStrictEqual(merged);
+  });
+
+  it("should add no library version when both rows hold the same library workout", () => {
+    // Arrange
+    const older = row("id-a", OLDER_AT);
+    const newer = row("id-b", NEWER_AT);
+
+    // Act
+    const merged = mergeBothWays(older, newer);
+
+    // Assert
+    expect(merged).not.toHaveProperty("libraryVersions");
+  });
+
   it("should keep the uncertain and drain nothing when a stale Placed is gone elsewhere", () => {
     // Arrange
     const stale = row("id-a", NEWER_AT, {

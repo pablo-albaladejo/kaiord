@@ -341,6 +341,12 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
+    "never one you created, and keeps an earlier version",
+    "and also yours, and keeps an earlier version",
+    "Garmin library delete limited to versions Kaiord created and no entry uses",
+  ],
+  [
+    GARMIN,
     "filtered in the Kaiord App, in your browser",
     "processed somewhere",
     "Garmin calendar read filtered on the device",

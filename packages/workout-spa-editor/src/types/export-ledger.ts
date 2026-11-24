@@ -6,6 +6,7 @@ import {
   garminLibraryStateSchema,
   garminPlacementSchema,
 } from "./garmin-ledger";
+import { garminLibraryVersionSchema } from "./garmin-library-version";
 import { garminRemovalEntrySchema } from "./garmin-removal-entry";
 
 export const exportLedgerEntrySchema = z.object({
@@ -22,6 +23,9 @@ export const exportLedgerEntrySchema = z.object({
   // Garmin workout rows only (see isGarminWorkoutLedgerRow): the library
   // push state, the calendar placement and the superseded entries to delete.
   library: garminLibraryStateSchema.optional(),
+  // The earlier library workouts Kaiord created for this record, deleted
+  // once no calendar entry uses them (placement-library-cleanup).
+  libraryVersions: z.array(garminLibraryVersionSchema).optional(),
   forceRepush: z.literal(true).optional(),
   // TrainingPeaks workout rows only: the payload's `workoutDay`, the day the
   // confirmed copy sits on there (create-only destination, so a re-push of a

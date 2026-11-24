@@ -69,6 +69,10 @@
         "pattern": "^\\/workout-service\\/schedule\\/[1-9]\\d*$"
       },
       {
+        "method": "DELETE",
+        "pattern": "^\\/workout-service\\/workout\\/[1-9]\\d*$"
+      },
+      {
         "method": "GET",
         "pattern": "^\\/calendar-service\\/year\\/\\d{4}\\/month\\/\\d{1,2}$"
       }

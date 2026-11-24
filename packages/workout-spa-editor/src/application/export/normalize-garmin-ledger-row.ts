@@ -16,6 +16,8 @@
  *   drained. The id of a `scheduled` placement or `previous` is `keep`
  *   unless the queue already gives it a state. The queue is joined by id
  *   and sorted, as the merge emits it.
+ * - `libraryVersions` keeps only valid versions Kaiord created, one per id
+ *   at its highest state, in id order.
  *
  * Rows of any other destination or data type are returned untouched.
  */
@@ -30,6 +32,7 @@ import {
   garminPlacementSchema,
   parseGarminWorkoutId,
 } from "../../types/garmin-ledger";
+import { parseLibraryVersions } from "../../types/garmin-library-version";
 import {
   type GarminRemovalEntry,
   garminRemovalEntrySchema,
@@ -101,5 +104,8 @@ export function normalizeGarminLedgerRow<T extends Row | ExportLedgerEntry>(
   if (queue.length > 0 || Array.isArray(source.removalQueue))
     next.removalQueue = queue;
   else delete next.removalQueue;
+  const versions = parseLibraryVersions(source.libraryVersions);
+  if (versions.length > 0) next.libraryVersions = versions;
+  else delete next.libraryVersions;
   return next as T;
 }

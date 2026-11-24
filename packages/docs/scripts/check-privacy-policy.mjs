@@ -109,7 +109,7 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 15,
+  [GARMIN_SECTION]: 16,
   [TRAIN2GO_SECTION]: 12,
   [TANITA_SECTION]: 13,
   [TRAININGPEAKS_SECTION]: 18,
@@ -241,7 +241,13 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar delete limited to superseded Kaiord-placed entries",
     section: GARMIN_SECTION,
-    re: /deletes the old entry that Kaiord itself placed and has since superseded[\s\S]*?never deletes library workouts/i,
+    re: /deletes the old entry that Kaiord itself placed and has since superseded[\s\S]*?never deletes entries of other workouts/i,
+  },
+  {
+    label:
+      "Garmin library delete limited to versions Kaiord created and no entry uses",
+    section: GARMIN_SECTION,
+    re: /deletes the earlier version from your Garmin Connect workout library \(a library delete\)\. It deletes only library workouts that Kaiord's record holds as created by Kaiord, never one you created, and keeps an earlier version while it has a calendar entry/i,
   },
   {
     label: "Garmin calendar read filtered on the device",

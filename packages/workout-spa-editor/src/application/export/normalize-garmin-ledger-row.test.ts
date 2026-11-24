@@ -200,6 +200,30 @@ describe("normalizeGarminLedgerRow", () => {
     expect(next).not.toHaveProperty("forceRepush");
   });
 
+  it("should keep only the valid library versions Kaiord created, one per id", () => {
+    // Arrange
+    const row = garminRow({
+      libraryVersions: [
+        { workoutId: "1707800002", created: true, state: "superseded" },
+        { workoutId: "1707800001", created: true, state: "superseded" },
+        { workoutId: "1707800001", created: true, state: "deleted" },
+        { workoutId: "1707800003", state: "superseded" },
+        { workoutId: "0123", created: true, state: "superseded" },
+        "1707800004",
+      ],
+    });
+
+    // Act
+    const normalized = normalizeGarminLedgerRow(row);
+
+    // Assert
+    expect(normalized.libraryVersions).toEqual([
+      { workoutId: "1707800001", created: true, state: "deleted" },
+      { workoutId: "1707800002", created: true, state: "superseded" },
+    ]);
+    expect(normalizeGarminLedgerRow(normalized)).toStrictEqual(normalized);
+  });
+
   it("should be idempotent", () => {
     // Arrange
     const row = garminRow({

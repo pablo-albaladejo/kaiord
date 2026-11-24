@@ -203,3 +203,23 @@
       what the code does: deletes only entries Kaiord's record holds as
       placed by Kaiord, and reads the calendar before every placement and
       on every unchanged re-send.
+
+## 11. Library workouts Kaiord created (owner decision 2026-11-23, #1633)
+
+- [x] 11.1 Closed list: `DELETE /workout-service/workout/<id>`, no body, only
+      through the exact App origin; extension tests, privacy-surface golden.
+- [x] 11.2 Connector: `GarminLibraryPort.remove`, request only (no legacy
+      action); contract tests against the real closed list.
+- [x] 11.3 Record: `libraryVersions` (`created`, `superseded` < `deleted`)
+      written by the commit, joined by the merge (older row's library id
+      added), parsed by the normalizer.
+- [x] 11.4 `cleanLibrary` after the drain: delete only a superseded version
+      Kaiord created that the row no longer uses and two settled reads of
+      each known month prove unused; a failed delete is retried next send.
+- [x] 11.5 Message-contract tests (`hooks/garmin-library-cleanup.test.ts`)
+      with the fake Garmin speaking protocol 2.
+- [x] 11.6 Store listing (en, es), justification, privacy policy, its
+      checker rules and solo cases, and `claims/garmin.json`.
+- [ ] 11.7 The interrupted library create: needs the owner's live capture of
+      how Garmin lists its library (design "Library workouts settled
+      2026-11-23").

@@ -90,6 +90,39 @@ Before it reports `unchanged` for a `scheduled` `Placed` equal to the desired pl
 - **WHEN** the athlete sends, sends again, moves and edits a Workout
 - **THEN** every one of those entries and library workouts SHALL remain unchanged, and no id among them SHALL be sent to `unschedule`
 
+### Requirement: An earlier library version Kaiord created is deleted once unused
+
+The ledger row SHALL record, in `libraryVersions`, every library workout id that a commit replaced and that came from Kaiord's own push (`created: true`, `superseded` then `deleted`). At the end of a run that holds a settled placement, the pipeline SHALL send `DELETE /workout-service/workout/<id>` only for a `superseded` version that the row no longer uses (not the current library, the placement's, its `previous`'s, nor any queue entry's that is not `gone`) and that two reads `SETTLE_MS` apart show unused in every month the record knows it in. A failed read or a failed delete SHALL write nothing, and the next send SHALL try again. An id the record did not get from Kaiord's own push SHALL never be deleted.
+
+#### Scenario: An edit leaves one library workout
+
+- **GIVEN** a Workout sent to D1 and then edited
+- **WHEN** the edit is sent
+- **THEN** Garmin SHALL hold one library workout of it, placed on D1, and the earlier version SHALL have been deleted once
+
+#### Scenario: The athlete's workout of the same name is never deleted
+
+- **GIVEN** the athlete's own library workouts with the Workout's name, one of them on D1
+- **WHEN** the Workout is sent, edited and moved
+- **THEN** every one of the athlete's workouts SHALL remain, and none SHALL be sent a delete
+
+#### Scenario: A version still on another date is kept
+
+- **GIVEN** the athlete put the earlier version on D2 in Garmin Connect
+- **WHEN** the edit is sent
+- **THEN** the earlier version and its entry on D2 SHALL remain
+
+#### Scenario: A failed delete is retried
+
+- **GIVEN** Garmin refuses the delete of the earlier version
+- **WHEN** the edit is sent, and then the Workout is sent again
+- **THEN** after the first send Garmin and the record SHALL be as they were, and the second send SHALL delete it
+
+#### Scenario: Two tabs
+
+- **WHEN** two tabs send the edit at the same time
+- **THEN** each earlier version SHALL be sent one delete, and the current one none
+
 ### Requirement: One Web Lock per record serializes placement across tabs
 
 The pipeline SHALL run Phase 1 and Phase 2 inside `navigator.locks.request("garmin-place:" + kaiordRecordId, { ifAvailable: true }, run)`. A second push of the same record in the same tab SHALL join the running run: every joined caller SHALL receive the confirmed library id, `garmin-synced` SHALL be emitted once (by the owning run), and a joiner's date and "Send anyway" SHALL be dropped — a joiner that asked for another date SHALL get `failed:busy`, whose copy SHALL NOT claim another tab. When the lock is held elsewhere (`null`), the result SHALL be `failed:busy` (retryable) with 0 calls, including 0 library pushes. The lock SHALL be released when `run` settles, on success, failure or throw. An exception after Phase 1 succeeded (a ledger error in the claim, commit or drain, or a thrown port) SHALL return `failed{reason: "placement-interrupted", retryable: true}`, whose copy says the workout is in the library and a re-send places it — never the copy of a failed library push. The chat tool SHALL return that `reason` with `calendar: "failed"`, and any exception on its path SHALL become an app-authored error code, never the exception's text.

@@ -21,7 +21,7 @@ Kaiord for Garmin connects the Kaiord App (https://kaiord.com/app) to your Garmi
 What it does:
 
 • Sends the workouts you create in the Kaiord App to your Garmin Connect workout library.
-• Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added, and never deletes a library workout.
+• Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added. When you change a workout, it deletes from your library the earlier version Kaiord created, once that version has no calendar entry in the months where Kaiord placed it; it never deletes a library workout you created.
 • Reads your 20 most recent Garmin Connect activities for the Kaiord App.
 • Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.
 • Shows in its popup whether it can currently read from Garmin Connect.
@@ -53,7 +53,7 @@ Kaiord for Garmin conecta Kaiord App (https://kaiord.com/app) con tu cuenta de G
 Qué hace:
 
 • Envía los entrenamientos que creas en Kaiord App a tu biblioteca de entrenamientos de Garmin Connect.
-• Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú, y nunca borra un entrenamiento de la biblioteca.
+• Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú. Cuando cambias un entrenamiento, borra de tu biblioteca la versión anterior que creó Kaiord, en cuanto esa versión no tiene ninguna entrada en el calendario en los meses en que Kaiord la colocó; nunca borra un entrenamiento de la biblioteca que creaste tú.
 • Lee tus 20 actividades más recientes de Garmin Connect para Kaiord App.
 • Sube una medición de composición corporal (tu peso y los valores relacionados) a Garmin Connect cuando envías una desde Kaiord App.
 • Muestra en su ventana emergente si ahora mismo puede leer de Garmin Connect.
