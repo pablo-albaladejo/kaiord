@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PushWorkoutResult } from "../application/integrations/integration-ports";
-import { runPush } from "./use-garmin-bridge-action-helpers";
+import { runPush } from "./run-garmin-push";
 
-const executePush = vi.hoisted(() => vi.fn());
+const { executePush, loadOperations } = vi.hoisted(() => {
+  const executePush = vi.fn();
+  return { executePush, loadOperations: vi.fn(async () => ({ executePush })) };
+});
 
-vi.mock("../adapters/garmin/connector/garmin-workout-operations", () => ({
-  executePush,
+vi.mock("../adapters/garmin/connector/load-garmin-workout-operations", () => ({
+  loadGarminWorkoutOperations: loadOperations,
 }));
 
 vi.mock("../adapters/garmin/connector/garmin-ping-evaluation", () => ({
@@ -88,5 +91,30 @@ describe("runPush", () => {
       reason: "sign-in",
     });
     expect(redetect).toHaveBeenCalled();
+  });
+
+  it("should say the App did not load the send, never Garmin, when its code fails to load", async () => {
+    // Arrange
+    loadOperations.mockRejectedValueOnce(
+      new Error("Failed to fetch dynamically imported module")
+    );
+    const setPushing = vi.fn();
+    const redetect = vi.fn(async () => {});
+
+    // Act
+    const outcome = await runPush({}, setPushing, redetect);
+
+    // Assert
+    expect(setPushing).toHaveBeenLastCalledWith({
+      status: "error",
+      reason: "not-loaded",
+    });
+    expect(outcome).toEqual({
+      success: false,
+      garminWorkoutId: null,
+      notLoaded: true,
+    });
+    expect(executePush).not.toHaveBeenCalled();
+    expect(redetect).not.toHaveBeenCalled();
   });
 });

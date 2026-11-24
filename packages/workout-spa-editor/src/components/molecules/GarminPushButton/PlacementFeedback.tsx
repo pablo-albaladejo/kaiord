@@ -13,6 +13,7 @@ import {
   placementMessage,
   type PlacementTone,
 } from "./placement-message";
+import { ReloadAppButton } from "./ReloadAppButton";
 import { UncertainActions } from "./UncertainActions";
 
 const CONNECTIONS_HREF = "/connections";
@@ -68,6 +69,9 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
         <Link className="underline" href={CONNECTIONS_HREF}>
           {t("placement.openConnections")}
         </Link>
+      )}
+      {result.kind === "failed" && result.reason === "app-part-not-loaded" && (
+        <ReloadAppButton />
       )}
       {removable.map((e) => (
         <Button
