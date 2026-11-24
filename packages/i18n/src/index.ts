@@ -15,19 +15,3 @@ export {
   type LocaleResources,
   type NamespaceDictionary,
 } from "./types";
-export {
-  CONNECTION_FIXES,
-  connectionFix,
-  connectionNoTabNotice,
-  connectionNotCheckedText,
-  connectionNotice,
-  connectionReasonNotice,
-  type ConnectionFix,
-  type ConnectionNotice,
-  type ConnectionReason,
-  type ConnectionState,
-  type NotCheckedReason,
-  type NoTabNotice,
-  type ReasonNotice,
-  type ShownNotice,
-} from "./connection-notice";

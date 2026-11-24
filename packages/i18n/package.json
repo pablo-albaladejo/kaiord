@@ -11,6 +11,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./connection-notices": {
+      "import": "./dist/connection-notices.js",
+      "types": "./dist/connection-notices.d.ts"
     }
   },
   "files": [

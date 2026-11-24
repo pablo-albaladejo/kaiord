@@ -11,7 +11,7 @@
  * refuses `read-user-id` when it holds no id, and its `status` tells whether
  * a sign-in is held.
  */
-import type { ConnectionReason } from "@kaiord/i18n";
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
 import { z } from "zod";
 
 import { sendBridgeMessage } from "../../bridge/bridge-transport";

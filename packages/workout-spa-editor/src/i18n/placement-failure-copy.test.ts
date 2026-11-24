@@ -1,4 +1,4 @@
-import { connectionNotice } from "@kaiord/i18n";
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 import { describe, expect, it } from "vitest";
 
 import {

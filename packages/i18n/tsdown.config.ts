@@ -3,6 +3,7 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   entry: {
     index: "src/index.ts",
+    "connection-notices": "src/connection-notices-entry.ts",
   },
   format: ["esm"],
   dts: true,
