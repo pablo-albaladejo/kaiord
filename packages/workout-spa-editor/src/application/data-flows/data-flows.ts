@@ -7,7 +7,7 @@
  * dictionary. `withheld` marks a health flow to a Provider: what it does
  * when the athlete says no (goes without its health data, or does not go).
  */
-import { LLM_PROVIDER_TYPES } from "@kaiord/ai/providers";
+import { LLM_PROVIDER_TYPES } from "@kaiord/ai/provider-types";
 
 import {
   ASSISTANT_HEALTH_KINDS,

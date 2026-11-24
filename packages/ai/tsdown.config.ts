@@ -4,6 +4,9 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     providers: "src/providers/index.ts",
+    // The Provider list alone, without the model catalog and price table
+    // `providers` carries: the App's first load needs only the list.
+    "provider-types": "src/providers/types.ts",
     prompts: "src/prompts/index.ts",
     agents: "src/agents/index.ts",
     observability: "src/observability/index.ts",

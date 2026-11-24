@@ -67,6 +67,8 @@ import { gzipSync } from "node:zlib";
 // - `src/components/organisms/UpdatePrompt/UpdatePrompt.tsx` and
 //   `src/lib/service-worker/{watch-registration,apply-update}.ts` (behind
 //   `UpdatePromptGate` and the service worker's registration, after load)
+// - `ai/dist/providers.js` (the AI model catalog and price table: boot code
+//   that only needs the Provider list imports `@kaiord/ai/provider-types`)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -96,6 +98,7 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/components/organisms/UpdatePrompt/UpdatePrompt.tsx",
   "src/lib/service-worker/watch-registration.ts",
   "src/lib/service-worker/apply-update.ts",
+  "ai/dist/providers.js",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets

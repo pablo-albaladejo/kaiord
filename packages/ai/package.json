@@ -15,6 +15,10 @@
       "import": "./dist/providers.js",
       "types": "./dist/providers.d.ts"
     },
+    "./provider-types": {
+      "import": "./dist/provider-types.js",
+      "types": "./dist/provider-types.d.ts"
+    },
     "./prompts": {
       "import": "./dist/prompts.js",
       "types": "./dist/prompts.d.ts"

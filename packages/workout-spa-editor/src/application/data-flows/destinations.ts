@@ -4,7 +4,7 @@
  * reached through its extension, which a page policy does not govern.
  * Names are proper nouns, the same in every language.
  */
-import type { LlmProviderType } from "@kaiord/ai/providers";
+import type { LlmProviderType } from "@kaiord/ai/provider-types";
 
 import type { ExtensionId } from "../connections/extension-descriptors";
 

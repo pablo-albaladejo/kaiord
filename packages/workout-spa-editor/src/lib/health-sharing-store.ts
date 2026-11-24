@@ -5,7 +5,10 @@
  * Drive snapshot or a backup; "delete all data" clears it with the rest of
  * Web Storage. When storage throws, the answers last the session.
  */
-import { LLM_PROVIDER_TYPES, type LlmProviderType } from "@kaiord/ai/providers";
+import {
+  LLM_PROVIDER_TYPES,
+  type LlmProviderType,
+} from "@kaiord/ai/provider-types";
 import { z } from "zod";
 
 export const HEALTH_SHARING_KEY = "kaiord-health-sharing";

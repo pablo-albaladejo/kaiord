@@ -5,7 +5,7 @@
  * second time. Runs asking the same question share it; it is cancelled once
  * every run that asked it has stopped.
  */
-import type { LlmProviderType } from "@kaiord/ai/providers";
+import type { LlmProviderType } from "@kaiord/ai/provider-types";
 
 import type { HealthShare } from "../application/data-flows/data-flows";
 

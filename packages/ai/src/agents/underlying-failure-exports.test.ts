@@ -6,6 +6,7 @@ import packageJson from "../../package.json";
 const ENTRIES: Record<string, () => Promise<Record<string, unknown>>> = {
   ".": () => import("../index"),
   "./providers": () => import("../providers/index"),
+  "./provider-types": () => import("../providers/types"),
   "./prompts": () => import("../prompts/index"),
   "./agents": () => import("./index"),
   "./observability": () => import("../observability/index"),

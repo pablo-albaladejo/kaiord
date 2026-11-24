@@ -7,7 +7,7 @@
  * it waits gets an abort instead of an answer, and its question is taken off
  * the screen once no other run waits on it; `onWait` tells the run it waits.
  */
-import type { LlmProviderType } from "@kaiord/ai/providers";
+import type { LlmProviderType } from "@kaiord/ai/provider-types";
 
 import type {
   HealthFlowId,
