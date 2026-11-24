@@ -26,8 +26,9 @@ const EN_MODULES = import.meta.glob<NamespaceDictionary>(
   { eager: true, import: "default" }
 );
 
+// English is already in the catalog above, so it is never loaded on demand.
 const LOCALE_MODULES = import.meta.glob<NamespaceDictionary>(
-  "./locales/*/*.json",
+  ["./locales/*/*.json", "!./locales/en/*.json"],
   { import: "default" }
 );
 

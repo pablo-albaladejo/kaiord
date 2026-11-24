@@ -198,6 +198,25 @@ describe("PlacementFeedback", () => {
     ).toHaveClass("text-[var(--danger-text)]");
   });
 
+  it("should say the App did not load the send, with Reload, and never blame Garmin", async () => {
+    // Arrange
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+    const result = failed("app-part-not-loaded", true);
+    renderFeedback(result);
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Reload" }));
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Part of the Kaiord App did not load, so nothing was sent to Garmin."
+    );
+    expect(screen.queryByText(/not answering/i)).not.toBeInTheDocument();
+    expect(reload).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
   it("should show a refused sign-in as the Garmin Connection's notice", () => {
     // Arrange
     const result = failed("needs-reauth", false);

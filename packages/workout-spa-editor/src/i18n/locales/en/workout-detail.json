@@ -28,7 +28,8 @@
     "sending": "Sending…",
     "sent": "On your Garmin",
     "garminPushError": {
-      "notPrepared": "This workout could not be prepared for Garmin. Try again."
+      "notPrepared": "This workout could not be prepared for Garmin. Try again.",
+      "notLoaded": "Part of the Kaiord App did not load, so nothing was sent to Garmin. Reload the App to load it again."
     },
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
@@ -106,6 +107,7 @@
       "bridge-outdated": "In your Garmin library, with no date."
     },
     "openConnections": "Open Connections",
+    "reload": "Reload",
     "recordDeletedOn": "This workout was deleted while it was being sent. It may still be on your Garmin calendar on {{date}}: remove it in Garmin Connect.",
     "failed": {
       "busy": "This workout is already being sent. Try again once that send ends.",
@@ -117,6 +119,7 @@
       "schedule-endpoint": "Garmin's calendar did not accept the workout.",
       "schedule-rejected": "Garmin rejected this date for the workout.",
       "library-push-failed": "The workout could not be sent to Garmin.",
+      "app-part-not-loaded": "Part of the Kaiord App did not load, so nothing was sent to Garmin. Reload the App to load it again.",
       "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Connections, under Workout → Also sent to.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish.",
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it.",

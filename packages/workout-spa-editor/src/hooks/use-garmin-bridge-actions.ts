@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { executeList } from "../adapters/garmin/connector/garmin-workout-operations";
+import { loadGarminWorkoutOperations } from "../adapters/garmin/connector/load-garmin-workout-operations";
 import type { ConnectionState } from "../application/connections/connection-state";
 import type { PushState } from "../contexts/garmin-bridge-types";
 import { msUntilDiscoverySettled } from "./garmin-discovery-window";
+import { runPush } from "./run-garmin-push";
 import {
   getGarminExtensionId,
   runDetect,
-  runPush,
 } from "./use-garmin-bridge-action-helpers";
 
 const INITIAL_PUSH_STATE: PushState = { status: "idle" };
@@ -49,6 +49,7 @@ export const useGarminBridgeActions = () => {
   );
 
   const listWorkouts = useCallback(async (): Promise<unknown[]> => {
+    const { executeList } = await loadGarminWorkoutOperations();
     try {
       const { data } = await executeList(getGarminExtensionId());
       return data;
