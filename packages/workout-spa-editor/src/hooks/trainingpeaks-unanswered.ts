@@ -21,6 +21,8 @@ const depsFor = (extensionId: string) => ({
   days: {
     titlesOn: (day: string) => readTrainingPeaksDayTitles(extensionId, day),
   },
+  sleep: (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms)),
 });
 
 export const checkTrainingPeaksUnanswered = (

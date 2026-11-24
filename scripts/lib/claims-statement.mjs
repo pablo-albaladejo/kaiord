@@ -13,6 +13,8 @@ const EMAIL = /[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}/i;
 export const statementProblems = (proof) => {
   const words = proof["author-statement"];
   const where = `author statement ${JSON.stringify(words)}`;
+  if (typeof words !== "string")
+    return [`${where}: is not words; it states the owner's exact words`];
   if (words.trim() === "") return [`${where}: states nothing`];
   const problems = [];
   if (!STATEMENT_ROLES.includes(proof.by))

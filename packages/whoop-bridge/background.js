@@ -75,13 +75,14 @@ try {
 }
 
 // ── The personal fields no Connector reads, removed from every answer ──
+// When they do not load, `request` fails before anything is asked.
 let personalFields;
 try {
-  importScripts("personal-fields.js");
+  importScripts("personal-identity.js", "personal-fields.js");
   personalFields = globalThis.bridgePersonalFields;
 } catch {
   personalFields =
-    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+    typeof require !== "undefined" ? require("./personal-fields.js") : null;
 }
 
 // ── WHOOP call surface: the closed list ──
@@ -260,6 +261,7 @@ const UNAUTHORIZED_STATUS = 401;
 // Run by the content script in the open WHOOP tab, which hands back the
 // answer unread.
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { path } = requestGate.createRequestGate({ allowed: ALLOWED })(message);
   const res = await whoopFetch(path);
   // A 401 is WHOOP refusing the captured bearer: a verified sign-out.

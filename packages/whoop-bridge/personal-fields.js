@@ -12,57 +12,30 @@
  *   - json: Profile and body-measurement members WHOOP may add beside the data (a lab test's patient, height, weight); no Connector reads them from these answers, while a workout's `max_heart_rate`, which @kaiord/whoop reads, is not on the list.
  *   - html: form controls by name. WHOOP answers JSON; a page in its place keeps no personal form field.
  *
- * The common part is identity and contact details.
+ * The common part, identity and contact details, is the vendored
+ * `personal-identity.js`.
  */
 
-const bridgePersonalFields = Object.freeze({
-  json: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-    "patient_name",
-    "height",
-    "height_meter",
-    "weight_kilogram",
-  ]),
-  html: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-  ]),
-});
+// Wrapped so its names never meet a worker's other top-level declarations:
+// importScripts shares one global lexical scope.
+const bridgePersonalFields = (() => {
+  // Identity and contact details: the vendored list every extension shares,
+  // loaded before this file (importScripts), or required under Node.
+  const identity =
+    typeof require !== "undefined"
+      ? require("./personal-identity.js")
+      : globalThis.bridgePersonalIdentity;
+  return Object.freeze({
+    json: Object.freeze([
+      ...identity,
+      "patient_name",
+      "height",
+      "height_meter",
+      "weight_kilogram",
+    ]),
+    html: Object.freeze([...identity]),
+  });
+})();
 
 if (typeof module !== "undefined") {
   module.exports = bridgePersonalFields;

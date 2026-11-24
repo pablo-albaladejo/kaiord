@@ -12,53 +12,24 @@
  *   - json: MyTANITA answers CSV, which carries only measurements and is handed over as it came: dropping a column would be reading it.
  *   - html: form controls by name. A sign-in page MyTANITA serves in place of the export keeps no personal form field (a prefilled email, for example).
  *
- * The common part is identity and contact details.
+ * The common part, identity and contact details, is the vendored
+ * `personal-identity.js`.
  */
 
-const bridgePersonalFields = Object.freeze({
-  json: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-  ]),
-  html: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-  ]),
-});
+// Wrapped so its names never meet a worker's other top-level declarations:
+// importScripts shares one global lexical scope.
+const bridgePersonalFields = (() => {
+  // Identity and contact details: the vendored list every extension shares,
+  // loaded before this file (importScripts), or required under Node.
+  const identity =
+    typeof require !== "undefined"
+      ? require("./personal-identity.js")
+      : globalThis.bridgePersonalIdentity;
+  return Object.freeze({
+    json: Object.freeze([...identity]),
+    html: Object.freeze([...identity]),
+  });
+})();
 
 if (typeof module !== "undefined") {
   module.exports = bridgePersonalFields;

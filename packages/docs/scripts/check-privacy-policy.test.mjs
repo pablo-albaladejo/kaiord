@@ -302,9 +302,9 @@ test("a landing privacy page without the redirect fails on each missing part", (
 const SOLO_CASES = [
   [
     TRAIN2GO,
-    "it keeps none of this once the popup closes and never hands it to the Kaiord App",
+    "at most once every 5 minutes unless you press Refresh; it keeps what it read only in the extension's memory, never on disk, and never hands it to the Kaiord App",
     "it keeps some of this",
-    "Train2Go popup reads kept to the open popup",
+    "Train2Go popup reads kept in memory, at most once every 5 minutes",
   ],
   [
     GARMIN,

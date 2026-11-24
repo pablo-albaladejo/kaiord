@@ -536,4 +536,28 @@ describe("Train2Go popup", () => {
     expect(POPUP_HTML).not.toMatch(/#[0-9a-fA-F]{6}/);
     expect(POPUP_HTML).toContain(">T2</span");
   });
+
+  it("should leave the 5-minute limit to opening and force a read on Refresh", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      pingResponse: {
+        ok: true,
+        data: { sessionActive: true, userName: "Pablo", userId: 28035 },
+      },
+      readWeekResponse: { ok: true, data: { activities: [] } },
+    });
+    const dom = setupDom(chromeMock);
+    for (let i = 0; i < 4; i++) await flushAsync();
+
+    // Act
+    dom.window.document.getElementById("refresh-btn").click();
+    for (let i = 0; i < 4; i++) await flushAsync();
+
+    // Assert
+    const weekReads = chromeMock.runtime.sendMessage.mock.calls
+      .map(([message]) => message)
+      .filter((message) => message.action === "read-week")
+      .map((message) => message.force);
+    expect(weekReads).toEqual([false, true]);
+  });
 });

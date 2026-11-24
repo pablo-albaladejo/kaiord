@@ -1,6 +1,5 @@
 import { useLocation } from "wouter";
 
-import { useChoiceName } from "../../../hooks/use-model-name";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
@@ -12,6 +11,7 @@ import {
   modelChoiceGroups,
 } from "../SettingsPanel/model-choice";
 import { ModelChoiceOptions } from "../SettingsPanel/ModelChoiceOptions";
+import { useChoiceName } from "../SettingsPanel/use-choice-name";
 import { useModelChoice } from "../SettingsPanel/use-model-choice";
 
 export type ChatModelPickerProps = {

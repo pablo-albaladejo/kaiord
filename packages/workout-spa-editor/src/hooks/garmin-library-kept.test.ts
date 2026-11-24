@@ -1,9 +1,8 @@
 /**
- * What the athlete's Garmin library holds today, while library deletes are
- * off (`GARMIN_LIBRARY_DELETES`, owner decision 2026-11-24): an edit makes a
- * new library workout and the earlier version stays. Production hands the
- * pipeline no library port, and today's extension refuses the delete even
- * if one were asked for. `garmin-library-cleanup.test.ts` keeps proving
+ * What the athlete's Garmin library holds while library deletes are off
+ * (`GARMIN_LIBRARY_DELETES`): an edit makes a new library workout and the
+ * earlier version stays. Production hands the pipeline no library port, and
+ * the extension refuses the delete even if one were asked for. `garmin-library-cleanup.test.ts` keeps proving
  * the deletes for when the owner turns them on.
  */
 import "fake-indexeddb/auto";

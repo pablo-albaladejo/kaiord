@@ -5,8 +5,9 @@
  * athlete card from cached profile-snapshot, weekly figures
  * (planned / done / workload) over a completion bar, collapsible coach
  * notes, CTA pair. What the popup reads from Train2Go (the profile and the
- * week) lives only while it is open: it is read on every open and never
- * stored (ADR 0004's bounded exception).
+ * week) is never stored on disk (ADR 0004's bounded exception): the profile
+ * is read on every open, the week at most once every 5 minutes, kept only in
+ * the background worker's memory, and Refresh reads both again.
  * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s,
  * profile read 3 s, rollup 8 s). The profile read is an explicit read the
  * athlete asks for by opening the popup, not the Session check the Kaiord
@@ -259,11 +260,14 @@ const renderBroken = (state, since = null) => {
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
 };
 
-const fetchRollup = async (userId) => {
+// `force` (Refresh) reads the week again; otherwise the worker answers from
+// the week it read in the last 5 minutes, if any.
+const fetchRollup = async (userId, force) => {
   const res = await sendMessage({
     action: "read-week",
     date: todayISO(),
     userId,
+    force,
   });
   if (!res?.ok) throw new Error(res?.error ?? "read-week failed");
   return summariseRollup(res.data?.activities);
@@ -287,7 +291,7 @@ const renderConnected = ({ userName, coachName }) => {
   });
 };
 
-const loadPopupData = async () => {
+const loadPopupData = async ({ force = false } = {}) => {
   showRefresh(false);
   setMarkEstablished(false);
   renderStatusBlock($, msg, {
@@ -336,7 +340,7 @@ const loadPopupData = async () => {
   if (typeof userId === "number") {
     try {
       const rollup = await withTimeout(
-        fetchRollup(userId),
+        fetchRollup(userId, force),
         ROLLUP_TIMEOUT_MS,
         "rollup"
       );
@@ -349,7 +353,9 @@ const loadPopupData = async () => {
   showRefresh(true);
 };
 
-$("refresh-btn").addEventListener("click", () => loadPopupData());
+$("refresh-btn").addEventListener("click", () =>
+  loadPopupData({ force: true })
+);
 
 window.addEventListener("DOMContentLoaded", () => {
   localizePage();

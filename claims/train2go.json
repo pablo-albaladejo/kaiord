@@ -208,7 +208,7 @@
     },
     {
       "id": "train2go.listing.popup",
-      "text": "Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload, read each time you open it and never stored.",
+      "text": "Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload, read at most once every 5 minutes unless you press Refresh, and never stored on disk.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
@@ -221,6 +221,18 @@
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
           "title": "offers Try again, not a sign-in, when the check cannot tell why"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should not ask Train2Go again within 5 minutes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should read again when the athlete presses Refresh"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should keep the week only in memory, never in chrome.storage"
         }
       ]
     },
@@ -629,7 +641,7 @@
     },
     {
       "id": "train2go.pj.app-receives",
-      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only what the popup shows when you open it (who is signed in, with your coach's name and notes, and this week's totals) is read inside the extension, for the popup alone: it is never stored and never handed to the Kaiord App.",
+      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only what the popup shows when you open it (who is signed in, with your coach's name and notes, and this week's totals) is read inside the extension, for the popup alone: it is never stored on disk and never handed to the Kaiord App. This week's plan is read at most once every 5 minutes unless you press Refresh, and is kept until then only in the extension's memory.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -662,6 +674,18 @@
         {
           "test": "packages/train2go-bridge/test/bridge-answer.test.js",
           "title": "should drop credential keys at any depth and keep everything else"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should not ask Train2Go again within 5 minutes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should read again when the athlete presses Refresh"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should keep the week only in memory, never in chrome.storage"
         }
       ]
     },
@@ -1035,7 +1059,7 @@
     },
     {
       "id": "train2go.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, each time you open it or press Refresh; it keeps none of this once the popup closes and never hands it to the Kaiord App.",
+      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh; it keeps what it read only in the extension's memory, never on disk, and never hands it to the Kaiord App.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1075,7 +1099,19 @@
         },
         {
           "file": "packages/train2go-bridge/popup.js",
-          "contains": "$(\"refresh-btn\").addEventListener(\"click\", () => loadPopupData());"
+          "contains": "$(\"refresh-btn\").addEventListener(\"click\", () =>"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should not ask Train2Go again within 5 minutes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should read again when the athlete presses Refresh"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should keep the week only in memory, never in chrome.storage"
         }
       ]
     },
@@ -1326,7 +1362,7 @@
     },
     {
       "id": "train2go.es.listing.popup",
-      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana, que lee cada vez que la abres y no guarda.",
+      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana, que lee como mucho una vez cada 5 minutos salvo que pulses Actualizar, y no guarda en disco.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
@@ -1339,6 +1375,18 @@
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
           "title": "offers Try again, not a sign-in, when the check cannot tell why"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should not ask Train2Go again within 5 minutes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should read again when the athlete presses Refresh"
+        },
+        {
+          "test": "packages/train2go-bridge/test/week-read-limit.test.js",
+          "title": "should keep the week only in memory, never in chrome.storage"
         }
       ]
     },

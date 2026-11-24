@@ -18,6 +18,7 @@ const SYNC_FAILURE_KIND = (reason: string): string => {
     case "not-linked":
     case "session-expired":
     case "transport-error":
+    case "app-part-not-loaded":
       return reason;
     default:
       return "unknown";

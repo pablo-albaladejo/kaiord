@@ -138,7 +138,21 @@ const bridgeAnswer = (() => {
     return err;
   };
 
-  return { stripSessionSecrets, toAnswer, toBridgeError };
+  // The declared personal fields, or a refusal: when `personal-fields.js`
+  // did not load, every answer would go out untrimmed, so the request fails
+  // before anything is asked of the Platform, as a missing answer core does.
+  const requirePersonalFields = (personal) => {
+    if (!Array.isArray(personal?.json) || !Array.isArray(personal?.html))
+      throw new Error("Personal fields not loaded");
+    return personal;
+  };
+
+  return {
+    stripSessionSecrets,
+    toAnswer,
+    toBridgeError,
+    requirePersonalFields,
+  };
 })();
 
 if (typeof module !== "undefined") {

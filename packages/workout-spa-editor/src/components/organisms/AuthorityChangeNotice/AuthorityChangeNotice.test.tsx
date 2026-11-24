@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { useDataFlows } from "../../../hooks/connections/use-data-flows";
+import { useDataTypeRouting } from "../../../hooks/connections/use-data-type-routing";
 import { appI18n, setActiveLocale } from "../../../i18n/i18n";
 import { StaticLocaleProvider } from "../../../i18n/LocaleProvider";
 import type { CapabilityId } from "../../../lib/capabilities/capability-catalogue";
@@ -15,9 +17,9 @@ const PROFILE_ID = "00000000-0000-4000-8000-0000000000c7";
 const NOW = "2026-11-23T08:00:00.000Z";
 
 const ENGLISH =
-  "Tanita now decides your weight; days only TrainingPeaks reported don't change.";
+  "Tanita now decides: Weight. Days only TrainingPeaks reported don't change.";
 const SPANISH =
-  "Tanita decide ahora tu peso; los días que solo informó TrainingPeaks no cambian.";
+  "Tanita decide ahora: Peso. Los días que solo informó TrainingPeaks no cambian.";
 
 const seed = async (seen: Record<string, string[]> | undefined) => {
   await db.table("profiles").put({
@@ -49,6 +51,15 @@ const seed = async (seen: Record<string, string[]> | undefined) => {
   }
 };
 
+/** What the Connections screen's weight row reads "From". */
+const WeightRowFrom = () => {
+  const { byDataType } = useDataFlows(PROFILE_ID);
+  const { rows } = useDataTypeRouting(PROFILE_ID, byDataType);
+  const origin = rows.find((r) => r.dataType === "weight")?.origin;
+  const from = origin && "sourceId" in origin ? origin.sourceId : "none";
+  return <output data-testid="weight-row-from">{from}</output>;
+};
+
 const remembered = async () =>
   (await db.table<UserPreferences>("userPreferences").get(PROFILE_ID))
     ?.authorityDeciders;
@@ -76,6 +87,7 @@ describe("AuthorityChangeNotice", () => {
       "userPreferences",
       "integrationPolicies",
       "dataTypeSourcePolicy",
+      "connections",
     ]) {
       await db.table(table).clear();
     }
@@ -182,5 +194,32 @@ describe("AuthorityChangeNotice", () => {
       })
     );
     expect(screen.queryByText(ENGLISH)).not.toBeInTheDocument();
+  });
+
+  it("should name only the Platform the Connections screen shows deciding, a disconnected one that keeps its import route included", async () => {
+    // Arrange
+    await seed({ weight: ["trainingpeaks"] });
+    await db.table("connections").put({
+      profileId: PROFILE_ID,
+      providerId: "tanita",
+      status: "disconnected",
+      mechanism: "bridge",
+      updatedAt: NOW,
+    });
+
+    // Act
+    renderWithProviders(
+      <StaticLocaleProvider locale="en">
+        <AuthorityChangeNotice />
+        <WeightRowFrom />
+      </StaticLocaleProvider>,
+      { persistence: createDexiePersistence(db) }
+    );
+
+    // Assert
+    expect(await screen.findByText(ENGLISH)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("weight-row-from")).toHaveTextContent("tanita")
+    );
   });
 });

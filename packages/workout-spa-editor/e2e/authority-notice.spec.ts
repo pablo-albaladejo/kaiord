@@ -27,9 +27,9 @@ type DexieDb = {
 };
 
 const ENGLISH =
-  "Tanita now decides your weight; days only TrainingPeaks reported don't change.";
+  "Tanita now decides: Weight. Days only TrainingPeaks reported don't change.";
 const SPANISH =
-  "Tanita decide ahora tu peso; los días que solo informó TrainingPeaks no cambian.";
+  "Tanita decide ahora: Peso. Los días que solo informó TrainingPeaks no cambian.";
 
 const putWeightRoute = (page: Page, bridgeId: string) =>
   page.evaluate(

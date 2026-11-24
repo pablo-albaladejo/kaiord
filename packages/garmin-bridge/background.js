@@ -58,6 +58,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 loadScript("bearer-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+loadScript("personal-identity.js");
 const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 const snapshotValidator = loadScript("profile-snapshot.js");
 
@@ -91,8 +92,8 @@ const ALLOWED = [
   // prettier-ignore
   { method: "GET", pattern: /^\/activitylist-service\/activities\/search\/activities\?start=\d+&limit=\d+$/ },
   // Calendar placement: POST places a library workout (by workoutId) on a
-  // date; DELETE removes one calendar entry (by workoutScheduleId). Library
-  // workouts are never deleted (owner decision 2026-11-24).
+  // date; DELETE removes one calendar entry (by workoutScheduleId). No entry
+  // deletes a library workout.
   // prettier-ignore
   { method: "POST", pattern: /^\/workout-service\/schedule\/[1-9]\d*$/, body: "schedule" },
   // prettier-ignore
@@ -156,6 +157,7 @@ const toWireBody = (path, body) => {
 
 // ── The App's one call: a request from the closed list, answered raw ──
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path, body } = admitRequest(message);
   const res = await deadline.boundedCall(
     garminOAuth,

@@ -5,12 +5,13 @@
  * Platform that has decided it, the one deciding now last. A Platform new to
  * that list, with another before it, is news; a kind's first Platform, one
  * that decided before (back after a disconnect) and one the athlete chose in
- * the matrix are not, and are only remembered. Kinds that keep every source
- * have nothing to say.
+ * the matrix are not, and are only remembered. Only kinds of health data are
+ * watched (`health-data-kinds.ts`): kinds that keep every source have
+ * nothing to say, and Training Zones are not health data.
  */
 import type { ManagedDataType } from "@kaiord/core";
 
-import { hasAutomaticAuthority } from "../data-source-policy/automatic-authority";
+import { isHealthData } from "../data-source-policy/health-data-kinds";
 import type { DataTypeRoutingRow, RoutingOrigin } from "./data-type-routing";
 import { MANUAL_SOURCE_ID } from "./data-type-sources";
 
@@ -63,7 +64,7 @@ export const authorityChanges = (
   let changed = false;
   for (const { dataType, origin } of rows) {
     const id = decider(origin);
-    if (!hasAutomaticAuthority(dataType) || id === undefined) continue;
+    if (!isHealthData(dataType) || id === undefined) continue;
     if (id === MANUAL_SOURCE_ID) continue;
     const known = seen[dataType] ?? [];
     if (known.at(-1) === id) continue;

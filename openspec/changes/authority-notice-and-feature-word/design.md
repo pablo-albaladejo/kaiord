@@ -31,7 +31,8 @@ device. Rejected: a store of its own, a schema version for a hint.
 - Own entries are not Platforms and are ignored; a kind no source sends any
   more keeps its list.
 - Kinds taken by the same Platform from the same one are one notice
-  ("Tanita now decides your weight and body composition…").
+  ("Tanita now decides: Weight and Body Composition…"). Only kinds of
+  health data are watched; Training Zones are not health data.
 
 Rejected: comparing with the previous render only: a reload, a second device
 or the App closed during the connect would miss it or repeat it.

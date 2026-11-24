@@ -1,4 +1,5 @@
 {
+  "appPartNotLoaded": "Una parte de la App de Kaiord no se cargó, así que no se pidió nada a Train2Go. Recarga la App para cargarla de nuevo.",
   "banner": {
     "title": "Sugerencias de emparejamiento ({{total}})",
     "ariaLabel": "Sugerencias de emparejamiento",
@@ -94,7 +95,6 @@
     "loadingDescription": "Cargando descripción…",
     "retryDescription": "Reintentar",
     "descriptionError": {
-      "app-part-not-loaded": "Una parte de la App de Kaiord no se cargó, así que no se pidió nada a Train2Go. Recarga la App para cargarla de nuevo.",
       "not-linked": "Este coach no está vinculado a este atleta."
     },
     "showAll": "Ver todo",
@@ -171,7 +171,6 @@
     "shapeMismatch": "Train2Go ha enviado unas zonas que Kaiord no puede leer, así que no se han sincronizado.",
     "unsupported": "Esta plataforma de entrenamiento no comparte zonas.",
     "notSynced": "Tus zonas no se han sincronizado.",
-    "notLoaded": "Una parte de la App de Kaiord no se cargó, así que no se pidió nada a Train2Go. Recarga la App para cargarla de nuevo.",
     "kept": {
       "thresholds": "Train2Go tiene umbrales distintos de los que pusiste. Kaiord ha mantenido los tuyos.",
       "zones": "Train2Go tiene zonas distintas de las que pusiste. Kaiord ha mantenido las tuyas.",

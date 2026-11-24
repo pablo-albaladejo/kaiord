@@ -18,9 +18,13 @@ Git records commits, not who typed each line, so the history cannot prove "every
 
 ## The owner's statement
 
-This section is a declaration by the repository's owner, not a figure: git cannot check it. On 2026-11-23 the owner stated:
+This section is a declaration by the repository's owner, not a figure: git cannot check it. On 2026-11-23 the owner stated, in Spanish, of the commits in this repository:
 
-> Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.
+> «doy fe que todos son de un agente, antes era kiro»
+
+English translation: "I attest that they are all from an agent; before, it was Kiro."
+
+The statement is about the agents' work: the automation commits made by bots are not that work, and are counted apart below.
 
 What the history shows beside it:
 

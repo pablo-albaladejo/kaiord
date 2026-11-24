@@ -5,6 +5,7 @@
  * (`readDayTitles`). Never throws: anything but a readable answer is
  * `{ ok: false }`, which the caller tells the athlete as "could not check".
  */
+import type { DayTitles } from "../../../application/trainingpeaks/trainingpeaks-day-port";
 import { callConnector } from "../../bridge/connector-call";
 import { readDayTitles } from "./read-trainingpeaks-answers";
 import { readTrainingPeaksAthleteId } from "./trainingpeaks-athlete-transport";
@@ -12,8 +13,6 @@ import { workoutsOnDayPath } from "./trainingpeaks-paths";
 
 const READ_DAY_TIMEOUT_MS = 10_000;
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
-
-export type DayTitles = { ok: true; titles: string[] } | { ok: false };
 
 const isRealDay = (day: string) => {
   if (!ISO_DAY.test(day)) return false;

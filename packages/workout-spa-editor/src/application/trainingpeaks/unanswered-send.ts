@@ -5,7 +5,9 @@
  * title), and the next send of the Workout reads that day first
  * (`readLiveState`, the shared safe-write decision): a workout of the same
  * title there stops it and asks the athlete; a read that fails stops it
- * and says Kaiord could not check; none lets it through. The entry found is
+ * and says Kaiord could not check; none, in two reads `SETTLE_MS` apart as
+ * Garmin's placement confirms an absence, lets it through: TrainingPeaks
+ * may commit the unanswered send after the App gave up on it. The entry found is
  * never touched. "Send anyway" goes through without reading. Letting a
  * send through forgets the unanswered one: a first send's pending row is
  * removed, a recorded copy only loses the mark.
@@ -19,7 +21,11 @@ export type UnansweredDeps = {
   ledgerRepo: ExportLedgerRepository;
   destinationBridgeId: string;
   days: TrainingPeaksDayPort;
+  sleep: (ms: number) => Promise<void>;
 };
+
+/** How long an absence waits for its confirming second read. */
+export const SETTLE_MS = 3_000;
 
 export type UnansweredVerdict =
   | { blocked: false }
@@ -56,17 +62,20 @@ export const checkUnansweredSend = async (
   const sent = row?.unansweredSend;
   if (!row || !sent) return { blocked: false };
   if (!sendAnyway) {
-    const { state } = await readLiveState(async () => {
-      const read = await deps.days.titlesOn(sent.day);
-      const found =
-        read.ok && read.titles.some((t) => sameTitle(t, sent.title));
-      const live: LiveState = !read.ok
-        ? "unknown"
-        : found
-          ? "present"
-          : "absent";
-      return { state: live };
-    });
+    const { state } = await readLiveState(
+      async () => {
+        const read = await deps.days.titlesOn(sent.day);
+        const found =
+          read.ok && read.titles.some((t) => sameTitle(t, sent.title));
+        const live: LiveState = !read.ok
+          ? "unknown"
+          : found
+            ? "present"
+            : "absent";
+        return { state: live };
+      },
+      { ms: SETTLE_MS, sleep: deps.sleep }
+    );
     if (state === "present")
       return { blocked: true, reason: "may-be-there", date: sent.day };
     if (state === "unknown")

@@ -4,8 +4,10 @@
 
 An extension's popup MAY read and interpret Platform data only for its own
 window, when the athlete opens it, through the extension's closed list of
-paths. It SHALL NOT store that data beyond the popup's lifetime and SHALL NOT
-hand it to the Kaiord App. Each extension's `background.js` SHALL declare
+paths. It SHALL NOT store that data on disk and SHALL NOT hand it to the
+Kaiord App; it MAY keep a read in the extension's memory to ask the Platform
+less often (Train2Go's week: at most once every 5 minutes, unless the
+athlete presses Refresh). Each extension's `background.js` SHALL declare
 `POPUP_READS` and `POPUP_READ_SCRIPTS` (possibly empty), and
 `scripts/check-bridge-popup-reads.mjs` SHALL fail when a popup read is an
 external action, when any other action reaches its code, when it asks for a

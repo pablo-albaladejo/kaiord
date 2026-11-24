@@ -18,7 +18,8 @@ The owner's decisions of 2026-11-23 on the Kaiord Bridges (#1641, #1642,
 
 - **Bounded exception (ADR 0004 amended).** A popup may read and interpret
   data only for its own window, when the athlete opens it, through the closed
-  list, never stored beyond the popup's lifetime and never handed to the App.
+  list, never stored on disk and never handed to the App (a read may stay in
+  the extension's memory: Train2Go's week, at most once every 5 minutes).
   Each `background.js` declares `POPUP_READS` and `POPUP_READ_SCRIPTS`; a new
   root guard, `check-bridge-popup-reads.mjs` (`pnpm lint:bridge-popup-reads`),
   holds all five to it, with the storage keys each may write listed with

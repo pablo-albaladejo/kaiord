@@ -16,21 +16,20 @@ import {
   useZonesSyncOrchestrator,
   type ZonesSyncOrchestrator,
 } from "../adapters/train2go/use-zones-sync-orchestrator";
-import { KEPT_COPY } from "../adapters/train2go/zones-offer-copy";
-import type { ZonesOfferKind } from "../adapters/train2go/zones-offer-kind";
-import { useTranslate } from "../i18n/use-translate";
 import { usePersistence } from "./persistence-context";
 import { useToastContext } from "./ToastContext";
+import { useTrain2GoZonesToasts } from "./use-train2go-zones-toasts";
 
-const Ctx = createContext<ZonesSyncOrchestrator | null>(null);
+/** The orchestrator, plus the notice for a Train2Go action whose code did
+    not load (week sync, connect): nothing was asked of Train2Go. */
+export type Train2GoZonesSync = ZonesSyncOrchestrator & {
+  showNotLoaded: () => void;
+};
+
+const Ctx = createContext<Train2GoZonesSync | null>(null);
 
 const getExtensionId = (): string =>
   bridgeDiscovery.getExtensionId("train2go-bridge") ?? "";
-
-const OFFER_MS = 12_000;
-
-const ACTION =
-  "rounded-md bg-white/10 px-3 py-1 text-sm font-medium transition-colors hover:bg-white/20";
 
 export const Train2GoZonesSyncProvider = ({
   children,
@@ -39,41 +38,28 @@ export const Train2GoZonesSyncProvider = ({
 }) => {
   const persistence = usePersistence();
   const toasts = useToastContext();
-  const t = useTranslate("coaching");
   const transport = useMemo(
     () => createTrain2GoCoachingTransport(getExtensionId),
     []
   );
-  const offerTheirs = useMemo(
-    () => (kind: ZonesOfferKind, takeTheirs: () => Promise<void>) => {
-      toasts.info(t(KEPT_COPY[kind]), t("zonesSync.keptHint"), {
-        duration: OFFER_MS,
-        action: (
-          <button
-            type="button"
-            className={ACTION}
-            data-testid="zones-use-theirs"
-            onClick={() => void takeTheirs()}
-          >
-            {t("zonesSync.takeTheirs")}
-          </button>
-        ),
-      });
-    },
-    [toasts, t]
-  );
+  const { offerTheirs, showNotLoaded } = useTrain2GoZonesToasts();
   const orchestrator = useZonesSyncOrchestrator(
     persistence,
     transport,
     toasts,
-    offerTheirs
+    offerTheirs,
+    showNotLoaded
   );
   useZonesAutoImportOnMount(persistence, orchestrator.runSync);
+  const value = useMemo(
+    () => ({ ...orchestrator, showNotLoaded: () => showNotLoaded() }),
+    [orchestrator, showNotLoaded]
+  );
 
-  return <Ctx.Provider value={orchestrator}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
-export const useTrain2GoZonesSync = (): ZonesSyncOrchestrator => {
+export const useTrain2GoZonesSync = (): Train2GoZonesSync => {
   const ctx = useContext(Ctx);
   if (!ctx) {
     throw new Error(

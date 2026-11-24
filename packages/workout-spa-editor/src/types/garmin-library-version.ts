@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { garminWorkoutIdSchema } from "./garmin-ledger";
+import {
+  type GarminLibraryState,
+  garminWorkoutIdSchema,
+} from "./garmin-ledger";
 
 /**
  * A library workout Kaiord created for a record and has since replaced (an
@@ -48,13 +51,14 @@ export const joinLibraryVersions = (
 
 /** The library workout `before` held, when `after` replaces it. */
 export const supersededBy = (
-  before: { kind: string; workoutId?: string } | undefined,
-  after: { kind: string; workoutId?: string } | undefined
+  before: GarminLibraryState | undefined,
+  after: GarminLibraryState | undefined
 ): GarminLibraryVersion[] => {
-  const id = garminWorkoutIdSchema.safeParse(before?.workoutId);
-  if (before?.kind !== "confirmed" || !id.success) return [];
-  if (after?.kind === "confirmed" && after.workoutId === id.data) return [];
-  if (after === undefined) return [];
+  if (before?.kind !== "confirmed" || after === undefined) return [];
+  // A stored row is read back as it was written: its id is checked again.
+  const id = garminWorkoutIdSchema.safeParse(before.workoutId);
+  if (!id.success) return [];
+  if (after.kind === "confirmed" && after.workoutId === id.data) return [];
   return [{ workoutId: id.data, created: true, state: "superseded" }];
 };
 

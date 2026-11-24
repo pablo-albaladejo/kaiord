@@ -159,4 +159,19 @@ describe("authorityChanges", () => {
     expect(result.seen).toEqual(seen);
     expect(result.changed).toBe(false);
   });
+
+  it("should say nothing for Training Zones, which are not health data", () => {
+    // Arrange
+    const seen = { "training-zones": ["garmin"] };
+    const now = rows({
+      "training-zones": [route("garmin-bridge"), route("train2go-bridge")],
+    });
+
+    // Act
+    const result = authorityChanges(now, seen);
+
+    // Assert
+    expect(result.notices).toEqual([]);
+    expect(result.changed).toBe(false);
+  });
 });

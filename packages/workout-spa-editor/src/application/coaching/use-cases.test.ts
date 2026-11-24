@@ -11,6 +11,7 @@ import { createInMemoryIntegrationPolicyRepository } from "../../test-utils/in-m
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
+import { AppPartNotLoadedError } from "../../types/app-part-not-loaded-error";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import {
   buildCoachingActivityId,
@@ -396,6 +397,22 @@ describe("syncWeek", () => {
 
     // Assert
     expect(result).toEqual({ ok: false, reason: "session-expired" });
+  });
+
+  it("should say part of the App did not load when the transport's code does not load", async () => {
+    // Arrange
+    const t = makeTransport({
+      readWeek: vi.fn(async () => {
+        throw new AppPartNotLoadedError();
+      }),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    const result = await syncWeek(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "app-part-not-loaded" });
   });
 });
 

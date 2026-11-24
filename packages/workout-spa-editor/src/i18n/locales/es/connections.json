@@ -122,20 +122,8 @@
   },
   "authorityMatrixLink": "Elige qué Plataforma decide cada tipo de dato",
   "authorityNotice": {
-    "decides": "{{decides}} decide ahora {{kinds}}; los días que solo informó {{replaces}} no cambian.",
-    "change": "Cambiarlo",
-    "kinds": {
-      "weight": "tu peso",
-      "body-composition": "tu composición corporal",
-      "sleep": "tu sueño",
-      "hrv": "tu VFC",
-      "daily-wellness": "tu bienestar diario",
-      "stress": "tu estrés",
-      "strain": "tu esfuerzo",
-      "vitals": "tus constantes vitales",
-      "heart-rate-series": "tu serie de frecuencia cardiaca",
-      "training-zones": "tus zonas de entrenamiento"
-    }
+    "decides": "{{decides}} decide ahora: {{kinds}}. Los días que solo informó {{replaces}} no cambian.",
+    "change": "Cambiarlo"
   },
   "dataTypeHints": {
     "workout": "Sesiones estructuradas completadas",

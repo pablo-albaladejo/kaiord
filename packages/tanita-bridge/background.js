@@ -79,13 +79,14 @@ try {
 }
 
 // ── The personal fields no Connector reads, removed from every answer ──
+// When they do not load, `request` fails before anything is asked.
 let personalFields;
 try {
-  importScripts("personal-fields.js");
+  importScripts("personal-identity.js", "personal-fields.js");
   personalFields = globalThis.bridgePersonalFields;
 } catch {
   personalFields =
-    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+    typeof require !== "undefined" ? require("./personal-fields.js") : null;
 }
 
 // ── Tanita call surface: the closed list ──
@@ -149,6 +150,7 @@ const checkSession = async () => {
 
 // ── The App's one read: a request from the closed list, answered raw ──
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
     message
   );

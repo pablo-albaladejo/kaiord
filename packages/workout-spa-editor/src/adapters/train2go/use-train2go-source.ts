@@ -62,14 +62,16 @@ export function useTrain2GoSource(
     persistence,
     transport,
     analytics,
-    zonesSync.runSync
+    zonesSync.runSync,
+    zonesSync.showNotLoaded
   );
   const expand = useExpandCallback(persistence, transport, analytics);
   const connectImpl = useConnectCallback(
     persistence,
     transport,
     analytics,
-    zonesSync.runSync
+    zonesSync.runSync,
+    zonesSync.showNotLoaded
   );
 
   // Wrap the inner connect so a successful link forces an immediate

@@ -84,13 +84,14 @@ try {
 }
 
 // ── The personal fields no Connector reads, removed from every answer ──
+// When they do not load, `request` fails before anything is asked.
 let personalFields;
 try {
-  importScripts("personal-fields.js");
+  importScripts("personal-identity.js", "personal-fields.js");
   personalFields = globalThis.bridgePersonalFields;
 } catch {
   personalFields =
-    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+    typeof require !== "undefined" ? require("./personal-fields.js") : null;
 }
 
 // ── Dual-transport auth (bridge-specific; cookie→token→Bearer) ──
@@ -176,6 +177,7 @@ const readAthleteId = async () => {
 
 // ── The App's one call: a request from the closed list, answered raw ──
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path, body } = requestGate.createRequestGate({
     allowed: ALLOWED,
     bodySchemas: BODY_SCHEMAS,

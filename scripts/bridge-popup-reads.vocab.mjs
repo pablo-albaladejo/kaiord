@@ -3,7 +3,7 @@
  *
  * ADR 0004's bounded exception lets a working extension's popup read and
  * interpret data for its own window, when the athlete opens it, without
- * storing it beyond the popup's lifetime. So a bridge writes only the keys
+ * storing it on disk. So a bridge writes only the keys
  * below, each with the reason it is not popup-read data; any other key, or a
  * write whose keys cannot be read from the source, fails the guard.
  */
