@@ -35,17 +35,9 @@
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips in the connected state."
   },
-  "captionWillFeed": {
-    "message": "Will feed Kaiord",
-    "description": "Caption above the capability chips before the bridge is connected."
-  },
   "typeWeight": {
     "message": "Weight",
     "description": "Capability chip for the Weight data type imported into Kaiord."
-  },
-  "typeWeightBack": {
-    "message": "Weight ↑ back to TrainingPeaks",
-    "description": "Capability chip for the Weight push-back this bridge supports but that no Kaiord export route drives yet; shown dashed under \"Will feed Kaiord\"."
   },
   "openEditor": {
     "message": "Open Kaiord editor",

@@ -38,31 +38,20 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   notCheckedCause:
     "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
   captionFeeds: "Feeds Kaiord",
-  captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
-  typeWeightBack: "Weight ↑ back to TrainingPeaks",
   openEditor: "Open Kaiord editor",
   openTrainingPeaks: "Open TrainingPeaks ↗",
   refresh: "Refresh",
 };
 
-// Managed data types this bridge moves, named exactly as the Connections page
-// names them (@kaiord/core MANAGED_DATA_REGISTRY labels).
-//
-// FEED_KEYS is what actually flows today: `read-metrics` imports weight.
-// FUTURE_KEYS is capability the bridge exposes but nothing drives yet — the
-// `push-weight` action exists here, while the SPA ships no export route for
-// this bridge. Listing it under "Feeds Kaiord" would be manifest-true and
-// user-false, so it gets its own dashed row: the same register the
-// not-signed-in state uses for "this would work once it is wired".
+// Managed data types this bridge moves into Kaiord, named exactly as the
+// Connections page names them (@kaiord/core MANAGED_DATA_REGISTRY labels).
 const FEED_KEYS = ["typeWeight"];
-const FUTURE_KEYS = ["typeWeightBack"];
 
 // Every region any resolved state fills, so the checking layout is the
 // resolved layout's height.
 const SKELETON_REGIONS = [
   { region: "chips-region", parts: ["caption", "chips"] },
-  { region: "future-region", parts: ["caption", "chips"] },
   { region: "consequence-region", parts: ["line"] },
   { region: "footer-region", parts: ["cta", "secondary"] },
 ];
@@ -93,10 +82,6 @@ const renderConnected = () => {
     causeKey: "connectedCause",
   });
   renderChips($, chipsFor(FEED_KEYS), { caption: msg("captionFeeds") });
-  renderChips($, chipsFor(FUTURE_KEYS, "dashed"), {
-    caption: msg("captionWillFeed"),
-    region: "future-region",
-  });
   renderConsequence($, []);
   renderCtas($, {
     primaryLabel: msg("openEditor"),
@@ -141,7 +126,6 @@ const renderBroken = (state, since) => {
     }
   );
   renderChips($, []);
-  renderChips($, [], { region: "future-region" });
   renderConsequence($, []);
 };
 
@@ -158,10 +142,6 @@ const renderNotChecked = () => {
     causeKey: "notCheckedCause",
   });
   renderChips($, chipsFor(FEED_KEYS), { caption: msg("captionFeeds") });
-  renderChips($, chipsFor(FUTURE_KEYS, "dashed"), {
-    caption: msg("captionWillFeed"),
-    region: "future-region",
-  });
   renderConsequence($, []);
   renderCtas($, {
     primaryLabel: msg("openEditor"),
