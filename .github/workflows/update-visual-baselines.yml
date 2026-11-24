@@ -28,6 +28,18 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          # The push below runs the husky pre-push hook (`pnpm lint` + tsc),
+          # as it does locally. Its history guards need a full clone and
+          # origin/main: lint:coverage-floors and lint:boundaries-allowlist
+          # diff against the merge base with origin/main, and
+          # lint:method-figures resolves commits deep in the history. A
+          # shallow clone makes all three fail closed and blocks the push.
+          fetch-depth: 0
+
+      # Explicit, so the merge-base guards never depend on which refs the
+      # checkout happened to map for a non-default `ref`.
+      - name: Fetch origin/main for the pre-push guards
+        run: git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
@@ -41,6 +53,8 @@ jobs:
         with:
           browser: chromium
 
+      # Also what the pre-push hook needs: its lint and `tsc --noEmit`
+      # resolve workspace packages through their built `dist/`.
       - name: Build workspace dependencies
         run: pnpm -r build
 
