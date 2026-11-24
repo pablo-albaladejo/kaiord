@@ -8,6 +8,7 @@ import { createInMemoryCapabilityDecisionRepository } from "../../test-utils/in-
 import { createInMemoryDataTypeSourcePolicyRepository } from "../../test-utils/in-memory-data-type-source-policy-repository";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import { authorityInForce } from "./authority-in-force";
 import { AUTHORITY_MATRIX_ID } from "./automatic-authority";
 import { resolveEffectiveSource } from "./resolve-effective-source.use-case";
 
@@ -204,5 +205,50 @@ describe("automatic Authority", () => {
     // Assert
     expect(result.mode).toBe("union");
     expect(result.mode === "union" ? result.records : []).toHaveLength(2);
+  });
+});
+
+describe("what Kaiord picks the Authority for", () => {
+  const HEALTH_DATA = [
+    "weight",
+    "body-composition",
+    "sleep",
+    "hrv",
+    "daily-wellness",
+    "stress",
+    "strain",
+    "vitals",
+    "heart-rate-series",
+  ] as const;
+  const KEPT_FROM_EVERY_SOURCE = [
+    "activity",
+    "planned-session",
+    "workout",
+  ] as const;
+
+  it("should pick one Platform for every kind of health data when nobody chose", () => {
+    // Arrange
+    const kinds = HEALTH_DATA;
+
+    // Act
+    const modes = kinds.map(
+      (kind) => authorityInForce(kind, undefined, []).mode
+    );
+
+    // Assert
+    expect(modes).toEqual(kinds.map(() => "automatic"));
+  });
+
+  it("should keep Activities, planned sessions and Workouts from every source when nobody chose", () => {
+    // Arrange
+    const kinds = KEPT_FROM_EVERY_SOURCE;
+
+    // Act
+    const read = kinds.map((kind) => authorityInForce(kind, undefined, []));
+
+    // Assert
+    expect(read).toEqual(
+      kinds.map(() => ({ mode: "union", sourceOrder: [], disabled: new Set() }))
+    );
   });
 });
