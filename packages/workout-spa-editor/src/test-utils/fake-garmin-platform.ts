@@ -19,7 +19,9 @@
  * (`fake-garmin-requests`): only `request` on the real closed list, raw
  * answers, and the one action protocol 1 never had, deleting a library
  * workout (which takes its calendar entries with it, the cautious reading
- * of Garmin). `failNext` answers the next message of an action with a
+ * of Garmin). That action is the extension as it will be once the owner
+ * turns `GARMIN_LIBRARY_DELETES` on; `libraryDelete: false` is today's
+ * extension, whose closed list refuses it. `failNext` answers the next message of an action with a
  * status and writes nothing.
  */
 import { vi } from "vitest";
@@ -45,7 +47,10 @@ type Envelope = {
 
 const month = (date: string) => date.slice(0, 7);
 
-export const createFakeGarminPlatform = ({ protocol = 1 } = {}) => {
+export const createFakeGarminPlatform = ({
+  protocol = 1,
+  libraryDelete = true,
+} = {}) => {
   const library: FakeLibraryWorkout[] = [];
   const calendar: FakeCalendarItem[] = [];
   const log: Message[] = [];
@@ -177,7 +182,7 @@ export const createFakeGarminPlatform = ({ protocol = 1 } = {}) => {
     message: Message,
     callback: (raw: unknown) => void
   ) => {
-    const own = protocol === 2 ? toFakeAction(message) : message;
+    const own = protocol === 2 ? toFakeAction(message, libraryDelete) : message;
     log.push(own ?? message);
     if (own && state.loseOn === own.action) {
       state.loseOn = undefined;

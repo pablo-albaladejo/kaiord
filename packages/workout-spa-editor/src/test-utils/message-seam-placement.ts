@@ -7,8 +7,12 @@
  * `restartTab()` models a tab that died: a fresh in-tab join map and lock
  * manager over the same device storage. `openTab()` is a second tab of the
  * same browser: its own join map, the browser's one lock manager.
- * `protocol: 2` is the current extension (raw answers, the library delete);
- * the default, 1, the previous one, which has no library delete.
+ * `protocol: 2` is the current extension (raw answers), with the library
+ * delete it regains once the owner turns `GARMIN_LIBRARY_DELETES` on, or
+ * without it (`libraryDelete: false`, today's closed list); the default, 1,
+ * the previous one, which has no library delete. `libraryPort: false`
+ * hands the pipeline no library port, as production wires it while the
+ * switch is off.
  */
 import { vi } from "vitest";
 
@@ -38,9 +42,13 @@ const pushFn = buildGarminPushFn(async (gcn) => {
 
 export const createMessageSeamConnector = (
   db: KaiordDatabase,
-  { protocol = 1 }: { protocol?: number } = {}
+  {
+    protocol = 1,
+    libraryDelete = true,
+    libraryPort = true,
+  }: { protocol?: number; libraryDelete?: boolean; libraryPort?: boolean } = {}
 ) => {
-  const garmin = createFakeGarminPlatform({ protocol });
+  const garmin = createFakeGarminPlatform({ protocol, libraryDelete });
   garmin.install();
   const ledgerRepo = createDexieExportLedgerRepository(db);
   type Tab = {
@@ -51,7 +59,9 @@ export const createMessageSeamConnector = (
   const deps = (on: Tab = tab): PlacementPipelineDeps => ({
     ledgerRepo,
     calendar: createGarminCalendarPort(() => EXTENSION_ID),
-    library: createGarminLibraryPort(() => EXTENSION_ID),
+    ...(libraryPort
+      ? { library: createGarminLibraryPort(() => EXTENSION_ID) }
+      : {}),
     scheduleIdsInFind: SCHEDULE_IDS_IN_FIND,
     now: () => Date.now(),
     sleep: async (ms) => {
