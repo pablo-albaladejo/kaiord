@@ -215,6 +215,7 @@ const readWeek = async (date, userId) => {
 // The vendored gate admits only `method` and `path` of a listed entry; no
 // entry declares a body, so a body (or any other key) is refused unsent.
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
     message
   );

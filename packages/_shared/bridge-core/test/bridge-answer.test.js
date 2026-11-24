@@ -10,6 +10,7 @@ const {
   stripSessionSecrets,
   toAnswer,
   toBridgeError,
+  requirePersonalFields,
 } = require("../bridge-answer.js");
 
 describe("bridge-answer: Session secrets in HTML", () => {
@@ -285,5 +286,31 @@ describe("bridge-answer: personal fields no Connector reads", () => {
 
     // Assert
     expect(JSON.parse(answer.body)).toEqual({ email: "a@b.c" });
+  });
+});
+
+describe("bridge-answer: personal fields that did not load", () => {
+  it.each([undefined, null, {}, { json: [] }, { html: [] }])(
+    "should refuse to answer without declared personal fields (%o)",
+    (personal) => {
+      // Arrange
+
+      // Act
+      const checking = () => requirePersonalFields(personal);
+
+      // Assert
+      expect(checking).toThrow("Personal fields not loaded");
+    }
+  );
+
+  it("should hand back the declared personal fields", () => {
+    // Arrange
+    const personal = { json: ["email"], html: [] };
+
+    // Act
+    const checked = requirePersonalFields(personal);
+
+    // Assert
+    expect(checked).toBe(personal);
   });
 });

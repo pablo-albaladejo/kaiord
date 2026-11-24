@@ -156,6 +156,7 @@ const toWireBody = (path, body) => {
 
 // ── The App's one call: a request from the closed list, answered raw ──
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path, body } = admitRequest(message);
   const res = await deadline.boundedCall(
     garminOAuth,
