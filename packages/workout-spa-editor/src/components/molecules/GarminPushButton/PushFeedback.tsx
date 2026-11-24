@@ -3,6 +3,7 @@ import type { PushState } from "../../../contexts";
 import type { GarminPushFailure } from "../../../contexts/garmin-bridge-types";
 import { useTranslate } from "../../../i18n/use-translate";
 import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
+import { ReloadAppButton } from "./ReloadAppButton";
 
 type PushFeedbackProps = {
   push: PushState;
@@ -10,10 +11,11 @@ type PushFeedbackProps = {
 };
 
 /** A failure of the Connection is its notice; an extension that was updated
-    mid-send did not answer, which is "not-answering". Only a workout that
-    could not be converted is the send's own failure. */
+    mid-send did not answer, which is "not-answering". A workout that could
+    not be converted, or a send the App could not load, is the App's own
+    failure: Garmin was never asked. */
 const CONNECTION_OF: Record<
-  Exclude<GarminPushFailure, "not-prepared">,
+  Exclude<GarminPushFailure, "not-prepared" | "not-loaded">,
   ConnectionState
 > = {
   updated: "not-answering",
@@ -47,6 +49,16 @@ export const PushFeedback: React.FC<PushFeedbackProps> = ({
     return (
       <span className="text-xs text-[var(--danger-text)]">
         {t("footer.garminPushError.notPrepared")}
+      </span>
+    );
+  }
+  if (push.reason === "not-loaded") {
+    return (
+      <span className="flex items-center gap-2 text-xs">
+        <span className="text-[var(--danger-text)]" role="status">
+          {t("footer.garminPushError.notLoaded")}
+        </span>
+        <ReloadAppButton />
       </span>
     );
   }

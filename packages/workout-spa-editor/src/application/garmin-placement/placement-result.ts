@@ -14,6 +14,8 @@ export const PLACEMENT_FAILURE_REASONS = [
   "needs-reauth",
   "deadline-before-send",
   "library-push-failed",
+  /** The App could not load the send itself: Garmin was never asked. */
+  "app-part-not-loaded",
   "no-export-route",
   "placement-interrupted",
   /** The calendar read before a write failed: nothing was sent. */

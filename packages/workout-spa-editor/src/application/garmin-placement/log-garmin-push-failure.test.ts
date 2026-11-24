@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createPlacementHarness, D1 } from "../../test-utils/placement-harness";
+import { AppPartNotLoadedError } from "../../types/app-part-not-loaded-error";
 import { logGarminPushFailure } from "./log-garmin-push-failure";
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
@@ -59,5 +60,23 @@ describe("runPhaseOne — a failed library push", () => {
       name: "Error",
       message: "library push failed",
     });
+  });
+
+  it("should report the App's own failure, retryable, when the send did not load", async () => {
+    // Arrange
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const h = createPlacementHarness();
+    h.library.fail = new AppPartNotLoadedError();
+
+    // Act
+    const result = await h.push(D1);
+
+    // Assert
+    expect(result).toEqual({
+      kind: "failed",
+      reason: "app-part-not-loaded",
+      retryable: true,
+    });
+    expect(h.calendar.calls).toEqual([]);
   });
 });

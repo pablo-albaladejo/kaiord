@@ -1,6 +1,7 @@
 /**
- * Helpers for `useGarminBridgeActions` — detection + push flows factored
- * out of the hook so the hook body stays within the file-size budget.
+ * Helpers for `useGarminBridgeActions` — the detection flow, factored out
+ * of the hook so the hook body stays within the file-size budget (the
+ * send is `runPush`).
  * Extension IDs come from the bridge discovery singleton at call time.
  */
 
@@ -8,13 +9,7 @@ import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { PREVIOUS_BRIDGE_PROTOCOL_VERSION } from "../adapters/bridge/thin-bridge-request";
 import { ping } from "../adapters/garmin/connector/garmin-ping";
 import { evaluatePingResult } from "../adapters/garmin/connector/garmin-ping-evaluation";
-import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
 import type { ConnectionState } from "../application/connections/connection-state";
-import type {
-  GarminPushOutcome,
-  PushState,
-} from "../contexts/garmin-bridge-types";
-import { logFailure } from "../lib/log-failure";
 import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 
 export const getGarminExtensionId = (): string =>
@@ -69,33 +64,4 @@ export const runDetect = async (set: DetectSetters): Promise<void> => {
   set.setSessionActive(result.session);
   set.setFeatures(result.features);
   set.setConnection(result.connection);
-};
-
-/**
- * Resolves with the push outcome. Callers MUST read `success` (rather
- * than assuming success once the promise resolves) — this never rejects,
- * so a caller ignoring the result would otherwise report success even
- * when the bridge returned an error. `garminWorkoutId` carries the
- * Garmin-assigned id parsed from the push response (null when absent).
- */
-export const runPush = async (
-  gcn: unknown,
-  setPushing: (s: PushState) => void,
-  redetect: () => Promise<void>
-): Promise<GarminPushOutcome> => {
-  setPushing({ status: "loading" });
-  const result = await executePush(getGarminExtensionId(), gcn);
-  if (result.status === "invalidated") {
-    await redetect();
-    setPushing({ status: "error", reason: "updated" });
-    return { success: false, garminWorkoutId: null };
-  }
-  if (result.status === "error") {
-    if (result.redetect) await redetect();
-    logFailure("garmin-send", result.detail);
-    setPushing({ status: "error", reason: result.reason });
-    return { success: false, garminWorkoutId: null };
-  }
-  setPushing({ status: "success" });
-  return { success: true, garminWorkoutId: result.garminWorkoutId };
 };
