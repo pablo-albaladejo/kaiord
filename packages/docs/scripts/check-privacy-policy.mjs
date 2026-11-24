@@ -244,9 +244,9 @@ export const REQUIRED_RULES = [
   },
   {
     label:
-      "Garmin library delete limited to versions Kaiord created and no entry uses",
+      "Garmin library workouts never deleted; an edit keeps the earlier version",
     section: GARMIN_SECTION,
-    re: /deletes the earlier version from your Garmin Connect workout library \(a library delete\)\. It deletes only library workouts that Kaiord's record holds as created by Kaiord, never one you created, and keeps an earlier version while it has a calendar entry/i,
+    re: /never deletes a workout from your Garmin Connect workout library\. When you change a workout and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library/i,
   },
   {
     label: "Garmin calendar read filtered on the device",

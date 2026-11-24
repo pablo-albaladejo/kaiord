@@ -223,3 +223,22 @@
 - [ ] 11.7 The interrupted library create: needs the owner's live capture of
       how Garmin lists its library (design "Library workouts settled
       2026-11-23").
+
+## 12. Library deletes off until the owner's capture (owner decision 2026-11-24, #1633)
+
+- [x] 12.1 `GARMIN_LIBRARY_DELETES` (`src/hooks/garmin-library-deletes-switch.ts`),
+      off: the production deps carry no library port, and
+      `hooks/garmin-placement-deps.test.ts` fails if the switch or the port
+      is turned on. `cleanLibrary`, the port and their tests are unchanged.
+- [x] 12.2 Closed list: `DELETE /workout-service/workout/<id>` removed with
+      the privacy-surface golden; the extension tests prove it is refused.
+      It comes back with the switch (design "Library deletes off until the
+      owner's capture, 2026-11-24").
+- [x] 12.3 Store listing (en, es), justification, privacy policy, its check
+      rule and solo case, and `claims/garmin.json`: Kaiord deletes nothing
+      from the Garmin library; an edit leaves the earlier version there.
+- [ ] 12.4 The owner's live capture: how Garmin answers a delete of a
+      library workout that has calendar entries (cascade or refuse), and how
+      it lists its library (order, page size, `createdDate` time zone,
+      identifying fields). Then turn the switch on with the closed-list
+      entry, its tests, the golden and the texts.

@@ -92,7 +92,7 @@
     },
     {
       "id": "garmin.listing.calendar",
-      "text": "Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added. When you change a workout, it deletes from your library the earlier version Kaiord created, once that version has no calendar entry in the months where Kaiord placed it; it never deletes a library workout you created.",
+      "text": "Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added. It never deletes anything from your Garmin Connect workout library: when you change a workout and send it again, Kaiord adds the new version and the earlier one stays in your library.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -119,20 +119,20 @@
           "title": "should never be moved or deleted when the Workout moves on"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should leave one library workout and one calendar entry"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should never delete the athlete's own workout of the same name"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep the earlier version while the athlete has it on another date"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep a version until Garmin answers the read of its month"
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },
@@ -529,28 +529,24 @@
       ]
     },
     {
-      "id": "garmin.pj.library-delete",
-      "text": "**Library delete**: When you change a workout in the Kaiord App and send it again, Kaiord creates a new library workout for it. The extension then calls `DELETE /workout-service/workout/{workoutId}`, with no body, to remove the earlier version from your Garmin Connect workout library. The allowlist accepts this path only with a numeric id. The Kaiord App asks for it only for a library workout its record holds as created by Kaiord and that has no calendar entry in the months where Kaiord placed it, never for one you created.",
+      "id": "garmin.pj.no-library-delete",
+      "text": "**No library delete**: The extension never deletes a workout from your Garmin Connect workout library: no path on its allowlist can, and it refuses `DELETE /workout-service/workout/{workoutId}` before sending anything. When you change a workout in the Kaiord App and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/library-delete.test.js",
-          "title": "should delete one library workout by its id, sending no body"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should leave one library workout and one calendar entry"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should never delete the athlete's own workout of the same name"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep the earlier version while the athlete has it on another date"
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         },
         {
           "test": "packages/garmin-bridge/test/library-delete.test.js",
-          "title": "should pass Garmin's refusal of a library delete on with its status"
+          "title": "should send nothing to Garmin for a library delete while signed in"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
         }
       ]
     },
@@ -1017,28 +1013,24 @@
       ]
     },
     {
-      "id": "garmin.pp.library-cleanup",
-      "text": "**Library Clean-Up**: When you change a workout and send it again, Kaiord creates a new library workout for it, and the extension then deletes the earlier version from your Garmin Connect workout library (a library delete). It deletes only library workouts that Kaiord's record holds as created by Kaiord, never one you created, and keeps an earlier version while it has a calendar entry in a month where Kaiord placed it, or while that month cannot be read.",
+      "id": "garmin.pp.library-never-deleted",
+      "text": "**Library Workouts Never Deleted**: The extension never deletes a workout from your Garmin Connect workout library. When you change a workout and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should leave one library workout and one calendar entry"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should never delete the athlete's own workout of the same name"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep the earlier version while the athlete has it on another date"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep a version until Garmin answers the read of its month"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
         },
         {
           "test": "packages/garmin-bridge/test/library-delete.test.js",
-          "title": "should delete one library workout by its id, sending no body"
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },
@@ -1196,7 +1188,7 @@
     },
     {
       "id": "garmin.es.listing.calendar",
-      "text": "Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú. Cuando cambias un entrenamiento, borra de tu biblioteca la versión anterior que creó Kaiord, en cuanto esa versión no tiene ninguna entrada en el calendario en los meses en que Kaiord la colocó; nunca borra un entrenamiento de la biblioteca que creaste tú.",
+      "text": "Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú. Nunca borra nada de tu biblioteca de entrenamientos de Garmin Connect: cuando cambias un entrenamiento y lo envías de nuevo, Kaiord añade la versión nueva y la anterior se queda en tu biblioteca.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -1223,20 +1215,20 @@
           "title": "should never be moved or deleted when the Workout moves on"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should leave one library workout and one calendar entry"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should never delete the athlete's own workout of the same name"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep the earlier version while the athlete has it on another date"
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-library-cleanup.test.ts",
-          "title": "should keep a version until Garmin answers the read of its month"
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },

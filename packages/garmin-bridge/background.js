@@ -91,15 +91,12 @@ const ALLOWED = [
   // prettier-ignore
   { method: "GET", pattern: /^\/activitylist-service\/activities\/search\/activities\?start=\d+&limit=\d+$/ },
   // Calendar placement: POST places a library workout (by workoutId) on a
-  // date; DELETE removes one calendar entry (by workoutScheduleId).
+  // date; DELETE removes one calendar entry (by workoutScheduleId). Library
+  // workouts are never deleted (owner decision 2026-11-24).
   // prettier-ignore
   { method: "POST", pattern: /^\/workout-service\/schedule\/[1-9]\d*$/, body: "schedule" },
   // prettier-ignore
   { method: "DELETE", pattern: /^\/workout-service\/schedule\/[1-9]\d*$/ },
-  // One library workout by its id, no body. The App's Connector sends it
-  // only for a version Kaiord created and no calendar entry still uses.
-  // prettier-ignore
-  { method: "DELETE", pattern: /^\/workout-service\/workout\/[1-9]\d*$/ },
   // Calendar read: one month (0-based) of the athlete's calendar.
   // prettier-ignore
   { method: "GET", pattern: /^\/calendar-service\/year\/\d{4}\/month\/\d{1,2}$/ },

@@ -955,7 +955,9 @@ own entry next to it; the athlete was told once that it stayed.
 The owner decided on 2026-11-23 (#1633) that Kaiord deletes a library
 workout it created once nothing uses it. Before, an edit created a new
 library workout and moved the calendar entry to it, leaving the old version
-in the athlete's library for ever.
+in the athlete's library for ever. Since 2026-11-24 the delete does not run
+in production and the closed-list entry below is removed, until the owner's
+live capture (next section).
 
 - **The closed list gains one entry.** `DELETE /workout-service/workout/<id>`
   (canonical id, no body), reachable only through the exact App origin
@@ -1024,3 +1026,72 @@ the library (`GET /workout-service/workouts`: order, page size, whether
 not been captured live, and a match by name and time would rest on guesses
 and could take the athlete's own workout. Not implemented; the owner will
 capture it.
+
+## Library deletes off until the owner's capture, 2026-11-24
+
+The owner decided on 2026-11-24 (#1633) that the library delete settled the
+day before MUST NOT run until the owner has captured live how Garmin behaves.
+The reason is the first residual above: Kaiord reads only the months where it
+placed a version. If the athlete scheduled that version by hand in another
+month, and Garmin deletes a library workout's calendar entries in cascade, the
+delete would take the athlete's own entry with it.
+
+- **The switch.** `GARMIN_LIBRARY_DELETES` in
+  `packages/workout-spa-editor/src/hooks/garmin-library-deletes-switch.ts`,
+  `false`. While it is off, the production wiring
+  (`src/hooks/garmin-placement-deps.ts`) hands the placement pipeline no
+  library port, so `cleanLibrary` returns at once and an edit leaves the
+  earlier version in the athlete's library.
+  `src/hooks/garmin-placement-deps.test.ts` fails if the switch is on or the
+  production deps carry a library port, so turning it on is a deliberate
+  change of the owner's, with that test, never an accident.
+- **Kept as they are.** `cleanLibrary`, `GarminLibraryPort`,
+  `createGarminLibraryPort`, `libraryVersions` and their tests
+  (`hooks/garmin-library-cleanup.test.ts`, the Connector contract tests of
+  the delete). The tests inject the port and put in front of the fake Garmin
+  the extension as it will be once the switch is on: the real closed list
+  plus `GARMIN_LIBRARY_DELETE_ENTRY` (`src/test-utils/bridge-closed-list.ts`).
+  So they keep proving the behaviour for the day it is turned on.
+  `hooks/garmin-library-kept.test.ts` proves today's behaviour: with no
+  library port, or behind today's closed list, an edit leaves both versions
+  and no delete is sent.
+- **The extension.** The closed list no longer holds
+  `DELETE /workout-service/workout/<id>`. A closed list should not allow
+  what nothing uses, and the entry is a second lock behind the switch.
+  `packages/garmin-bridge/test/library-delete.test.js` proves the extension
+  refuses it, whatever the id or origin, before any token or request. The
+  privacy-surface golden drops it too. **The entry comes back with the
+  switch**, in the same change: `{ method: "DELETE", pattern:
+/^\/workout-service\/workout\/[1-9]\d*$/ }`, no body, on one line, with
+  the golden, the extension tests of 2026-11-23 (a canonical id and no body
+  sent; a refusal passed on with its status), and the contract test's list
+  of admitted requests.
+- **The texts say what the code does today.** The store listing (English
+  and Spanish), the permission justification, the privacy policy's Garmin
+  section and its check rule, and `claims/garmin.json` say that Kaiord
+  deletes nothing from the athlete's Garmin library and that an edit leaves
+  the earlier version there. Turning the switch on rewrites them again.
+
+Considered and rejected: keeping the entry and turning off only the App (the
+closed list would allow a delete nothing sends); deleting `cleanLibrary` and
+its tests (the decision of 2026-11-23 stands, only its timing waits on the
+capture). The 2026-11-23 section rejected a feature flag because an
+extension without the entry already refuses the delete; that held for an
+older extension, not for the decision to wait: the switch is the owner's,
+not the extension's.
+
+**What the owner's capture must establish before turning it on.**
+
+1. How Garmin answers `DELETE /workout-service/workout/<id>` for a library
+   workout that still has calendar entries, in the month Kaiord placed it and
+   in another: does it delete the entries in cascade, or refuse the delete
+   (and with which status and body)? A cascade means the delete needs a way to
+   prove no entry in any month uses the version (not possible with one month
+   per request, as the residual says) before it is safe; a refusal means the
+   pipeline's "any other answer writes nothing" already keeps the athlete's
+   entry.
+2. How Garmin lists the library (`GET /workout-service/workouts`): the
+   order, the page size and its limit, whether `createdDate` carries a time
+   zone, and which fields identify a workout. Task 11.7 needs this, and it
+   tells whether a version can be recognized as Kaiord's without the
+   record.

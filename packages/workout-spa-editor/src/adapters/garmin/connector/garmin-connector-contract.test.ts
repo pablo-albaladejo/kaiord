@@ -8,7 +8,11 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 
-import { closedListOf, isListed } from "../../../test-utils/bridge-closed-list";
+import {
+  closedListOf,
+  GARMIN_LIBRARY_DELETE_ENTRY,
+  isListed,
+} from "../../../test-utils/bridge-closed-list";
 import {
   currentExtension,
   json,
@@ -31,7 +35,7 @@ import { executeList, executePush } from "./garmin-workout-operations";
 
 const EXT = "garmin-ext";
 const HTTP_ACCEPTED = 202;
-const LISTED_ENTRIES = 8;
+const LISTED_ENTRIES = 7;
 // A FIT header: its size, the protocol, then ".FIT" at bytes 8-11.
 // eslint-disable-next-line no-magic-numbers -- fixed FIT header bytes
 const FIT_HEADER = [14, 16, 0, 0, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0];
@@ -509,7 +513,6 @@ describe("Garmin Connector asks only for what the extension's closed list admits
       ["POST", GARMIN_UPLOAD_PATH],
       ["POST", garminSchedulePath("1707805999")],
       ["DELETE", garminSchedulePath("1790718680")],
-      ["DELETE", garminLibraryWorkoutPath("1711500235")],
       ["GET", garminMonthPath("2026-12-01")],
     ] as const;
 
@@ -519,5 +522,22 @@ describe("Garmin Connector asks only for what the extension's closed list admits
     // Assert
     expect(list.length).toBe(LISTED_ENTRIES);
     expect(refused).toEqual([]);
+  });
+
+  it("should find the library delete refused today and admitted by the entry it regains", () => {
+    // Arrange
+    const path = garminLibraryWorkoutPath("1711500235");
+
+    // Act
+    const today = isListed(list, "DELETE", path);
+    const regained = isListed(
+      [...list, GARMIN_LIBRARY_DELETE_ENTRY],
+      "DELETE",
+      path
+    );
+
+    // Assert
+    expect(today).toBe(false);
+    expect(regained).toBe(true);
   });
 });

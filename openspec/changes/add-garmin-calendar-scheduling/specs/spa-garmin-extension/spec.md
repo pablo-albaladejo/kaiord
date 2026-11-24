@@ -90,9 +90,17 @@ Before it reports `unchanged` for a `scheduled` `Placed` equal to the desired pl
 - **WHEN** the athlete sends, sends again, moves and edits a Workout
 - **THEN** every one of those entries and library workouts SHALL remain unchanged, and no id among them SHALL be sent to `unschedule`
 
-### Requirement: An earlier library version Kaiord created is deleted once unused
+### Requirement: An earlier library version Kaiord created is deleted once unused, behind a switch that is off
+
+The production wiring SHALL hand the placement pipeline no library port while `GARMIN_LIBRARY_DELETES` (`src/hooks/garmin-library-deletes-switch.ts`) is off, and it SHALL stay off until the owner's live capture (design "Library deletes off until the owner's capture, 2026-11-24"): while it is off, an edit sent again SHALL leave the earlier version in the athlete's Garmin library and no library delete SHALL be sent. The behaviour below is what the pipeline does when it is handed a library port; its tests inject one.
 
 The ledger row SHALL record, in `libraryVersions`, every library workout id that a commit replaced and that came from Kaiord's own push (`created: true`, `superseded` then `deleted`). At the end of a run that holds a settled placement, the pipeline SHALL send `DELETE /workout-service/workout/<id>` only for a `superseded` version that the row no longer uses (not the current library, the placement's, its `previous`'s, nor any queue entry's that is not `gone`) and that two reads `SETTLE_MS` apart show unused in every month the record knows it in. A failed read or a failed delete SHALL write nothing, and the next send SHALL try again. An id the record did not get from Kaiord's own push SHALL never be deleted.
+
+#### Scenario: Production deletes nothing while the switch is off
+
+- **GIVEN** `GARMIN_LIBRARY_DELETES` is off
+- **WHEN** a Workout sent to D1 is edited and the edit is sent
+- **THEN** the production placement deps SHALL carry no library port, no `DELETE /workout-service/workout/<id>` SHALL be sent, and Garmin SHALL hold both library versions, the new one placed on D1
 
 #### Scenario: An edit leaves one library workout
 

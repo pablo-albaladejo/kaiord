@@ -377,9 +377,9 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
-    "never one you created, and keeps an earlier version",
-    "and also yours, and keeps an earlier version",
-    "Garmin library delete limited to versions Kaiord created and no entry uses",
+    "and the earlier version stays in your library",
+    "and the earlier version is deleted from your library",
+    "Garmin library workouts never deleted; an edit keeps the earlier version",
   ],
   [
     GARMIN,

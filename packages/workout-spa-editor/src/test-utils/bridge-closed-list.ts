@@ -27,3 +27,15 @@ export const isListed = (
   method: string,
   path: string
 ): boolean => list.some((e) => e.method === method && e.pattern.test(path));
+
+/**
+ * The entry Kaiord for Garmin regains when the owner turns
+ * `GARMIN_LIBRARY_DELETES` on (design "Library deletes off until the
+ * owner's capture, 2026-11-24"): one library workout by canonical id, no
+ * body. Today's `ALLOWED` does not hold it; the fake extension adds it so
+ * the library-delete tests keep proving the behaviour for that day.
+ */
+export const GARMIN_LIBRARY_DELETE_ENTRY: ClosedEntry = {
+  method: "DELETE",
+  pattern: /^\/workout-service\/workout\/[1-9]\d*$/,
+};

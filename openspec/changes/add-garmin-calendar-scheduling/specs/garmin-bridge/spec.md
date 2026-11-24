@@ -12,8 +12,9 @@ Every **data** call SHALL be checked against an allowlist of (method, path-patte
 - `GET` `/activitylist-service/activities/search/activities` (with any query string)
 - `POST` `/workout-service/schedule/<digits>` — place a library workout on a calendar date
 - `DELETE` `/workout-service/schedule/<digits>` — remove one calendar entry by its schedule id
-- `DELETE` `/workout-service/workout/<digits>` — delete one library workout by its id, with no body (the App asks for it only for an earlier version Kaiord created that no calendar entry uses)
 - `GET` `/calendar-service/year/<4 digits>/month/<1–2 digits>` — read one month of the calendar (see Requirement: Calendar read filtered in the service worker)
+
+No entry SHALL delete a library workout: `DELETE /workout-service/workout/<digits>` stays off the list until the owner turns the App's `GARMIN_LIBRARY_DELETES` switch on (design "Library deletes off until the owner's capture, 2026-11-24").
 
 Each schedule pattern SHALL match digits only, with no query string and no further sub-path; each entry SHALL sit on a single physical line so the privacy-surface guard reads it whole.
 
@@ -36,11 +37,10 @@ The token mint is OUTSIDE this allowlist and reaches three further endpoints acr
 - **WHEN** a `PUT` is issued for `/workout-service/workout/123`
 - **THEN** the extension returns `{ ok: false, error: "Blocked: disallowed path or method" }` and makes no network request
 
-#### Scenario: The library delete takes a canonical id and no body
+#### Scenario: A library delete is refused whatever its id
 
-- **WHEN** a `DELETE` is checked against `/workout-service/workout/1711500235`
-- **THEN** it SHALL be allowed with no body
-- **AND** the same path with a body, `/workout-service/workout/0123`, `/workout-service/workout/abc`, `/workout-service/workout/1/schedule` and `/workout-service/workout/1?force=true` SHALL be rejected without a network request
+- **WHEN** a `DELETE` is issued for `/workout-service/workout/1711500235`, with or without a body, from the exact App origin and with the athlete signed in
+- **THEN** the extension SHALL refuse it with no token minted and no network request
 
 #### Scenario: Calendar schedule paths accept digits only
 
