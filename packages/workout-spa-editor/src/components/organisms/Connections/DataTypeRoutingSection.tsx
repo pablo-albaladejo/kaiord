@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { DATA_TYPE_GROUPS } from "../../../application/connections/data-type-groups";
 import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useDataTypeRouting } from "../../../hooks/connections/use-data-type-routing";
+import { useFocusRoutingRow } from "../../../hooks/connections/use-focus-routing-row";
 import { useTranslate } from "../../../i18n/use-translate";
 import { AuthorityMatrixLink } from "./AuthorityMatrixLink";
 import { DataTypeRoutingGroup } from "./DataTypeRoutingGroup";
@@ -29,6 +30,7 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
       ),
     [rows]
   );
+  useFocusRoutingRow(rows);
 
   return (
     <section className="space-y-3" data-testid="data-type-routing">
