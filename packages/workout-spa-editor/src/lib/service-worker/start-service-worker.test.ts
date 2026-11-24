@@ -76,6 +76,9 @@ const load = async () => {
   const apply = await import("./apply-update");
   const unsaved = await import("../unsaved-edits");
   const flushes = await import("../pending-flushes");
+  // The update watch loads with the registration (a dynamic import); having
+  // it in the module registry already lets `settle` cover it on a busy run.
+  await import("./watch-registration");
   return { ...start, ...store, ...apply, ...unsaved, ...flushes };
 };
 
