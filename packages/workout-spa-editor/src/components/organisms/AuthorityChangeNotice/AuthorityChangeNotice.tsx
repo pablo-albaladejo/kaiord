@@ -33,7 +33,7 @@ export function AuthorityChangeNotice() {
     (notice: Notice) => {
       const kinds = new Intl.ListFormat(locale, {
         type: "conjunction",
-      }).format(notice.dataTypes.map((k) => t(`authorityNotice.kinds.${k}`)));
+      }).format(notice.dataTypes.map((k) => t(`dataTypes.${k}`)));
       const href = matrixOn
         ? capabilityHome(AUTHORITY_MATRIX_ID)
         : `${CONNECTIONS_PATH}?kind=${notice.dataTypes[0]}`;

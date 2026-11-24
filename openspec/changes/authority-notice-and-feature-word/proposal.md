@@ -13,8 +13,9 @@ turn on.
 
 - **One notice when the Authority changes**: the first time a connected
   Platform starts deciding a kind another Platform was deciding, an info
-  notice names the consequence ("Tanita now decides your weight; days only
-  TrainingPeaks reported don't change.", English and Spanish) with one link:
+  notice names the consequence ("Tanita now decides: Weight. Days only
+  TrainingPeaks reported don't change.", English and Spanish, the kind by
+  its Connections label; kinds of health data only) with one link:
   the kind's Connections row, or the matrix while it is on. No dialog (ADR
   0003). Once per kind and new Authority, remembered on the athlete's
   preferences row (synced), never for a Platform the athlete chose in the
