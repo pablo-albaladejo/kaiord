@@ -193,6 +193,13 @@ const EXTERNAL_ACTIONS = new Set([
 // only the Session check the popup sends.
 const INTERNAL_ACTIONS = new Set(["checkSession"]);
 
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
+
 // No credential handshake: this bridge mints nothing and exchanges nothing.
 // The MyTANITA session cookie rides along on the export fetch itself
 // (`credentials:"include"` in session-fetch.js), and that fetch is gated by

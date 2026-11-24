@@ -320,6 +320,13 @@ const EXTERNAL_ACTIONS = new Set([
 // content script.
 const INTERNAL_ACTIONS = new Set(["popup-status", "tab-open"]);
 
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
+
 // The bearer the WHOOP tab's content script captured: taken only from this
 // extension's own content script running on app.whoop.com, stored, and never
 // answered, so no page and no other content script learns anything from it.

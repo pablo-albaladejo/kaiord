@@ -247,6 +247,13 @@ chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 const INTERNAL_ACTIONS = new Set(["ping"]);
 
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
+
 chrome.runtime.onMessage.addListener(
   bridgeEnvelope.createInternalDispatch({
     dispatch,

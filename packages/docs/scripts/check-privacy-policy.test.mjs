@@ -301,6 +301,12 @@ test("a landing privacy page without the redirect fails on each missing part", (
 
 const SOLO_CASES = [
   [
+    TRAIN2GO,
+    "it keeps none of this once the popup closes and never hands it to the Kaiord App",
+    "it keeps some of this",
+    "Train2Go popup reads kept to the open popup",
+  ],
+  [
     GARMIN,
     "a workout's author (your name and profile pictures) and the people it is shared with, an activity's owner names and pictures and the places it started and ended",
     "some details",

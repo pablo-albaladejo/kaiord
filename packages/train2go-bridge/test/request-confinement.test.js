@@ -16,7 +16,6 @@ const SNAPSHOT = positiveSnapshotFixtures[0];
 const POPUP_STATE_KEYS = new Set([
   "profileSnapshot",
   "lastPushReceipt",
-  "lastWeeklyRollup",
   "kaiordTheme",
   "bridgeHealth",
   "bridgeTelemetry",

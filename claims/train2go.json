@@ -208,7 +208,7 @@
     },
     {
       "id": "train2go.listing.popup",
-      "text": "Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload.",
+      "text": "Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload, read each time you open it and never stored.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
@@ -299,7 +299,7 @@
     },
     {
       "id": "train2go.listing.stored",
-      "text": "The extension stores no password, cookie or token. It keeps in your browser (chrome.storage.local) only what its popup shows: the profile summary the Kaiord App sends, this week's totals, the app's theme preference, when it last could and could not read from Train2Go, and a log of its last 25 errors.",
+      "text": "The extension stores no password, cookie or token. It keeps in your browser (chrome.storage.local) only what its popup shows: the profile summary the Kaiord App sends, the app's theme preference, when it last could and could not read from Train2Go, and a log of its last 25 errors.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -311,7 +311,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "falls back to read-week when cache is stale"
+          "title": "should read the week each time it opens, whatever an older version left in storage"
         },
         {
           "test": "packages/train2go-bridge/test/bridge-theme.test.js",
@@ -470,17 +470,17 @@
       "proof": [
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "uses cached rollup when fresh and skips read-week"
+          "title": "should store nothing it read, only its own Connection health"
         },
         {
           "file": "packages/train2go-bridge/popup.js",
-          "contains": "chrome.storage.local.get([\"profileSnapshot\", \"lastWeeklyRollup\"]"
+          "contains": "chrome.storage.local.get([\"profileSnapshot\"]"
         }
       ]
     },
     {
       "id": "train2go.pj.storage-local",
-      "text": "**Stored in `chrome.storage.local`**: the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; this week's planned, completed and workload totals, reused for 5 minutes; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Train2Go; and a log of the last 25 errors the extension handled without failing.",
+      "text": "**Stored in `chrome.storage.local`**: the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Train2Go; and a log of the last 25 errors the extension handled without failing.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -491,16 +491,12 @@
           "title": "writes lastPushReceipt atomically with the snapshot"
         },
         {
-          "file": "packages/train2go-bridge/popup.js",
-          "contains": "const ROLLUP_TTL_MS = 5 * 60 * 1_000;"
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "should store nothing it read, only its own Connection health"
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "uses cached rollup when fresh and skips read-week"
-        },
-        {
-          "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "falls back to read-week when cache is stale"
+          "title": "should read the week each time it opens, whatever an older version left in storage"
         },
         {
           "test": "packages/train2go-bridge/test/bridge-theme.test.js",
@@ -633,7 +629,7 @@
     },
     {
       "id": "train2go.pj.app-receives",
-      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.",
+      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only what the popup shows when you open it (who is signed in, with your coach's name and notes, and this week's totals) is read inside the extension, for the popup alone: it is never stored and never handed to the Kaiord App.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1039,7 +1035,7 @@
     },
     {
       "id": "train2go.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
+      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the extension first removes from that answer your surname, gender, height, weight and heart rates, and your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, each time you open it or press Refresh; it keeps none of this once the popup closes and never hands it to the Kaiord App.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1062,20 +1058,12 @@
           "contains": "sendMessage({ action: \"read-profile\" }),"
         },
         {
-          "file": "packages/train2go-bridge/popup.js",
-          "contains": "const ROLLUP_TTL_MS = 5 * 60 * 1_000;"
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "should read the week each time it opens, whatever an older version left in storage"
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "uses cached rollup when fresh and skips read-week"
-        },
-        {
-          "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "falls back to read-week when cache is stale"
-        },
-        {
-          "file": "packages/train2go-bridge/popup.js",
-          "contains": "loadPopupData({ bypassTtl: true })"
+          "title": "should store nothing it read, only its own Connection health"
         },
         {
           "test": "packages/train2go-bridge/test/answer-secrets.test.js",
@@ -1084,12 +1072,16 @@
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-personal-fields.test.ts",
           "title": "should read the same athlete id and name from the trimmed profile ping"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "$(\"refresh-btn\").addEventListener(\"click\", () => loadPopupData());"
         }
       ]
     },
     {
       "id": "train2go.pp.stored",
-      "text": "**Stored in Your Browser**: The extension keeps in `chrome.storage.local` only what its popup shows: the profile summary the Kaiord App sends for its popup, this week's totals, the app's theme preference, when it last could and could not read from Train2Go, and a log of the last 25 errors it handled without failing. Removing the extension from Chrome deletes them.",
+      "text": "**Stored in Your Browser**: The extension keeps in `chrome.storage.local` only what its popup shows: the profile summary the Kaiord App sends for its popup, the app's theme preference, when it last could and could not read from Train2Go, and a log of the last 25 errors it handled without failing. Removing the extension from Chrome deletes them.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1101,7 +1093,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "falls back to read-week when cache is stale"
+          "title": "should read the week each time it opens, whatever an older version left in storage"
         },
         {
           "test": "packages/train2go-bridge/test/bridge-theme.test.js",
@@ -1334,7 +1326,7 @@
     },
     {
       "id": "train2go.es.listing.popup",
-      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana.",
+      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana, que lee cada vez que la abres y no guarda.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
@@ -1425,7 +1417,7 @@
     },
     {
       "id": "train2go.es.listing.stored",
-      "text": "La extensión no guarda ninguna contraseña, cookie ni token. Solo guarda en tu navegador (chrome.storage.local) lo que muestra su ventana emergente: el resumen del perfil que envía Kaiord App, los totales de esta semana, la preferencia de tema de la app, cuándo pudo y cuándo no pudo leer de Train2Go por última vez, y un registro de sus últimos 25 errores.",
+      "text": "La extensión no guarda ninguna contraseña, cookie ni token. Solo guarda en tu navegador (chrome.storage.local) lo que muestra su ventana emergente: el resumen del perfil que envía Kaiord App, la preferencia de tema de la app, cuándo pudo y cuándo no pudo leer de Train2Go por última vez, y un registro de sus últimos 25 errores.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1437,7 +1429,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "falls back to read-week when cache is stale"
+          "title": "should read the week each time it opens, whatever an older version left in storage"
         },
         {
           "test": "packages/train2go-bridge/test/bridge-theme.test.js",

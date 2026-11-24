@@ -109,7 +109,7 @@ export const BRIDGE_REGISTRY = {
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
   [GARMIN_SECTION]: 16,
-  [TRAIN2GO_SECTION]: 13,
+  [TRAIN2GO_SECTION]: 14,
   [TANITA_SECTION]: 14,
   [TRAININGPEAKS_SECTION]: 19,
   [WHOOP_SECTION]: 10,
@@ -339,6 +339,11 @@ export const REQUIRED_RULES = [
     label: "Train2Go no-telemetry stated",
     section: TRAIN2GO_SECTION,
     re: NO_TELEMETRY,
+  },
+  {
+    label: "Train2Go popup reads kept to the open popup",
+    section: TRAIN2GO_SECTION,
+    re: /it keeps none of this once the popup closes and never hands it to the Kaiord App/i,
   },
   {
     label: "Train2Go personal fields removed from answers",

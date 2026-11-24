@@ -129,9 +129,14 @@ const saysUnauthenticated = (data) =>
 
 // The typed outcome of one profile-ping answer, shared by the Session check
 // and the popup's profile read so both word one answer the same way.
+// Signed in when the ping succeeds and names a user: a yes or no, read here
+// without the popup's parser, so the Session check reaches no popup read.
+const pingNamesUser = (data) =>
+  data?.success === true && Boolean(data?.data?.user);
+
 const sessionOutcomeOf = (res) => {
   if (res?.ok) {
-    if (parser.parsePingJson(res.data).sessionActive) return "signed-in";
+    if (pingNamesUser(res.data)) return "signed-in";
     return saysUnauthenticated(res.data) ? "signed-out" : "not-answering";
   }
   return res?.needsReauth ? "signed-out" : "not-answering";
@@ -318,6 +323,13 @@ chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 // only the three actions the popup sends.
 
 const INTERNAL_ACTIONS = new Set(["ping", "read-profile", "read-week"]);
+
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Train2Go data for the popup alone, when the athlete opens it, through the
+// closed list, never stored and never handed to the App, and the script only
+// they use. Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set(["read-profile", "read-week"]);
+const POPUP_READ_SCRIPTS = ["parser.js"];
 
 chrome.runtime.onMessage.addListener(
   bridgeEnvelope.createInternalDispatch({
