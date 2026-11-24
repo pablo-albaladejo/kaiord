@@ -50,7 +50,7 @@ Choosing the Authority by hand SHALL be the Capability `authority-matrix`, grade
 - **THEN** no section or link to choose which Platform decides SHALL show
 - **AND** the assistant SHALL NOT be offered `set_authority`
 - **AND** the assistant SHALL still be offered `set_data_route`, which switches a source's import on or off and waits for the athlete to confirm
-- **WHEN** they turn "Choose which Platform decides" on in Settings, Capabilities
+- **WHEN** they turn "Choose which Platform decides" on in Settings, Features
 - **THEN** the section SHALL show each kind more than one source reports, with "Automatic" chosen
 
 #### Scenario: A choice overrides the automatic one

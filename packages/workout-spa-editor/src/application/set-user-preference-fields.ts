@@ -25,6 +25,7 @@ export type UserPreferenceFieldsPatch = Partial<
     | "labDashboardParams"
     | "setupChecklistDismissed"
     | "dismissedCoachMarks"
+    | "authorityDeciders"
   >
 >;
 

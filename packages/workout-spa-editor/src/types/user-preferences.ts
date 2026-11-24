@@ -65,6 +65,13 @@ export const userPreferencesSchema = z.object({
    * Settings → "Show tips again" empties the array rather than deleting it.
    */
   dismissedCoachMarks: z.array(z.string()).optional(),
+  /**
+   * Per kind of data, every Platform that has decided it, the one deciding
+   * now last: what the athlete was already told about the Authority. Rides
+   * the cloud snapshot, so a notice seen on one device is not repeated on
+   * another. Optional and unindexed — no Dexie version bump.
+   */
+  authorityDeciders: z.record(z.string(), z.array(z.string())).optional(),
   updatedAt: z.iso.datetime(),
 });
 

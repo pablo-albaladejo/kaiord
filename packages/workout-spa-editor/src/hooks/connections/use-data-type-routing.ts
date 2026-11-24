@@ -21,11 +21,10 @@ import {
   togglesByType,
 } from "../../application/connections/routing-by-type";
 import { AUTHORITY_MATRIX_ID } from "../../application/data-source-policy/automatic-authority";
-import { choiceInForce } from "../../application/data-source-policy/read-authority-choice";
+import { choicesInForce } from "../../application/data-source-policy/read-authority-choice";
 import { useCapabilities } from "../../contexts/capabilities-context";
 import { usePersistence } from "../../contexts/persistence-context";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
-import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import { useBridgeSyncStates } from "../data-hub/use-bridge-sync-states";
 import { useDataTypeSourcePolicies } from "../data-hub/use-data-type-source-policies";
 import { useBridgeConnections } from "../use-bridge-connections";
@@ -50,12 +49,6 @@ export type DataTypeRouting = {
   >;
 };
 
-const inForce = (
-  stored: readonly DataTypeSourcePolicy[],
-  matrixOn: boolean
-): readonly DataTypeSourcePolicy[] =>
-  stored.flatMap((row) => choiceInForce(row, matrixOn) ?? []);
-
 export const useDataTypeRouting = (
   profileId: string | null,
   byDataType: DataFlowsByType
@@ -65,7 +58,10 @@ export const useDataTypeRouting = (
   const stored = useDataTypeSourcePolicies(profileId);
   // Rows read only the choices in force, as every reader does.
   const matrixOn = useCapabilities().isOn(AUTHORITY_MATRIX_ID);
-  const policies = useMemo(() => inForce(stored, matrixOn), [stored, matrixOn]);
+  const policies = useMemo(
+    () => choicesInForce(stored, matrixOn),
+    [stored, matrixOn]
+  );
   const connections = useBridgeConnections(profileId);
   const records = useConnectionStatus(profileId);
 

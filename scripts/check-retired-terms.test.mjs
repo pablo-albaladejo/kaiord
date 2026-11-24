@@ -164,6 +164,45 @@ describe("check-retired-terms, athlete-facing words", () => {
     assert.deepEqual(problems, []);
   });
 
+  it("should fail on Capability and Capacidad in athlete-facing text, in English and in Spanish", () => {
+    // Arrange
+    const texts = [
+      "Capabilities",
+      "Turn on a Capability in Settings.",
+      "Capacidades",
+      "Activa una capacidad en Ajustes.",
+    ];
+
+    // Act
+    const problems = texts.map((text) =>
+      retiredTermProblems("x.json", text, athlete)
+    );
+
+    // Assert
+    assert.ok(
+      problems.every((p) => p.length === 1 && p[0].includes("Feature")),
+      JSON.stringify(problems)
+    );
+  });
+
+  it("should let the athlete read Features and Funciones, and a declared token or a physiological capacity", () => {
+    // Arrange
+    const texts = [
+      "Features",
+      "Funciones",
+      "Only the `read:body` capability is declared.",
+      "Capacidad aeróbica",
+    ];
+
+    // Act
+    const problems = texts.flatMap((text) =>
+      retiredTermProblems("x.json", text, athlete)
+    );
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+
   it("should pass an npm package name and a store address that must stay", () => {
     // Arrange
     const text =

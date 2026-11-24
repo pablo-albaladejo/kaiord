@@ -39,6 +39,13 @@ export const choiceInForce = (
     ? undefined
     : stored;
 
+/** Every stored row as the choices in force: none while the matrix is off. */
+export const choicesInForce = (
+  stored: readonly DataTypeSourcePolicy[],
+  matrixOn: boolean
+): readonly DataTypeSourcePolicy[] =>
+  stored.flatMap((row) => choiceInForce(row, matrixOn) ?? []);
+
 export const readAuthorityChoice = async (
   deps: AuthorityChoiceDeps,
   input: { profileId: string; dataType: ManagedDataType }

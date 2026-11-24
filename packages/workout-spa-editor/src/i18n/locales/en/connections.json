@@ -121,6 +121,22 @@
     }
   },
   "authorityMatrixLink": "Choose which Platform decides each kind of data",
+  "authorityNotice": {
+    "decides": "{{decides}} now decides your {{kinds}}; days only {{replaces}} reported don't change.",
+    "change": "Change it",
+    "kinds": {
+      "weight": "weight",
+      "body-composition": "body composition",
+      "sleep": "sleep",
+      "hrv": "HRV",
+      "daily-wellness": "daily wellness",
+      "stress": "stress",
+      "strain": "strain",
+      "vitals": "vitals",
+      "heart-rate-series": "heart-rate series",
+      "training-zones": "training zones"
+    }
+  },
   "dataTypeHints": {
     "workout": "Completed structured sessions",
     "planned-session": "What you or your coach scheduled",
