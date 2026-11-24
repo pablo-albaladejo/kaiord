@@ -26,10 +26,6 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 **Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension hands that answer to the Kaiord App unread, and the Kaiord App keeps only the entries of that one workout, each entry's id and date. Every other calendar item is dropped in the Kaiord App, in your browser, and is never stored or sent.
 
-### `https://connect.garmin.com/*`
-
-**Why**: The Garmin Connect site, where you sign in. No request the extension makes is addressed to this host; the popup and the `open-garmin` action only open it in a new tab.
-
 ## Content Script
 
 ### `kaiord-announce.js` on `https://kaiord.com/*`

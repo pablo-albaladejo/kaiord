@@ -8,7 +8,6 @@
   "permissions": ["storage"],
 
   "host_permissions": [
-    "https://connect.garmin.com/*",
     "https://connectapi.garmin.com/*",
     "https://sso.garmin.com/*"
   ],

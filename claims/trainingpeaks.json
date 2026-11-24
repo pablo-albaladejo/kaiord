@@ -503,7 +503,7 @@
     },
     {
       "id": "trainingpeaks.pj.tpapi-why",
-      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the four requests the Kaiord App may ask for. A request outside these five, or a write whose body is not the one shape declared for it, is refused before it is sent:",
+      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the three requests the Kaiord App may ask for. A request outside these four, or a write whose body is not the one shape declared for it, is refused before it is sent:",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -515,7 +515,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should allow the metrics range read and single-metric write"
+          "title": "should allow the metrics range read and refuse a metric write"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
@@ -612,20 +612,6 @@
       ]
     },
     {
-      "id": "trainingpeaks.pj.weight-path",
-      "text": "`POST /metrics/v3/athletes/{id}/consolidatedtimedmetric` adds one weight measurement. The extension accepts this request, but the Kaiord App does not send it today.",
-      "proof": [
-        {
-          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
-          "title": "should send a weight that matches its declared shape as JSON"
-        },
-        {
-          "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
-          "contains": "\"trainingpeaks-bridge\": [\"workout\"],"
-        }
-      ]
-    },
-    {
       "id": "trainingpeaks.pj.bearer",
       "text": "Every request except the token exchange carries the token as `Authorization: Bearer` and no cookies (`credentials: \"omit\"`).",
       "proof": [
@@ -636,10 +622,6 @@
         {
           "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
-        },
-        {
-          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
-          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -783,10 +765,6 @@
         {
           "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
-        },
-        {
-          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
-          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -1005,7 +983,7 @@
     },
     {
       "id": "trainingpeaks.pp.metrics",
-      "text": "**Body Metrics**: When the Kaiord App asks, the extension reads the metrics you logged in TrainingPeaks over a date range from `https://tpapi.trainingpeaks.com/metrics/v3/...` (the Kaiord App asks for the last 30 days) and passes the answer to the Kaiord App unread. The answer may include metrics other than weight, such as pulse, sleep or steps; the Kaiord App keeps only your weight. The extension also accepts a request to add one weight measurement, but the Kaiord App does not send it today. These are the `read:body`, `write:body` and `write:workouts` capabilities.",
+      "text": "**Body Metrics**: When the Kaiord App asks, the extension reads the metrics you logged in TrainingPeaks over a date range from `https://tpapi.trainingpeaks.com/metrics/v3/...` (the Kaiord App asks for the last 30 days) and passes the answer to the Kaiord App unread. The answer may include metrics other than weight, such as pulse, sleep or steps; the Kaiord App keeps only your weight. The extension writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent. These are the `read:body` and `write:workouts` capabilities.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -1029,7 +1007,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
-          "title": "should send a weight that matches its declared shape as JSON"
+          "title": "should refuse to add a weight measurement, which the Kaiord App never sends"
         },
         {
           "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
@@ -1043,7 +1021,7 @@
     },
     {
       "id": "trainingpeaks.pp.answers-unread",
-      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it, except that it first removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
+      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it, except that it first removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
@@ -1093,7 +1071,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should allow the metrics range read and single-metric write"
+          "title": "should allow the metrics range read and refuse a metric write"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",

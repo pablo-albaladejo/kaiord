@@ -535,34 +535,6 @@
       ]
     },
     {
-      "id": "garmin.pj.connect",
-      "text": "`https://connect.garmin.com/*`",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"https://connect.garmin.com/*\""
-        }
-      ]
-    },
-    {
-      "id": "garmin.pj.connect-why",
-      "text": "**Why**: The Garmin Connect site, where you sign in. No request the extension makes is addressed to this host; the popup and the `open-garmin` action only open it in a new tab.",
-      "proof": [
-        {
-          "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
-        },
-        {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles open-garmin action"
-        },
-        {
-          "file": "packages/garmin-bridge/popup.js",
-          "contains": "const OPEN_GARMIN_URL = \"https://connect.garmin.com/modern/\";"
-        }
-      ]
-    },
-    {
       "id": "garmin.pj.content-script",
       "text": "Content Script",
       "kind": "label"

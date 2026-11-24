@@ -592,7 +592,7 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "`read:body`, `write:body` and `write:workouts` capabilities",
+    "`read:body` and `write:workouts` capabilities",
     "some capabilities",
     "TrainingPeaks body and workout scopes disclosed",
   ],
@@ -610,9 +610,9 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "but the Kaiord App does not send it today",
-    "and the Kaiord App may send it",
-    "TrainingPeaks unused weight write disclosed",
+    "writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent",
+    "writes what it writes",
+    "TrainingPeaks metric write refused",
   ],
   [
     TRAININGPEAKS,

@@ -583,7 +583,7 @@
     },
     {
       "id": "train2go.pj.paths",
-      "text": "**Paths**: only five, all `GET`, checked against an allowlist in the service worker before any request is sent: `/api/v2/profile/ping` (who is signed in), `/api/v2/workplan/weekly/{date}` and `/api/v2/workplan/daily/{date}` (the coaching plan), `/api/v2/workplan/tooltip/activity/{id}`, and `/user/details` (zones and weight). Any other path or method is refused without a request.",
+      "text": "**Paths**: only four, all `GET`, checked against an allowlist in the service worker before any request is sent: `/api/v2/profile/ping` (who is signed in), `/api/v2/workplan/weekly/{date}` and `/api/v2/workplan/daily/{date}` (the coaching plan), and `/user/details` (zones and weight). Any other path or method is refused without a request.",
       "proof": [
         {
           "file": "packages/train2go-bridge/background.js",
@@ -903,7 +903,7 @@
     },
     {
       "id": "train2go.pp.read-only",
-      "text": "**Read Only**: Every request is a `GET` to one of five allowlisted paths; a request outside them is refused before it is sent. The extension never changes anything on Train2Go: it does not modify the page, submit forms, or write to your account.",
+      "text": "**Read Only**: Every request is a `GET` to one of four allowlisted paths; a request outside them is refused before it is sent. The extension never changes anything on Train2Go: it does not modify the page, submit forms, or write to your account.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",

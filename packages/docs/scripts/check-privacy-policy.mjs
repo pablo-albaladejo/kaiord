@@ -76,7 +76,6 @@ export const BRIDGE_REGISTRY = {
   "garmin-bridge": {
     section: GARMIN_SECTION,
     hosts: new Set([
-      "https://connect.garmin.com/*",
       "https://connectapi.garmin.com/*",
       "https://sso.garmin.com/*",
     ]),
@@ -443,7 +442,7 @@ export const REQUIRED_RULES = [
   {
     label: "TrainingPeaks body and workout scopes disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /`read:body`, `write:body` and `write:workouts` capabilities/,
+    re: /`read:body` and `write:workouts` capabilities/,
   },
   {
     label: "TrainingPeaks workout write disclosed (calendar)",
@@ -456,9 +455,9 @@ export const REQUIRED_RULES = [
     re: /cannot delete anything in TrainingPeaks or change a workout already there/i,
   },
   {
-    label: "TrainingPeaks unused weight write disclosed",
+    label: "TrainingPeaks metric write refused",
     section: TRAININGPEAKS_SECTION,
-    re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
+    re: /writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent/i,
   },
   {
     label: "TrainingPeaks connection check minting no token disclosed",

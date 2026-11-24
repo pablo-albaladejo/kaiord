@@ -800,3 +800,24 @@ describe("set-theme (the app's theme preference for the popup)", () => {
     expect(__chromeLocalStore.kaiordTheme).toBeUndefined();
   });
 });
+
+describe("host permissions", () => {
+  it.each(["manifest.json", "manifest.prod.json"])(
+    "should ask %s only for the two hosts the service worker sends requests to",
+    (file) => {
+      // Arrange
+      const path = require("node:path").join(__dirname, "..", file);
+
+      // Act
+      const manifest = JSON.parse(
+        require("node:fs").readFileSync(path, "utf8")
+      );
+
+      // Assert
+      expect(manifest.host_permissions).toEqual([
+        "https://connectapi.garmin.com/*",
+        "https://sso.garmin.com/*",
+      ]);
+    }
+  );
+});

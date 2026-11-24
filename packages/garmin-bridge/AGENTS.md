@@ -27,7 +27,7 @@ content script (`test/thin-bridge.test.js`).
 
 ## Key Files
 
-- `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com`).
+- `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connectapi.garmin.com` and `sso.garmin.com` only; opening `connect.garmin.com` in a tab needs none).
 - `manifest.prod.json` — Production manifest for Chrome Web Store release (same surface, no localhost origins).
 - `background.js` — Service worker. The closed list with body schemas (`workout`, `fit-file`, `schedule`), `request` under one deadline and send cut-off, action routing for `ping`/`request`/`open-garmin`/`profile-snapshot(-clear)`/`set-theme`, swallowed-error telemetry.
 - `garmin-deadline.js` — The one deadline every request runs under (`boundedCall`: 25 s, no write after 15 s, `deadline-before-send` / `deadline-exceeded`).

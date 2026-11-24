@@ -16,13 +16,12 @@ Why Kaiord for TrainingPeaks asks for each permission in `manifest.prod.json`, f
 
 ### `https://tpapi.trainingpeaks.com/*`
 
-**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the four requests the Kaiord App may ask for. A request outside these five, or a write whose body is not the one shape declared for it, is refused before it is sent:
+**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the three requests the Kaiord App may ask for. A request outside these four, or a write whose body is not the one shape declared for it, is refused before it is sent:
 
 - `GET /users/v3/token` exchanges your TrainingPeaks sign-in for an access token. It carries your TrainingPeaks cookie (`credentials: "include"`) and no `Authorization` header; Chrome attaches the cookie, and the extension cannot read it.
 - `GET /metrics/v3/athletes/{id}/consolidatedtimedmetrics/{start}/{end}` reads the metrics you logged over a date range. The answer may include metrics other than weight, such as pulse, sleep or steps; the extension passes it to the Kaiord App unread, and the Kaiord App keeps only your weight.
 - `POST /fitness/v6/athletes/{id}/workouts` adds a workout you send from the Kaiord App to your TrainingPeaks calendar.
 - `GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. TrainingPeaks' answer reaches the Kaiord App in your browser, which keeps only the workout's id and day and drops the rest there.
-- `POST /metrics/v3/athletes/{id}/consolidatedtimedmetric` adds one weight measurement. The extension accepts this request, but the Kaiord App does not send it today.
 
 Every request except the token exchange carries the token as `Authorization: Bearer` and no cookies (`credentials: "omit"`).
 

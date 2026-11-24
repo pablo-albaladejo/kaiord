@@ -67,7 +67,6 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
   // prettier-ignore
   { method: "GET", pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
-  { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
   // Server-rendered HTML page the App's Connector reads zones and weight
   // from.
   { method: "GET", pattern: /^\/user\/details$/ },

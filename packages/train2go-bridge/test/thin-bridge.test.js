@@ -91,6 +91,10 @@ describe("thin Bridge: closed path list", () => {
 
   it.each([
     { label: "a path outside the list", path: "/api/v2/comments/1" },
+    {
+      label: "the activity tooltip, which no Connector reads",
+      path: "/api/v2/workplan/tooltip/activity/123",
+    },
     { label: "a listed path with a query added", path: "/user/details?x=1" },
     { label: "another host", path: "//attacker.example/user/details" },
     { label: "a path with no leading slash", path: "user/details" },
