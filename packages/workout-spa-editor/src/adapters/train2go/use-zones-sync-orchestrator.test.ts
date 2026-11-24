@@ -48,6 +48,7 @@ const buildToasts = (): ToastSpy =>
   }) as unknown as ToastSpy;
 
 const persistence = { profiles: {} as object } as unknown as PersistencePort;
+const showNotLoaded = vi.fn();
 const transport = {} as CoachingTransport;
 
 const sampleConflict: ConflictItem = {
@@ -67,7 +68,13 @@ const syncedWithOffer = async (toasts = buildToasts()) => {
   mockSyncZones.mockResolvedValue(differing([sampleConflict]));
   const offer = vi.fn();
   const { result } = renderHook(() =>
-    useZonesSyncOrchestrator(persistence, transport, toasts, offer)
+    useZonesSyncOrchestrator(
+      persistence,
+      transport,
+      toasts,
+      offer,
+      showNotLoaded
+    )
   );
   await act(async () => {
     await result.current.runSync("p1");
@@ -90,7 +97,13 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        toasts,
+        vi.fn(),
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -107,7 +120,13 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        toasts,
+        vi.fn(),
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -124,7 +143,13 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        toasts,
+        vi.fn(),
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -141,7 +166,13 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        offer,
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -158,7 +189,13 @@ describe("useZonesSyncOrchestrator", () => {
     mockSyncZones.mockResolvedValue(differing([sampleConflict]));
     const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        offer,
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -183,7 +220,13 @@ describe("useZonesSyncOrchestrator", () => {
     mockSyncZones.mockResolvedValue(differing([sampleConflict]));
     const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        offer,
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -205,7 +248,13 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        offer,
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -244,7 +293,13 @@ describe("useZonesSyncOrchestrator", () => {
     rememberZonesOffer("p1", [sampleConflict]);
     mockSyncZones.mockResolvedValue(differing([]));
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), vi.fn())
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        vi.fn(),
+        showNotLoaded
+      )
     );
 
     // Act

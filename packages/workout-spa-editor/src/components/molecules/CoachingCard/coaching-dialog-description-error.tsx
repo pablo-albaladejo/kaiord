@@ -11,7 +11,10 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ExpandFailureReason } from "../../../types/coaching-expand-result";
 import { PlatformConnectionNotice } from "../ConnectionNotice/PlatformConnectionNotice";
-import { ReloadAppButton } from "../ReloadAppButton";
+import {
+  train2GoNotLoadedMessage,
+  Train2GoNotLoadedNotice,
+} from "../Train2GoNotLoaded/train2go-not-loaded";
 
 const TEST_ID = "coaching-dialog-description-error";
 
@@ -23,16 +26,9 @@ export const DialogDescriptionError = ({
   onRetry: () => void;
 }) => {
   const t = useTranslate("coaching");
-  if (reason === "app-part-not-loaded") {
-    return (
-      <div data-testid={TEST_ID} className="space-y-1 text-xs">
-        <p className="text-danger-text" role="status">
-          {t("dialog.descriptionError.app-part-not-loaded")}
-        </p>
-        <ReloadAppButton />
-      </div>
-    );
-  }
+  const notLoaded = train2GoNotLoadedMessage(reason, t);
+  if (notLoaded)
+    return <Train2GoNotLoadedNotice message={notLoaded} testId={TEST_ID} />;
   if (reason !== "not-linked") {
     return (
       <PlatformConnectionNotice

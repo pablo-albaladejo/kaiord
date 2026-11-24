@@ -15,12 +15,9 @@ vi.mock("../../lib/lazy-import", () => ({
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
 
 // The App's own failure: Train2Go was never asked, so it is not "not
-// answering"; the toast offers a reload instead.
-const ZONES_NOT_LOADED = [
-  "Your zones were not synced.",
-  "Part of the Kaiord App did not load, so nothing was asked of Train2Go. Reload the App to load it again.",
-  { action: expect.anything() },
-] as const;
+// answering"; the provider's notice offers a reload instead.
+const ZONES_NOT_SYNCED = "Your zones were not synced.";
+const showNotLoaded = vi.fn();
 
 type ToastSpy = ReturnType<typeof useToast>;
 
@@ -39,6 +36,7 @@ const loadFailure = new Error("lazy import failed");
 describe("useZonesSyncOrchestrator with a failed import", () => {
   beforeEach(() => {
     localStorage.clear();
+    showNotLoaded.mockReset();
     mockLazyImport.mockReset();
     // Past the queued answers, a load runs for real: the Connection notices
     // the failure toast words load through the same `lazyImport`.
@@ -52,7 +50,13 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     mockLazyImport.mockRejectedValueOnce(loadFailure);
     const toasts = buildToasts();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        toasts,
+        vi.fn(),
+        showNotLoaded
+      )
     );
 
     // Act
@@ -61,7 +65,8 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(...ZONES_NOT_LOADED);
+    expect(showNotLoaded).toHaveBeenCalledWith(ZONES_NOT_SYNCED);
+    expect(toasts.error).not.toHaveBeenCalled();
   });
 
   it("should still offer Train2Go's numbers when the offer memo fails to load", async () => {
@@ -77,7 +82,13 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
       .mockRejectedValueOnce(loadFailure);
     const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        buildToasts(),
+        offer,
+        showNotLoaded
+      )
     );
 
     // Act
@@ -106,7 +117,13 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     const toasts = buildToasts();
     const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts, offer)
+      useZonesSyncOrchestrator(
+        persistence,
+        transport,
+        toasts,
+        offer,
+        showNotLoaded
+      )
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -119,6 +136,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(...ZONES_NOT_LOADED);
+    expect(showNotLoaded).toHaveBeenCalledWith(ZONES_NOT_SYNCED);
+    expect(toasts.error).not.toHaveBeenCalled();
   });
 });

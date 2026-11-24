@@ -1,4 +1,5 @@
-/** `useConnectCallback` — the connect action of `use-train2go-actions.ts`. */
+/** `useConnectCallback` — the connect action of `use-train2go-actions.ts`.
+    When its code does not load, `onNotLoaded` tells the athlete. */
 import type { Analytics } from "@kaiord/core";
 import { useCallback, useRef } from "react";
 
@@ -15,7 +16,8 @@ export const useConnectCallback = (
   p: PersistencePort,
   t: CoachingTransport,
   a: Analytics,
-  runZonesSync?: (profileId: string) => Promise<void>
+  runZonesSync?: (profileId: string) => Promise<void>,
+  onNotLoaded?: () => void
 ) => {
   const abortRef = useRef<AbortController | null>(null);
   return useCallback(
@@ -23,10 +25,11 @@ export const useConnectCallback = (
       abortRef.current?.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
-      const { attemptLink } = await lazyImport(
+      const loaded = await lazyImport(
         () => import("../../application/coaching/attempt-link")
-      );
-      const r = await attemptLink(
+      ).catch(() => null);
+      if (!loaded) return onNotLoaded?.();
+      const r = await loaded.attemptLink(
         { profiles: p.profiles, transport: t },
         profileId,
         ctrl.signal
@@ -38,6 +41,6 @@ export const useConnectCallback = (
         await runZonesSync(profileId).catch(() => undefined);
       }
     },
-    [p, t, a, runZonesSync]
+    [p, t, a, runZonesSync, onNotLoaded]
   );
 };
