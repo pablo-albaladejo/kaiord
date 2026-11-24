@@ -38,11 +38,16 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
   beforeEach(() => {
     localStorage.clear();
     mockLazyImport.mockReset();
+    // Past the queued answers, a load runs for real: the Connection notices
+    // the failure toast words load through the same `lazyImport`.
+    mockLazyImport.mockImplementation((load) =>
+      (load as () => Promise<unknown>)()
+    );
   });
 
   it("should toast a failed fetch when the sync use case fails to load", async () => {
     // Arrange
-    mockLazyImport.mockRejectedValue(loadFailure);
+    mockLazyImport.mockRejectedValueOnce(loadFailure);
     const toasts = buildToasts();
     const { result } = renderHook(() =>
       useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())

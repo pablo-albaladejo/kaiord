@@ -6,7 +6,7 @@
  * store can render one uniform state per bridge.
  */
 
-import type { ConnectionReason } from "@kaiord/i18n";
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
 
 export type SessionProbeResult = {
   /** Did the extension answer? `false` means it is gone, not signed out. */
