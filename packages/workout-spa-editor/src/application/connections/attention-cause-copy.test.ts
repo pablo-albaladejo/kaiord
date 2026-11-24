@@ -1,3 +1,4 @@
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 import { describe, expect, it } from "vitest";
 
 import { getTranslate } from "../../i18n/use-translate";
@@ -17,7 +18,7 @@ describe("attentionCauseText", () => {
     };
 
     // Act
-    const text = attentionCauseText(cause, t, "en");
+    const text = attentionCauseText(cause, t, "en", connectionNotice);
 
     // Assert
     expect(text).toBe(
@@ -34,7 +35,7 @@ describe("attentionCauseText", () => {
     };
 
     // Act
-    const text = attentionCauseText(cause, tEs, "es");
+    const text = attentionCauseText(cause, tEs, "es", connectionNotice);
 
     // Assert
     expect(text).toBe(
@@ -47,7 +48,7 @@ describe("attentionCauseText", () => {
     const cause: AttentionCause = { kind: "several" };
 
     // Act
-    const text = attentionCauseText(cause, t, "en");
+    const text = attentionCauseText(cause, t, "en", connectionNotice);
 
     // Assert
     expect(text).toBe("Each one shows its fix on Connections.");
@@ -63,7 +64,9 @@ describe("attentionCauseText", () => {
     ];
 
     // Act
-    const texts = causes.map((cause) => attentionCauseText(cause, t, "en"));
+    const texts = causes.map((cause) =>
+      attentionCauseText(cause, t, "en", connectionNotice)
+    );
 
     // Assert
     for (const text of texts) {

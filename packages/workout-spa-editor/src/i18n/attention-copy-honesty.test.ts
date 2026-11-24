@@ -14,11 +14,11 @@
  * weakened into uselessness fails here instead of passing quietly; the pins
  * turn any change to the shipped words into a reviewed change.
  */
+import type { NamespaceDictionary } from "@kaiord/i18n";
 import {
   connectionNotice,
   type ConnectionState,
-  type NamespaceDictionary,
-} from "@kaiord/i18n";
+} from "@kaiord/i18n/connection-notices";
 import { describe, expect, it } from "vitest";
 
 const MODULES = import.meta.glob<NamespaceDictionary>("./locales/*/*.json", {

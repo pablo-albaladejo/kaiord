@@ -1,11 +1,11 @@
+import type { Locale } from "@kaiord/i18n";
 import {
   connectionNotice,
   type ConnectionReason,
   connectionReasonNotice,
   type ConnectionState,
-  type Locale,
   type ShownNotice,
-} from "@kaiord/i18n";
+} from "@kaiord/i18n/connection-notices";
 
 /**
  * The one notice a Connection shows: a working Session that cannot serve

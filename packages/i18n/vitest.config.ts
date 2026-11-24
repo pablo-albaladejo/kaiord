@@ -13,6 +13,7 @@ export default defineConfig({
         "**/*.test.ts",
         "**/*.config.ts",
         "src/index.ts",
+        "src/connection-notices-entry.ts",
       ],
       thresholds: {
         lines: 80,

@@ -6,7 +6,7 @@
  * `BridgeConnectionState` is what consumers see: the same shape plus the
  * `lastSyncAt` timestamp read from the existing `coachingSyncState` rows.
  */
-import type { ConnectionReason } from "@kaiord/i18n";
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
 
 import type { SessionProber } from "./bridge-session-probe-types";
 

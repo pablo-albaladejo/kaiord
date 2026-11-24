@@ -2,7 +2,7 @@ import type {
   ConnectionReason,
   ConnectionState,
   ShownNotice,
-} from "@kaiord/i18n";
+} from "@kaiord/i18n/connection-notices";
 
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { connectionNoticeOf } from "./connection-notice-of";

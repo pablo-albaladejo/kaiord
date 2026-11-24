@@ -2,7 +2,6 @@ import { watchDialogInput } from "../unsaved-dialog-input";
 import { trackFirstInput } from "./first-input";
 import { sayHello } from "./hello";
 import { isReloadRequested } from "./update-store";
-import { watchRegistration } from "./watch-registration";
 
 export type StartOptions = {
   prod: boolean;
@@ -33,10 +32,15 @@ export function startServiceWorker(options: StartOptions): void {
     reloading = true;
     options.reload();
   });
+  // The update watch loads with the registration, after first paint: it
+  // pulls the update flow (unsaved-edit checks, pending flushes) that the
+  // first route never needs.
   options.whenReady(() => {
-    container
-      .register(`${base}sw.js`, { scope: base })
-      .then((registration) =>
+    Promise.all([
+      container.register(`${base}sw.js`, { scope: base }),
+      import("./watch-registration"),
+    ])
+      .then(([registration, { watchRegistration }]) =>
         watchRegistration(registration, {
           container,
           sinceLoadMs: options.sinceLoadMs,

@@ -6,7 +6,7 @@
  * (`hasAccountId`, `tabOpen`); the one a protocol behind says the first in
  * `status` (`userId: null`) and cannot say the second. No id is asked for.
  */
-import type { ConnectionReason } from "@kaiord/i18n";
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
 
 import { classifyEnvelope } from "./bridge-envelope-classify";
 import { readWhoopSession } from "./bridge-legacy-session-readers";

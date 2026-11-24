@@ -5,7 +5,7 @@ import { Router } from "wouter";
 import App from "./App.tsx";
 import { HealthSharingNotice } from "./components/organisms/HealthSharingNotice/HealthSharingNotice";
 import { StaleSchemaGate } from "./components/organisms/StaleSchemaDialog/StaleSchemaGate";
-import { UpdatePrompt } from "./components/organisms/UpdatePrompt/UpdatePrompt";
+import { UpdatePromptGate } from "./components/organisms/UpdatePrompt/UpdatePromptGate";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
@@ -50,7 +50,7 @@ export const AppRoot = (props: AppRootProps) => (
                     <LocaleProvider>
                       <UnitsProvider>
                         <StaleSchemaGate />
-                        <UpdatePrompt />
+                        <UpdatePromptGate />
                         <HealthSharingNotice />
                         <Router hook={useFragmentLocation}>
                           <App />

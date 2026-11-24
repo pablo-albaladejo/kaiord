@@ -7,7 +7,10 @@
  * every extension popup calls. So two surfaces can never word one Connection
  * two ways, and none can state a cause the check did not establish.
  */
-import type { ConnectionReason, ConnectionState } from "@kaiord/i18n";
+import type {
+  ConnectionReason,
+  ConnectionState,
+} from "@kaiord/i18n/connection-notices";
 
 import type { BridgeSessionSignal } from "./connection-source-status";
 import type { SessionOutcome } from "./session-outcome";

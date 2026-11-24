@@ -10,6 +10,7 @@
  * says "sources down" beside the rest of the app.
  */
 
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 import { useLocation } from "wouter";
 
 import { attentionCauseText } from "../../../application/connections/attention-cause-copy";
@@ -32,7 +33,12 @@ export const useSettingsAttention = (): SettingsAttentionModel | null => {
       attention.count === 1 ? "attention.title_one" : "attention.title_other",
       { count: attention.count }
     ),
-    detail: attentionCauseText(attention.cause, tCommon, locale),
+    detail: attentionCauseText(
+      attention.cause,
+      tCommon,
+      locale,
+      connectionNotice
+    ),
     // Connections is not a Settings section, so the banner carries the way
     // there; the rail chip ignores it.
     action: {

@@ -9,7 +9,7 @@
  * same page as Sign in. "try-again" has no destination: it re-runs the check
  * where the notice is shown.
  */
-import type { ShownNotice } from "@kaiord/i18n";
+import type { ShownNotice } from "@kaiord/i18n/connection-notices";
 
 import { extensionOf } from "./extension-descriptors";
 

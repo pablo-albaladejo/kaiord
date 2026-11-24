@@ -11,7 +11,7 @@ import {
   connectionNoTabNotice,
   connectionNotice,
   connectionReasonNotice,
-} from "@kaiord/i18n";
+} from "@kaiord/i18n/connection-notices";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {

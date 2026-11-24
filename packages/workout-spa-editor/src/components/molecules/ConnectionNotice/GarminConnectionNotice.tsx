@@ -1,4 +1,4 @@
-import type { ConnectionState } from "@kaiord/i18n";
+import type { ConnectionState } from "@kaiord/i18n/connection-notices";
 
 import { useGarminBridge } from "../../../contexts";
 import { PlatformConnectionNotice } from "./PlatformConnectionNotice";

@@ -11,7 +11,7 @@
  * states the failed read and offers both possible causes; see
  * `connection-card-copy`.
  */
-import type { ConnectionReason } from "@kaiord/i18n";
+import type { ConnectionReason } from "@kaiord/i18n/connection-notices";
 
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import type { ConnectionSourceStatus } from "./connection-source";
