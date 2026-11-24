@@ -1,5 +1,6 @@
-import { listedModels, modelDisplayName } from "@kaiord/ai/providers";
+import { listedModels } from "@kaiord/ai/providers";
 
+import type { ModelNamer } from "../../../hooks/use-model-name";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 
 /** A provider and one of its models, always chosen together. */
@@ -54,6 +55,9 @@ export const modelChoiceGroups = (
 /** "Claude Sonnet 5 · Mi Claude": a choice by product name and account. */
 export const choiceName = (
   { providerId, modelId }: ModelChoice,
-  providers: LlmProviderConfig[]
-): string =>
-  `${modelDisplayName(modelId)} · ${providers.find((p) => p.id === providerId)?.label ?? ""}`;
+  providers: LlmProviderConfig[],
+  name: ModelNamer
+): string => {
+  const account = providers.find((p) => p.id === providerId);
+  return `${name(account?.type, modelId)} · ${account?.label ?? ""}`;
+};

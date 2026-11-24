@@ -1,8 +1,7 @@
-import { modelDisplayName } from "@kaiord/ai/providers";
-
 import { priceBasisOf } from "../../../application/usage/price-basis";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useModelName } from "../../../hooks/use-model-name";
 import { useTranslate } from "../../../i18n/use-translate";
 import { AssistantUsage } from "./AssistantUsage";
 import { keyStatusOf } from "./key-status";
@@ -17,6 +16,7 @@ const PRINCIPAL = ["default"] as const;
 /** The athlete's main model: what it is, where it runs, what it cost. */
 export function AssistantCard() {
   const t = useTranslate("settings");
+  const name = useModelName();
   const athlete = useActiveProfileLive()?.profile?.name;
   const { profileId, providers, models } = useEffectiveModels(PRINCIPAL);
   const { onSetBinding } = useAiModelsHandlers();
@@ -41,7 +41,7 @@ export function AssistantCard() {
             data-testid="assistant-model"
             className="font-semibold text-ink-strong"
           >
-            {modelDisplayName(running.modelId)}
+            {name(account.type, running.modelId)}
           </span>
           <span className="text-sm text-ink-muted">
             {t("assistant.runsOn", { account: account.label })}

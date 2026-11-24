@@ -104,7 +104,7 @@ describe("AssistantCard", () => {
     // Assert
     expect(screen.getByText("Your assistant (for Ana)")).toBeInTheDocument();
     expect(screen.getByTestId("assistant-model")).toHaveTextContent(
-      "Claude Opus 5"
+      "Claude Opus 5 (not evaluated)"
     );
     expect(screen.getByText("on Mi Claude")).toBeInTheDocument();
     expect(screen.getByTestId("key-status")).toHaveTextContent("Key verified");
@@ -243,10 +243,13 @@ describe("AssistantCard", () => {
     rerender(<AssistantCard />);
 
     // Assert
-    expect([forAna, anaAccount]).toEqual(["GPT-5 mini", "on Mi GPT"]);
+    expect([forAna, anaAccount]).toEqual([
+      "GPT-5 mini (not evaluated)",
+      "on Mi GPT",
+    ]);
     expect(screen.getByText("Your assistant (for Bea)")).toBeInTheDocument();
     expect(screen.getByTestId("assistant-model")).toHaveTextContent(
-      "Claude Opus 5"
+      "Claude Opus 5 (not evaluated)"
     );
     expect(screen.getByText("on Mi Claude")).toBeInTheDocument();
   });

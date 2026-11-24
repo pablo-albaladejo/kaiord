@@ -227,7 +227,9 @@ describe("useCoachingAi", () => {
     );
 
     // Assert
-    expect(result.current.progress?.modelName).toBe("GPT-4o mini");
+    expect(result.current.progress?.modelName).toBe(
+      "GPT-4o mini (not evaluated)"
+    );
     expect(result.current.progress?.update).toMatchObject({
       phase: "generating",
       items: 4,

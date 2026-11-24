@@ -1,6 +1,5 @@
-import { modelDisplayName } from "@kaiord/ai/providers";
-
 import { providerName } from "../../../application/ai/provider-label";
+import { useModelName } from "../../../hooks/use-model-name";
 import { useTranslate } from "../../../i18n/use-translate";
 import {
   encodeChoice,
@@ -11,6 +10,7 @@ import {
 /** One optgroup per account: its models, then "Custom…". */
 export function ModelChoiceOptions({ groups }: { groups: ModelChoiceGroup[] }) {
   const t = useTranslate("settings");
+  const name = useModelName();
   return groups.map(({ provider, models }) => (
     <optgroup
       key={provider.id}
@@ -21,7 +21,7 @@ export function ModelChoiceOptions({ groups }: { groups: ModelChoiceGroup[] }) {
           key={modelId}
           value={encodeChoice({ providerId: provider.id, modelId })}
         >
-          {`${modelDisplayName(modelId)} · ${provider.label}`}
+          {`${name(provider.type, modelId)} · ${provider.label}`}
         </option>
       ))}
       <option value={encodeCustom(provider.id)}>{t("models.custom")}</option>

@@ -9,7 +9,7 @@
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { AiRunProgress } from "./ai-run-progress";
-import type { AiFailureState } from "./use-coaching-ai-handler";
+import type { AiFailureState } from "./use-coaching-ai-types";
 
 export type CoachingDialogBodyProps = {
   activity: CoachingActivity;
