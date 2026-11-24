@@ -2,36 +2,28 @@ import { useCallback } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { readTrainingPeaksAthleteId } from "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport";
-import { executeWorkoutPush } from "../application/export/execute-workout-push";
-import type { RepushVerdict } from "../application/trainingpeaks/trainingpeaks-repush-guard";
 import { useAnalytics } from "../contexts";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { buildTrainingPeaksPayload } from "./trainingpeaks-payload";
-import {
-  toTrainingPeaksPushFailure,
-  type TrainingPeaksPushFailureOutcome,
-} from "./trainingpeaks-push-failure";
-import {
-  buildTrainingPeaksPushFn,
-  ledgerRepo,
-  policyRepo,
-  TRAININGPEAKS_BRIDGE_ID,
-} from "./trainingpeaks-push-fn";
+import { toTrainingPeaksPushFailure } from "./trainingpeaks-push-failure";
+import { TRAININGPEAKS_BRIDGE_ID } from "./trainingpeaks-push-fn";
+import type {
+  TrainingPeaksPushOptions,
+  TrainingPeaksPushOutcome,
+} from "./trainingpeaks-push-outcome";
 import { checkBeforeTrainingPeaksSend } from "./trainingpeaks-repush-check";
+import { sendTrainingPeaksPayload } from "./trainingpeaks-send-payload";
+import {
+  checkTrainingPeaksUnanswered,
+  rememberIfUnanswered,
+} from "./trainingpeaks-unanswered";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
-export type TrainingPeaksPushOutcome =
-  /**
-   * `workoutId` is absent on a `lost-race` outcome, where another caller owns
-   * the in-flight POST — the push still succeeded, this caller just does not
-   * own the id. Callers must not assume an id is always there.
-   */
-  | { ok: true; workoutId: string | undefined }
-  | TrainingPeaksPushFailureOutcome
-  /** A changed workout TrainingPeaks already holds; `allowCopy` overrides. */
-  | { ok: false; block: Extract<RepushVerdict, { blocked: true }> };
-
-export type TrainingPeaksPushOptions = { allowCopy?: boolean };
+export type {
+  TrainingPeaksBlock,
+  TrainingPeaksPushOptions,
+  TrainingPeaksPushOutcome,
+} from "./trainingpeaks-push-outcome";
 
 /**
  * Pushes a persisted workout to the athlete's TrainingPeaks calendar.
@@ -48,7 +40,8 @@ export type TrainingPeaksPushOptions = { allowCopy?: boolean };
  * TrainingPeaks is not answering. Intensity thresholds
  * come from the active profile's zones for the workout's sport; without them
  * the converter still produces a workout, warning for each target it had to
- * drop.
+ * drop. A send whose answer never arrived is remembered, and the next one
+ * reads that day first (`trainingpeaks-unanswered`).
  */
 export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
   const analytics = useAnalytics();
@@ -66,9 +59,16 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
         return { ok: false, reason: "install" };
       }
 
+      let payload: Record<string, unknown> | undefined;
       try {
+        const unanswered = await checkTrainingPeaksUnanswered(
+          extensionId,
+          workout.id,
+          options?.sendAnyway === true
+        );
+        if (unanswered.blocked) return { ok: false, block: unanswered };
         const athleteId = await readTrainingPeaksAthleteId(extensionId);
-        const payload = buildTrainingPeaksPayload(
+        payload = buildTrainingPeaksPayload(
           { ...workout, krd: workout.krd },
           athleteId,
           profile
@@ -80,20 +80,16 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
           options?.allowCopy === true
         );
         if (verdict.blocked) return { ok: false, block: verdict };
-        const result = await executeWorkoutPush(
-          { policyRepo, ledgerRepo },
-          {
-            profileId: workout.profileId,
-            kaiordRecordId: workout.id,
-            destinationBridgeId: TRAININGPEAKS_BRIDGE_ID,
-            payload,
-            pushFn: buildTrainingPeaksPushFn(extensionId),
-          }
+        const result = await sendTrainingPeaksPayload(
+          extensionId,
+          workout,
+          payload
         );
         analytics.event("trainingpeaks-workout-pushed", { result: "success" });
         return { ok: true, workoutId: result.externalId };
       } catch (error: unknown) {
         analytics.event("trainingpeaks-workout-pushed", { result: "failure" });
+        await rememberIfUnanswered(error, extensionId, workout.id, payload);
         return toTrainingPeaksPushFailure(error);
       }
     },

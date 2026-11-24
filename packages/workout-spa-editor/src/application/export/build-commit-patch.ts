@@ -6,12 +6,18 @@
  * library state the push reported (when it reported one) and clears
  * `forceRepush`: a successful library push is exactly what that flag asked
  * for. A push that reports no `library` (every non-Garmin destination) leaves
- * the row's `library` as it was. Likewise a `destinationDate` (the day a
+ * the row's `library` as it was. A confirmed library workout it replaces is
+ * kept in `libraryVersions` as a version Kaiord created, so the placement can
+ * delete it once no calendar entry uses it. Likewise a `destinationDate` (the day a
  * TrainingPeaks copy sits on) is set when given and kept when not, so a
  * destination without one never gains it.
  */
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type { GarminLibraryState } from "../../types/garmin-ledger";
+import {
+  joinLibraryVersions,
+  supersededBy,
+} from "../../types/garmin-library-version";
 
 /** What a destination push resolves with. */
 export type ExportPushResult = {
@@ -36,6 +42,9 @@ export const buildCommitPatch = (input: {
       exportedAt,
     };
     if (pushed.library) next.library = pushed.library;
+    const replaced = supersededBy(row.library, pushed.library);
+    if (replaced.length > 0)
+      next.libraryVersions = joinLibraryVersions(row.libraryVersions, replaced);
     if (destinationDate !== undefined) next.destinationDate = destinationDate;
     delete next.forceRepush;
     return next;

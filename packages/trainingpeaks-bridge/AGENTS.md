@@ -75,7 +75,7 @@ match `BRIDGE_MANIFEST` in `background.js`.
   envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `request` / `read-athlete-id` /
   `open-trainingpeaks` / `set-theme`. `read-athlete-id` is read just before a
   send and is where the token is minted; `checkSession` asks TrainingPeaks
-  nothing (`signed-in` from a valid stored token, else `not-checked`). The App's Connector reads one workout by id and keeps only its id and day.
+  nothing (`signed-in` from a valid stored token, else `not-checked`). The App's Connector reads one workout by id and keeps only its id and day, and, only after a send that got no answer, the workouts of that one day (`workouts/<day>/<day>`, both dates equal), keeping only their titles.
 - The session cookie is never read, stored, or logged; the extension only holds
   the minted access token. A Session check never mints it (#1643).
 - Weight-unit assumption: the type-9 metric value is kilograms (see

@@ -133,6 +133,32 @@
       ]
     },
     {
+      "id": "trainingpeaks.listing.unanswered",
+      "text": "If a send gets no answer, the workout may still have reached TrainingPeaks: before that workout is sent again, the Kaiord App reads the workouts of that day and, if one has the same title, sends nothing and asks you first.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should not send again and ask when the day already holds a workout of that title"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should send when the day holds no workout of that title"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should neither read the day nor ask when every earlier send was answered"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should read the workouts of one day and hand them over unread"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one day and keep only the titles of the workouts on it"
+        }
+      ]
+    },
+    {
       "id": "trainingpeaks.listing.basic",
       "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
@@ -503,7 +529,7 @@
     },
     {
       "id": "trainingpeaks.pj.tpapi-why",
-      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the three requests the Kaiord App may ask for. A request outside these four, or a write whose body is not the one shape declared for it, is refused before it is sent:",
+      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the four requests the Kaiord App may ask for. A request outside these five, or a write whose body is not the one shape declared for it, is refused before it is sent:",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -532,6 +558,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
           "title": "should declare a body schema for exactly the write entries"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should read the workouts of one day and hand them over unread"
         }
       ]
     },
@@ -608,6 +638,24 @@
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
           "title": "should send again when the athlete deleted Kaiord's copy on TrainingPeaks"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.day-read",
+      "text": "`GET /fitness/v6/athletes/{id}/workouts/{day}/{day}` reads the workouts of one day, only after a send to that day got no answer, to learn whether that workout reached TrainingPeaks before it is sent again. TrainingPeaks' answer reaches the Kaiord App in your browser, which keeps only the titles of that day's workouts and drops the rest there.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should read the workouts of one day and hand them over unread"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one day and keep only the titles of the workouts on it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should not send again and ask when the day already holds a workout of that title"
         }
       ]
     },
@@ -941,7 +989,7 @@
     },
     {
       "id": "trainingpeaks.pp.workouts",
-      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. Before a workout is sent again, it reads the copy the Kaiord App sent earlier with `GET /fitness/v6/athletes/{id}/workouts/{workoutId}` and hands TrainingPeaks' answer to the Kaiord App, which keeps only that workout's id and day; the rest of the answer, such as its title, notes and what you recorded, is dropped there, in your browser. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again while its earlier copy is there adds a second copy, and the Kaiord App asks you first.",
+      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. Before a workout is sent again, it reads the copy the Kaiord App sent earlier with `GET /fitness/v6/athletes/{id}/workouts/{workoutId}` and hands TrainingPeaks' answer to the Kaiord App, which keeps only that workout's id and day; the rest of the answer, such as its title, notes and what you recorded, is dropped there, in your browser. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again while its earlier copy is there adds a second copy, and the Kaiord App asks you first. If a send gets no answer, then before that workout is sent again the extension reads the workouts of that day with `GET /fitness/v6/athletes/{id}/workouts/{day}/{day}` and hands TrainingPeaks' answer to the Kaiord App, which keeps only their titles; if one has the same title, the Kaiord App sends nothing and asks you first.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
@@ -978,6 +1026,18 @@
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
           "title": "should send a changed workout without asking when its earlier copy is gone"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should read the workouts of one day and hand them over unread"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one day and keep only the titles of the workouts on it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should not send again and ask when the day already holds a workout of that title"
         }
       ]
     },
@@ -1103,7 +1163,7 @@
     },
     {
       "id": "trainingpeaks.pp.no-third-party",
-      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to hand it TrainingPeaks' answers about your metrics and about a workout it sent, and to receive the workouts you send).",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to hand it TrainingPeaks' answers about your metrics, about a workout it sent and about the workouts of a day a send got no answer for, and to receive the workouts you send).",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -1228,6 +1288,32 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should allow no DELETE, PUT or PATCH request to TrainingPeaks"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.es.listing.unanswered",
+      "text": "Si un envío no recibe respuesta, el entrenamiento puede haber llegado igualmente a TrainingPeaks: antes de volver a enviar ese entrenamiento, Kaiord App lee los entrenamientos de ese día y, si uno tiene el mismo título, no envía nada y te pregunta primero.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should not send again and ask when the day already holds a workout of that title"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should send when the day holds no workout of that title"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.unanswered.test.tsx",
+          "title": "should neither read the day nor ask when every earlier send was answered"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should read the workouts of one day and hand them over unread"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one day and keep only the titles of the workouts on it"
         }
       ]
     },

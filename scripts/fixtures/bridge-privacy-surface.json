@@ -67,6 +67,10 @@
         "pattern": "^\\/workout-service\\/schedule\\/[1-9]\\d*$"
       },
       {
+        "method": "DELETE",
+        "pattern": "^\\/workout-service\\/workout\\/[1-9]\\d*$"
+      },
+      {
         "method": "GET",
         "pattern": "^\\/calendar-service\\/year\\/\\d{4}\\/month\\/\\d{1,2}$"
       }
@@ -255,6 +259,10 @@
       {
         "method": "GET",
         "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts\\/\\d+$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts\\/(\\d{4}-\\d{2}-\\d{2})\\/\\1$"
       }
     ],
     "external_actions": [

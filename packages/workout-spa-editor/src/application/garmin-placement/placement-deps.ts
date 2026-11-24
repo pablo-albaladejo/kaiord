@@ -1,6 +1,7 @@
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
 import type { ExportLedgerRepository } from "../export/export-ledger-repository.port";
 import type { GarminCalendarPort } from "./garmin-calendar-port";
+import type { GarminLibraryPort } from "./garmin-library-port";
 
 export type LedgerKey = {
   kaiordRecordId: string;
@@ -10,6 +11,8 @@ export type LedgerKey = {
 export type PlacementDeps = {
   ledgerRepo: ExportLedgerRepository;
   calendar: GarminCalendarPort;
+  /** Deletes a library workout; absent, no superseded version is deleted. */
+  library?: GarminLibraryPort;
   /** The bridge reports `calendar-find-v1`. */
   canFind: boolean;
   /** A3: `calendar-find` exposes schedule ids (`SCHEDULE_IDS_IN_FIND`). */

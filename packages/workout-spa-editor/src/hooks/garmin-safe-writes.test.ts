@@ -208,10 +208,10 @@ describe("changing a Workout after it was sent", () => {
   });
 });
 
-describe("what Kaiord did not create", () => {
+describe.each([1, 2])("what Kaiord did not create, protocol %i", (protocol) => {
   it("should stay untouched through sends, moves and edits", async () => {
     // Arrange
-    const c = createMessageSeamConnector(db);
+    const c = createMessageSeamConnector(db, { protocol });
     const own = c.garmin.athlete.addOwnWorkout("Tempo", D1);
     c.garmin.athlete.addActivity(D1, "Morning run");
     c.garmin.athlete.addOwnWorkout("Long run", D2);

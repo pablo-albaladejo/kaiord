@@ -176,6 +176,28 @@ describe("TrainingPeaksPushButton", () => {
     ).toBeInTheDocument();
   });
 
+  it("should send anyway, without a second question, after a send that got no answer", async () => {
+    // Arrange
+    push.mockResolvedValueOnce({
+      ok: false,
+      block: { blocked: true, reason: "may-be-there", date: "2026-11-24" },
+    });
+    push.mockResolvedValueOnce({ ok: true, workoutId: "5001" });
+    render(<TrainingPeaksPushButton workout={workout} />);
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+    // Act
+    await userEvent.click(
+      await screen.findByTestId("trainingpeaks-send-anyway-button")
+    );
+
+    // Assert
+    expect(push).toHaveBeenLastCalledWith({ sendAnyway: true });
+    expect(
+      await screen.findByText("footer.sentToTrainingPeaks")
+    ).toBeInTheDocument();
+  });
+
   describe("planning horizon", () => {
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ["Date"] });

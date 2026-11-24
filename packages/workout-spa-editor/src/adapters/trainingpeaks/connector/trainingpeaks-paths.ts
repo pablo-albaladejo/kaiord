@@ -16,3 +16,7 @@ export const workoutsPath = (athleteId: number): string =>
 
 export const workoutPath = (athleteId: number, workoutId: string): string =>
   `${workoutsPath(athleteId)}/${workoutId}`;
+
+/** One day of the athlete's workouts: the range starts and ends on it. */
+export const workoutsOnDayPath = (athleteId: number, day: string): string =>
+  `${workoutsPath(athleteId)}/${day}/${day}`;

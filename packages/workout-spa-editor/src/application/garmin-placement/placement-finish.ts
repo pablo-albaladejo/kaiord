@@ -7,12 +7,15 @@
  * no record of creating stayed behind (`placement-foreign-left`); a row deleted meanwhile is `record-deleted` with the date. A
  * drain that found the `Placed` dead left the row `uncertain` (verify
  * before delete, §3.5): the run reports that, never a success. `ownPost`:
- * `placed` is this run's own ok POST, never judged dead by a drain.
+ * `placed` is this run's own ok POST, never judged dead by a drain. After
+ * the drain, an earlier library workout Kaiord created that no entry uses
+ * is deleted (`cleanLibrary`); that step never changes the result.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import { isKaiords } from "../sync/merge-garmin-removal-queue";
 import type { PlacementRun } from "./placement-deps";
 import { noticeForeignLeft } from "./placement-foreign-left";
+import { cleanLibrary } from "./placement-library-cleanup";
 import { drainQueue } from "./placement-removal-step";
 import { type PlacementResult, recordDeleted } from "./placement-result";
 import { canConfirmAt } from "./placement-row";
@@ -27,6 +30,7 @@ export const finishPlacement = async (
   ownPost = false
 ): Promise<PlacementResult> => {
   await drainQueue(run, placed, ownPost);
+  await cleanLibrary(run);
   const row = await run.deps.ledgerRepo.findByNaturalKey(run.key);
   if (!row) return recordDeleted(placed.date);
   const p = row.placement;

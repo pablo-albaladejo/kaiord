@@ -22,6 +22,7 @@ What it does:
 
 • Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.
 • Each send adds a new workout in TrainingPeaks. Before sending a workout again, the Kaiord App checks whether TrainingPeaks still has the copy it sent: if it does, an unchanged workout adds nothing, and for one you changed the Kaiord App asks you first, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.
+• If a send gets no answer, the workout may still have reached TrainingPeaks: before that workout is sent again, the Kaiord App reads the workouts of that day and, if one has the same title, sends nothing and asks you first.
 • On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.
 • Reads the metrics you logged in TrainingPeaks over the last 30 days, from which the Kaiord App keeps only your weight.
 • Shows in its popup whether your TrainingPeaks sign-in can be used.
@@ -57,6 +58,7 @@ Qué hace:
 
 • Envía los entrenamientos que creas en Kaiord App a tu calendario de TrainingPeaks, cada uno en su día.
 • Cada envío añade un entrenamiento nuevo en TrainingPeaks. Antes de volver a enviar un entrenamiento, Kaiord App comprueba si TrainingPeaks todavía tiene la copia que envió: si la tiene, un entrenamiento sin cambios no añade nada, y para uno que cambiaste Kaiord App te pregunta primero, porque TrainingPeaks tendría entonces dos copias. La extensión no puede borrar nada en TrainingPeaks ni cambiar un entrenamiento que ya esté allí.
+• Si un envío no recibe respuesta, el entrenamiento puede haber llegado igualmente a TrainingPeaks: antes de volver a enviar ese entrenamiento, Kaiord App lee los entrenamientos de ese día y, si uno tiene el mismo título, no envía nada y te pregunta primero.
 • En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.
 • Lee las métricas que registraste en TrainingPeaks en los últimos 30 días, de las que Kaiord App guarda solo tu peso.
 • Muestra en su ventana emergente si se puede usar tu inicio de sesión de TrainingPeaks.

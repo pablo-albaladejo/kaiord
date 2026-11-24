@@ -377,6 +377,12 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
+    "never one you created, and keeps an earlier version",
+    "and also yours, and keeps an earlier version",
+    "Garmin library delete limited to versions Kaiord created and no entry uses",
+  ],
+  [
+    GARMIN,
     "filtered in the Kaiord App, in your browser",
     "processed somewhere",
     "Garmin calendar read filtered on the device",
@@ -577,6 +583,12 @@ const SOLO_CASES = [
     "which keeps only that workout's id and day",
     "which keeps that workout",
     "TrainingPeaks workout read kept by the App to its id and day",
+  ],
+  [
+    TRAININGPEAKS,
+    "which keeps only their titles",
+    "which keeps all of them",
+    "TrainingPeaks day read only after an unanswered send, kept to titles",
   ],
   [
     WHOOP,

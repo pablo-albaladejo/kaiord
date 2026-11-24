@@ -34,7 +34,9 @@ Measured facts:
 - **Goal**: follow the coach: a Train2Go date move moves the Kaiord workout.
 - **Goal**: never leave a gap. A duplicate is tolerated and reported; a
   session missing from the calendar is not.
-- **Non-goal**: deleting or recreating Garmin **library** workouts, all-or-nothing
+- **Non-goal**: deleting or recreating Garmin **library** workouts (reversed for
+  versions Kaiord created on 2026-11-23: see "Library workouts settled
+  2026-11-23"), all-or-nothing
   bulk semantics, TrainingPeaks, and unscheduling when a workout is deleted in
   Kaiord (a follow-up).
 
@@ -194,7 +196,9 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 
 - A move costs 2 calls, plus 1 read when the outcome is ambiguous.
 - A failed DELETE leaves a visible duplicate until it clears or is dismissed.
-- Library workouts are never deleted.
+- Library workouts are never deleted (reversed on 2026-11-23 for an earlier
+  version Kaiord created that no calendar entry uses: see "Library workouts
+  settled 2026-11-23").
 - A cross-device race can leave a duplicate, never a gap. The duplicate is untracked when a merge drops an ambiguous `attempting`.
 - Cross-device clock skew above ~38 s, or a sending device that sleeps with its POST in flight, can let the gate's re-POST duplicate an entry that lands late (§3.4, residual L1): a duplicate, never a gap.
 - The ledger gains `library`, `placement`, `removalQueue` and `forceRepush`, plus a shape normalizer and a merge hook.
@@ -214,7 +218,8 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - unscheduling when a workout is deleted in Kaiord
 - following the coach for session-matched workouts
 - matching a coach's delete + recreate
-- cleaning up superseded library workouts
+- cleaning up superseded library workouts (done 2026-11-23, "Library
+  workouts settled 2026-11-23"; the interrupted create is still open)
 - library duplicates from cross-device `[U]` pushes
 - verify-before-delete makes each `unschedule` one `calendar-find` dearer (two when the first read lags); batching the verification with the drain's 404 re-checks is a possible optimisation
 - a local-observation gate for the re-POST (time since this device first saw the `attempting{posted:true}`, not the writer's `at`), closing the clock-skew and sleeping-sender duplicate of §3.4 (L1)
@@ -944,3 +949,78 @@ before a sync, erases it from the row it uploads; the facts protect the
 athlete's entries once every device runs this build. When the Workout moves back to a date where a recognized entry
 stays, that entry is already in the record (superseded), so Kaiord posts its
 own entry next to it; the athlete was told once that it stayed.
+
+## Library workouts settled 2026-11-23
+
+The owner decided on 2026-11-23 (#1633) that Kaiord deletes a library
+workout it created once nothing uses it. Before, an edit created a new
+library workout and moved the calendar entry to it, leaving the old version
+in the athlete's library for ever.
+
+- **The closed list gains one entry.** `DELETE /workout-service/workout/<id>`
+  (canonical id, no body), reachable only through the exact App origin
+  (`packages/garmin-bridge/test/library-delete.test.js`). The path is the one
+  `@kaiord/garmin-connect` already deletes with (`remove-workout.ts`). The
+  previous protocol has no such action: an extension one version behind
+  deletes nothing, and the App sends it no legacy message (`legacy` is now
+  optional on a `BridgeCall`).
+- **The record of what Kaiord created.** `libraryVersions` on the ledger row:
+  each library workout id a commit replaced (`buildCommitPatch`, only a
+  `confirmed` id from Kaiord's own push), `created: true`, state
+  `superseded` < `deleted`, joined by max. The merge joins both rows' lists
+  and adds the older row's own confirmed library id when the newer row holds
+  another (an edit on each of two devices made two). The normalizer drops
+  any entry without `created`. An id Kaiord did not get from its own push is
+  never listed, so the athlete's workouts, same name or not, can never be
+  deleted.
+- **When.** At the end of every run that holds a settled `Placed`
+  (`finishPlacement`, after the drain), so a failed delete is retried on the
+  next send. A version is deletable only when it is `superseded` and the row
+  no longer uses it: not the current library, not the placement's, not its
+  `previous`'s, and no queue entry of it that is not `gone` (a replaced entry
+  whose delete failed, or an entry the athlete placed that Kaiord
+  recognized). Then it is proven unused live, with the shared decision
+  (`readLiveState`): every month the record knows the version in reads no
+  entry of it, twice, `SETTLE_MS` apart; a read that fails keeps it. The row
+  is re-read right before the delete. A 2xx or a 404 writes `deleted`; any
+  other answer writes nothing; a re-sign-in answer ends the step. It never
+  changes the run's result.
+- **Tests at the message contract** (`hooks/garmin-library-cleanup.test.ts`,
+  the fake Garmin with `protocol: 2`, which checks every request against the
+  real `ALLOWED` and models Garmin deleting a library workout's calendar
+  entries with it): an edit leaves one library workout; several edits leave
+  one; the athlete's own same-name workouts stay; a version the athlete put
+  on another date stays; a version whose replaced entry is still on the
+  calendar stays, and goes once that entry is removed; a version whose month
+  cannot be read stays until it can; a failed delete leaves Garmin and the
+  record as they were and is retried on the next send, and a confirmed one is
+  never sent again; two tabs sending the edit at once delete each version
+  once and never the current one; the previous extension deletes nothing.
+  "What Kaiord did not create" runs on both protocols.
+
+Considered and rejected: deleting the old version right after the commit
+(the calendar may still use it, and Garmin would take the entry with it);
+deleting by name (adopts the athlete's workout of the same name); a feature
+flag for the delete (an extension without the entry refuses it before
+sending anything, which already reads as "not deleted, try again").
+
+**Residuals.**
+
+- An entry the athlete placed of a superseded version in a month the record
+  never saw that version in is not read, so the version can be deleted and,
+  if Garmin deletes a workout's calendar entries with it, that entry goes
+  too. Reading every month is not possible with one month per request.
+- How Garmin answers a DELETE of a library workout that still has calendar
+  entries (refuses, or deletes them) was not captured live. The App never
+  sends one for an entry it knows about.
+
+**Pending the owner's live capture: the interrupted create.** A send whose
+library POST Garmin committed but whose answer never reached the App (the tab
+closed, the extension timed out) leaves a library workout no record holds: the
+next send creates another, and the first stays unscheduled in the library.
+Deleting it needs to recognize it as Kaiord's, which needs how Garmin lists
+the library (`GET /workout-service/workouts`: order, page size, whether
+`createdDate` carries a time zone, which fields identify a workout). That has
+not been captured live, and a match by name and time would rest on guesses
+and could take the athlete's own workout. Not implemented; the owner will
+capture it.

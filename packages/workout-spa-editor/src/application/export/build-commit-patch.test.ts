@@ -77,6 +77,32 @@ describe("buildCommitPatch through recordExport", () => {
     }
   );
 
+  it("should record the library workout an update replaced as a version Kaiord created", async () => {
+    // Arrange
+    const repo = seed("updated");
+
+    // Act
+    await push(repo, { externalId: NEW_ID!, library: CONFIRMED });
+
+    // Assert
+    expect(onlyRow(repo)?.libraryVersions).toEqual([
+      { workoutId: OLD_ID, created: true, state: "superseded" },
+    ]);
+  });
+
+  it("should record no version when the replaced library workout was missing from Garmin", async () => {
+    // Arrange
+    const repo = seed("updated", {
+      library: { kind: "missing", workoutId: OLD_ID! },
+    });
+
+    // Act
+    await push(repo, { externalId: NEW_ID!, library: CONFIRMED });
+
+    // Assert
+    expect(onlyRow(repo)).not.toHaveProperty("libraryVersions");
+  });
+
   it.each<Path>(["created", "updated"])(
     "should clear forceRepush on the %s path",
     async (path) => {
@@ -168,6 +194,9 @@ describe("buildCommitPatch", () => {
       contentHash: "fresh-hash",
       exportedAt: "2026-09-28T08:00:00.000Z",
       library: CONFIRMED,
+      libraryVersions: [
+        { workoutId: OLD_ID, created: true, state: "superseded" },
+      ],
     });
   });
 });

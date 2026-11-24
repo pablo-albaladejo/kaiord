@@ -84,6 +84,11 @@ const EXTERNAL_MESSAGES = [
     method: "GET",
     path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts/4242`,
   },
+  {
+    action: "request",
+    method: "GET",
+    path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts/2026-11-23/2026-11-23`,
+  },
   { action: "read-athlete-id" },
   { action: "set-theme", theme: "dark" },
   { action: "open-trainingpeaks" },
