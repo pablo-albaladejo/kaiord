@@ -1,4 +1,4 @@
-import type { ShownNotice } from "@kaiord/i18n";
+import type { ShownNotice } from "@kaiord/i18n/connection-notices";
 import { useCallback } from "react";
 
 import { connectionFixHref } from "../../../application/connections/connection-fix-target";

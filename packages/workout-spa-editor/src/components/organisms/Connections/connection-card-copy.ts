@@ -1,4 +1,4 @@
-import type { NotCheckedReason } from "@kaiord/i18n";
+import type { NotCheckedReason } from "@kaiord/i18n/connection-notices";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import type { ConnectionSourceStatus } from "../../../application/connections/connection-source";

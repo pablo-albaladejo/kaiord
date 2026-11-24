@@ -14,7 +14,8 @@
  * garmin's reads outlive the browser session outright, so the title states the
  * failed read and leaves the cause to the card.
  */
-import { connectionNotice, type Locale } from "@kaiord/i18n";
+import type { Locale } from "@kaiord/i18n";
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 
 import type { Translate } from "../../i18n/use-translate";
 import { calendarDay } from "./calendar-day";

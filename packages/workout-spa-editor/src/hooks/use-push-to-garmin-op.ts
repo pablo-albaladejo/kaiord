@@ -1,4 +1,4 @@
-import { connectionNotice } from "@kaiord/i18n";
+import { connectionNotice } from "@kaiord/i18n/connection-notices";
 import { useCallback } from "react";
 
 import type { PushToGarminInput } from "../application/chat/tools/chat-tool-deps";
