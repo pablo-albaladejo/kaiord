@@ -2,6 +2,7 @@
  * Phase 1 inside the lock: the governed library push (design §3.3 step 2).
  * `onLibraryConfirmed` fires iff the row then holds a confirmed library id.
  */
+import { isAppPartNotLoaded } from "../../types/app-part-not-loaded-error";
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
 import { isProfileRefusal } from "../../types/profile-refusal";
 import { NoActiveExportRouteError } from "../export/execute-workout-push";
@@ -40,6 +41,7 @@ export const runPhaseOne = async (
     if (error instanceof NoActiveExportRouteError)
       return failed("no-export-route", false);
     if (isProfileRefusal(error)) return failed(error.reason, false);
+    if (isAppPartNotLoaded(error)) return failed("app-part-not-loaded", true);
     logGarminPushFailure(error);
     return failed("library-push-failed", true);
   }

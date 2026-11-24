@@ -49,7 +49,13 @@ export const createPlacementHarness = (options: HarnessOptions = {}) => {
   const ledgerRepo = options.ledgerRepo ?? memory;
   const calendar = createFakeGarminCalendar();
   const lockManager = createInMemoryLockManager();
-  const library = { pushes: 0, nextId: 1_700_000, fail: false, noId: false };
+  const library = {
+    pushes: 0,
+    nextId: 1_700_000,
+    /** `true` fails the push; an Error fails it with that error. */
+    fail: false as boolean | Error,
+    noId: false,
+  };
   const deps: PlacementPipelineDeps = {
     ledgerRepo,
     calendar: calendar.port,
@@ -69,6 +75,7 @@ export const createPlacementHarness = (options: HarnessOptions = {}) => {
   };
   const postFn = async () => {
     library.pushes++;
+    if (library.fail instanceof Error) throw library.fail;
     if (library.fail) throw new Error("library push failed");
     const id = String(library.nextId++);
     const workoutId = parseGarminWorkoutId(id);
