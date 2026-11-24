@@ -14,7 +14,7 @@ const transport = { source: "train2go" } as CoachingTransport;
 const analytics = { event: vi.fn() } as unknown as Analytics;
 
 describe("useExpandCallback with a failed import", () => {
-  it("should answer a retryable transport failure instead of rejecting", async () => {
+  it("should answer that a part of the App did not load instead of rejecting", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const { result } = renderHook(() =>
@@ -25,6 +25,6 @@ describe("useExpandCallback with a failed import", () => {
     const outcome = await result.current("p1", "2026-10-16");
 
     // Assert
-    expect(outcome).toEqual({ ok: false, reason: "transport-error" });
+    expect(outcome).toEqual({ ok: false, reason: "app-part-not-loaded" });
   });
 });

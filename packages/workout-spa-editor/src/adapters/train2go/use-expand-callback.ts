@@ -15,12 +15,12 @@ export const useExpandCallback = (
   useCallback(
     async (profileId: string, date: string): Promise<ExpandDayResult> => {
       a.event("coaching.expand_day.invoked", { source: t.source });
-      // A failed load answers the dialog's retryable failure, not a spinner
-      // that never settles.
+      // A failed load answers the App's own failure (Train2Go was never
+      // asked), not a spinner that never settles.
       const loaded = await lazyImport(
         () => import("../../application/coaching/expand-day")
       ).catch(() => null);
-      if (!loaded) return { ok: false, reason: "transport-error" };
+      if (!loaded) return { ok: false, reason: "app-part-not-loaded" };
       return loaded.expandDay(
         {
           profiles: p.profiles,

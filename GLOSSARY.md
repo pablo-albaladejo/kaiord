@@ -124,3 +124,7 @@ _Avoid_: Skill, plugin, function
 The record the Kaiord App keeps, on the athlete's device, of what a run of the assistant did: what, when, with what result and at what cost.
 The athlete reads "Trace" in English and "Traza" in Spanish.
 _Avoid_: Log, usage event, telemetry, "registro"
+
+**Evaluated model**:
+A model whose stored eval results on the Kaiord App's tasks passed. Any other model is offered, marked "not evaluated" ("no evaluado").
+_Avoid_: Certified, supported, recommended

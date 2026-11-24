@@ -11,7 +11,7 @@
 import type { CoachingActivity } from "./coaching-activity";
 
 export type ExpandFailureReason =
-  "not-linked" | "session-expired" | "transport-error";
+  "not-linked" | "session-expired" | "transport-error" | "app-part-not-loaded";
 
 export type ExpandDayResult =
   | { ok: true; activityCount: number }

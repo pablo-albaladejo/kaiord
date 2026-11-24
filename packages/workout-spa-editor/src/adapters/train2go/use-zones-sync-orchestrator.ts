@@ -61,7 +61,7 @@ export const useZonesSyncOrchestrator = (
       const loaded = await lazyImport(
         () => import("../../application/coaching/sync-zones")
       ).catch(() => null);
-      if (!loaded) return fail("transport-error");
+      if (!loaded) return fail("app-part-not-loaded");
       const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) return fail(r.reason);
       if (!(await isNewOffer(profileId, r.conflicts))) return;
@@ -72,7 +72,7 @@ export const useZonesSyncOrchestrator = (
           r.conflicts,
           persistence
         );
-        if (!taken) return fail("transport-error");
+        if (!taken) return fail("app-part-not-loaded");
         toasts.success(t(TAKEN_COPY[kind]));
       });
     },

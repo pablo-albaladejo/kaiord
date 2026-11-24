@@ -47,7 +47,11 @@ export type ConflictItem = {
 };
 
 export type SyncZonesFailureReason =
-  "unsupported" | "transport-error" | "shape-mismatch" | "profile-deleted";
+  | "unsupported"
+  | "transport-error"
+  | "shape-mismatch"
+  | "profile-deleted"
+  | "app-part-not-loaded";
 
 export type ZonesPayload = z.infer<typeof zonesPayloadSchema>;
 export type HrBandBlock = NonNullable<ZonesPayload["hrZones"]>["cycling"];

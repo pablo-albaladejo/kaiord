@@ -17,6 +17,7 @@
  * `coaching` dictionary (`zonesSync.*`).
  */
 import type { PersistencePort } from "../../ports/persistence-port";
+import { isAppPartNotLoaded } from "../../types/app-part-not-loaded-error";
 import type { SyncZonesResult, ZonesPayload } from "../../types/coaching-zones";
 import { todayIsoDate } from "../../utils/today-iso-date";
 import type { CoachingTransport } from "./coaching-transport-port";
@@ -50,6 +51,9 @@ export const syncZones = async (
   try {
     payload = await transport.readZones(link.externalUserId);
   } catch (e) {
+    // The read's own code did not load: Train2Go was never asked.
+    if (isAppPartNotLoaded(e))
+      return { ok: false, reason: "app-part-not-loaded" };
     return { ok: false, reason: "transport-error", error: errorMessage(e) };
   }
   if (!payload) {

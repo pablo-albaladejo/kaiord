@@ -23,6 +23,7 @@ import type {
   CoachingRepository,
   ProfileRepository,
 } from "../../ports/persistence-port";
+import { isAppPartNotLoaded } from "../../types/app-part-not-loaded-error";
 import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import { buildCoachingDayNotesId } from "../../types/coaching-day-notes-record";
 import type { ExpandDayResult } from "../../types/coaching-expand-result";
@@ -88,6 +89,9 @@ export const expandDay = async (
       link.externalUserId
     );
   } catch (err) {
+    // The read's own code did not load: Train2Go was never asked.
+    if (isAppPartNotLoaded(err))
+      return { ok: false, reason: "app-part-not-loaded" };
     const error = err instanceof Error ? err.message : String(err);
     if (error === "Session expired") {
       return { ok: false, reason: "session-expired" };

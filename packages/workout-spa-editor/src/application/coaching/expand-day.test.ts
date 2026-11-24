@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import { AppPartNotLoadedError } from "../../types/app-part-not-loaded-error";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import type { Profile } from "../../types/profile";
@@ -95,6 +96,22 @@ describe("expandDay", () => {
 
     // Assert
     expect(result).toEqual({ ok: false, reason: "session-expired" });
+  });
+
+  it("should return app-part-not-loaded when the read's code did not load", async () => {
+    // Arrange
+    const t = transport({
+      readDay: vi.fn(async () => {
+        throw new AppPartNotLoadedError();
+      }),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    const result = await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "app-part-not-loaded" });
   });
 
   it("should return transport-error for generic transport rejections", async () => {

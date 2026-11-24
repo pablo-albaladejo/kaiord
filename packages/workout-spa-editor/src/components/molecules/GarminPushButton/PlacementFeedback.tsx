@@ -7,13 +7,13 @@ import type { GarminRemovalEntry } from "../../../types/garmin-removal-entry";
 import { AttentionMark } from "../../atoms/AttentionMark";
 import { Button } from "../../atoms/Button";
 import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
+import { ReloadAppButton } from "../ReloadAppButton";
 import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
 import {
   placementConnection,
   placementMessage,
   type PlacementTone,
 } from "./placement-message";
-import { ReloadAppButton } from "./ReloadAppButton";
 import { UncertainActions } from "./UncertainActions";
 
 const CONNECTIONS_HREF = "/connections";
