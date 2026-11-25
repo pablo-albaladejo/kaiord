@@ -1,5 +1,6 @@
 import type { Analytics } from "@kaiord/core";
 
+import type { AthleteNoteRepository } from "../../ports/athlete-note-repository";
 import type {
   CoachingRepository,
   PersistencePort,
@@ -8,11 +9,14 @@ import type {
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { AiMeta } from "../../types/calendar-fragments";
 import type { KRD } from "../../types/schemas";
+import type { ReadStepsTable } from "./choose-coaching-builder";
 import type { AiFailureReason } from "./convert-coaching-activity-error-mapper";
 
 export type ConvertWithAiInput = {
   activityId: string;
   abortSignal?: AbortSignal;
+  /** Rebuild an existing Workout in place: explicit and billed. */
+  regenerate?: boolean;
 };
 
 export type GenerateKrdPort = (input: {
@@ -25,9 +29,12 @@ export type ConvertWithAiDeps = {
   coaching: CoachingRepository;
   workouts: WorkoutRepository;
   sessionMatches: SessionMatchRepository;
+  athleteNotes: Pick<AthleteNoteRepository, "getById">;
   transaction: PersistencePort["transaction"];
   analytics: Analytics;
   generateKrd: GenerateKrdPort;
+  /** The steps-table seam (#1684); absent, every build goes to the AI. */
+  readStepsTable?: ReadStepsTable;
   newWorkoutId: () => string;
   newMatchId: () => string;
   clock: () => string;

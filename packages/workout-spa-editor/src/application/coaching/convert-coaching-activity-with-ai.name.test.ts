@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createInMemoryAthleteNoteRepository } from "../../test-utils/in-memory-athlete-note-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
@@ -29,6 +30,7 @@ const buildDeps = (
   coaching: buildStubCoachingRepo([activity]),
   workouts,
   sessionMatches: createInMemorySessionMatchRepository(),
+  athleteNotes: createInMemoryAthleteNoteRepository(),
   transaction: passThroughTransaction,
   analytics: buildStubAnalytics(),
   generateKrd: vi.fn().mockResolvedValue({

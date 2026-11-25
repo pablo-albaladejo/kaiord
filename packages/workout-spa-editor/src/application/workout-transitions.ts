@@ -21,7 +21,7 @@ const now = (): string => new Date().toISOString();
 export const transitionToStructured = (
   workout: WorkoutRecord,
   krd: KRD,
-  aiMeta: AiMeta
+  aiMeta: AiMeta | null
 ): WorkoutRecord => {
   if (workout.state !== "raw") {
     throw new Error(`Cannot transition from ${workout.state} to structured`);
