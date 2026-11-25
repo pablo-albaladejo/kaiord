@@ -2,6 +2,9 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import {
   structuredKrd,
   THRESHOLD_STEPS,
@@ -60,6 +63,7 @@ const renderContent = (
     manualCreating: false,
     onClose: noop,
     onAiProcess: noop,
+    onRegenerate: noop,
     onAiCancel: noop,
     onEditManually: noop,
     onOpenPicker: noop,
@@ -71,11 +75,15 @@ const renderContent = (
     onSplit: noop,
   } satisfies CoachingActivityDialogContentProps;
   return render(
-    <Dialog.Root open>
-      <Dialog.Content aria-describedby={undefined}>
-        <CoachingActivityDialogContent {...props} />
-      </Dialog.Content>
-    </Dialog.Root>
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      <ToastContextProvider>
+        <Dialog.Root open>
+          <Dialog.Content aria-describedby={undefined}>
+            <CoachingActivityDialogContent {...props} />
+          </Dialog.Content>
+        </Dialog.Root>
+      </ToastContextProvider>
+    </PersistenceProvider>
   );
 };
 

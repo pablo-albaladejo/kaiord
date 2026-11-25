@@ -10,6 +10,7 @@ import type { Analytics } from "@kaiord/core";
 
 import type { GenerateKrdPort } from "../../../application/coaching/convert-coaching-activity-with-ai";
 import { convertCoachingActivityWithAi } from "../../../application/coaching/convert-coaching-activity-with-ai";
+import { createReadStepsTable } from "../../../application/coaching/read-steps-table";
 import {
   generateWorkoutKrd,
   type GenerationDeps,
@@ -55,6 +56,8 @@ export type RunAiInput = {
   provider: LlmProviderConfig;
   modelId: string;
   abortSignal: AbortSignal;
+  /** Rebuild the existing Workout in place (explicit, billed). */
+  regenerate?: boolean;
   onProgress?: OnGenerateProgress;
   deps: GenerationDeps;
   analytics: Analytics;
@@ -62,11 +65,16 @@ export type RunAiInput = {
 
 export const runConvertWithAi = (input: RunAiInput) =>
   convertCoachingActivityWithAi(
-    { activityId: input.activityId, abortSignal: input.abortSignal },
+    {
+      activityId: input.activityId,
+      abortSignal: input.abortSignal,
+      regenerate: input.regenerate,
+    },
     {
       coaching: input.deps.persistence.coaching,
       workouts: input.deps.persistence.workouts,
       sessionMatches: input.deps.persistence.sessionMatch,
+      athleteNotes: input.deps.persistence.athleteNotes,
       transaction: input.deps.persistence.transaction,
       analytics: input.analytics,
       generateKrd: buildGenerateKrdPort(
@@ -76,6 +84,7 @@ export const runConvertWithAi = (input: RunAiInput) =>
         () => new Date().toISOString(),
         input.onProgress
       ),
+      readStepsTable: createReadStepsTable(() => new Date().toISOString()),
       newWorkoutId: () => crypto.randomUUID(),
       newMatchId: () => crypto.randomUUID(),
       clock: () => new Date().toISOString(),

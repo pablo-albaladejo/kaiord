@@ -80,6 +80,7 @@ const HOLDS_NOTHING_TO_LOSE: Record<string, string> = {
   "components/molecules/WellnessEntryDialog/use-wellness-fields.ts":
     IN_A_DIALOG,
   "components/molecules/GoalSetupDialog/GoalSetupForm.tsx": IN_A_DIALOG,
+  "components/molecules/CoachingCard/AthleteNoteField.tsx": IN_A_DIALOG,
 };
 
 const stripComments = (source: string): string =>

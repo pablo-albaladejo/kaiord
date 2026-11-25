@@ -35,6 +35,7 @@ export const OTHER_DATA_KINDS = [
   "messages",
   "workouts",
   "coachingPlan",
+  "athleteNote",
   "dataSources",
   "workoutDescription",
   "aiInstructions",

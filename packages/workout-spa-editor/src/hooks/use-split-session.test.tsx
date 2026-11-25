@@ -1,6 +1,6 @@
 /**
- * useUnmatchSession — wraps the unmatchSession use case with
- * `persistence.transaction(...)`. Idempotent on a missing row.
+ * useSplitSession — wraps the splitCoachingWorkout use case. Idempotent on
+ * a missing row.
  */
 
 import { act, renderHook } from "@testing-library/react";
@@ -9,9 +9,9 @@ import { describe, expect, it } from "vitest";
 
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
-import { useUnmatchSession } from "./use-unmatch-session";
+import { useSplitSession } from "./use-split-session";
 
-describe("useUnmatchSession", () => {
+describe("useSplitSession", () => {
   const wrap = (persistence = createInMemoryPersistence()) => {
     const Wrapper = ({ children }: { children: ReactNode }) => (
       <PersistenceProvider persistence={persistence}>
@@ -34,7 +34,7 @@ describe("useUnmatchSession", () => {
       source: "manual",
       executedWorkoutIds: [],
     });
-    const { result } = renderHook(() => useUnmatchSession(), {
+    const { result } = renderHook(() => useSplitSession(), {
       wrapper: Wrapper,
     });
 
@@ -52,7 +52,7 @@ describe("useUnmatchSession", () => {
     const { Wrapper } = wrap();
 
     // Act
-    const { result } = renderHook(() => useUnmatchSession(), {
+    const { result } = renderHook(() => useSplitSession(), {
       wrapper: Wrapper,
     });
 

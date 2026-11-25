@@ -36,6 +36,7 @@ const depsOf = (persistence: Persistence, duringLlm: () => Promise<void>) => ({
   coaching: persistence.coaching,
   workouts: persistence.workouts,
   sessionMatches: persistence.sessionMatch,
+  athleteNotes: persistence.athleteNotes,
   transaction: persistence.transaction,
   analytics: buildStubAnalytics(),
   generateKrd: async () => {

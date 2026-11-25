@@ -76,6 +76,7 @@ export function CoachingActivityDialog({
         manualCreating={dialog.manual.creating}
         onClose={handleDialogClose}
         onAiProcess={dialog.ai.startAi}
+        onRegenerate={dialog.ai.regenerateAi}
         onAiCancel={dialog.ai.cancelAi}
         onEditManually={dialog.manual.startManual}
         onOpenPicker={dialog.openPicker}

@@ -87,6 +87,11 @@
       "kind": "label"
     },
     {
+      "id": "app.dataflows.en.kinds.athleteNote",
+      "text": "your notes on your coach's activities",
+      "kind": "label"
+    },
+    {
       "id": "app.dataflows.en.kinds.dataSources",
       "text": "which source feeds each kind of data",
       "kind": "label"
@@ -606,6 +611,11 @@
     {
       "id": "app.dataflows.es.kinds.coachingPlan",
       "text": "el plan y los comentarios de tu entrenador",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.athleteNote",
+      "text": "tus notas a las actividades de tu entrenador",
       "kind": "label"
     },
     {

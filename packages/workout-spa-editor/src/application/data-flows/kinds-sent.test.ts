@@ -13,6 +13,8 @@ describe("kindsSent", () => {
     // Assert
     expect(kinds).toEqual([
       "workoutDescription",
+      "coachingPlan",
+      "athleteNote",
       "aiInstructions",
       "powerPaceZones",
       "heartRateZones",

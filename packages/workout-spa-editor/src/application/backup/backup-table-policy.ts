@@ -31,6 +31,7 @@ export const BACKUP_TABLE_POLICY: Readonly<Record<string, BackupTableRule>> = {
   aiModelBindings: "include",
   aiProviders: withoutApiKey,
   autoMatchDismissals: "include",
+  athleteNotes: "include",
   capabilityDecisions: "include",
   bridges: "exclude", // legacy, write-dead extension state of this device
   chatConversations: "include",

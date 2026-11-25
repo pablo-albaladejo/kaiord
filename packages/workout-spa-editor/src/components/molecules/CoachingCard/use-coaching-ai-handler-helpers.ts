@@ -7,38 +7,12 @@
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
 import { resolveModelForPurpose } from "@kaiord/ai/providers";
-import type { Analytics } from "@kaiord/core";
-import type { MutableRefObject } from "react";
 
-import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { classifyAiFailure } from "../../../application/coaching/convert-coaching-activity-error-mapper";
-import type { ModelNamer } from "../../../hooks/use-model-name";
-import type { GenerationDeps } from "../../../lib/generate-workout";
 import { withOrigin } from "../../../routing/with-origin";
-import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import type { AiModelBinding } from "../../../types/ai-model-binding";
-import type { CoachingActivity } from "../../../types/coaching-activity";
-import { beginAiRun, endAiRun, type SetAiRunProgress } from "./ai-run-progress";
+import { beginAiRun, endAiRun } from "./ai-run-progress";
+import type { StartAiCtx } from "./start-ai-ctx";
 import { runConvertWithAi } from "./use-coaching-ai-helpers";
-
-type Reason = AiFailureReason | "not-found" | "no-provider";
-
-export type StartAiCtx = {
-  activity: CoachingActivity | null;
-  profileId: string | null;
-  expandActivity: (activity: CoachingActivity) => void;
-  providers: LlmProviderConfig[] | undefined;
-  bindings: AiModelBinding[] | undefined;
-  deps: GenerationDeps;
-  analytics: Analytics;
-  abortRef: MutableRefObject<AbortController | null>;
-  setFailure: (f: { reason: Reason; error?: string } | null) => void;
-  setProgress: SetAiRunProgress;
-  onClose: () => void;
-  navigate: (to: string) => void;
-  onFailureToast: () => void;
-  nameModel: ModelNamer;
-};
 
 export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (!ctx.activity || !ctx.profileId || ctx.abortRef.current) return;
@@ -72,6 +46,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
       provider: resolved.provider,
       modelId: resolved.modelId,
       abortSignal: controller.signal,
+      regenerate: ctx.regenerate,
       onProgress,
       deps: ctx.deps,
       analytics: ctx.analytics,

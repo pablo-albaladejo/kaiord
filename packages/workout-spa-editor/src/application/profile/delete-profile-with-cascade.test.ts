@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryAiModelBindingRepository } from "../../test-utils/in-memory-ai-model-binding-repository";
+import { createInMemoryAthleteNoteRepository } from "../../test-utils/in-memory-athlete-note-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
 import { createInMemoryCapabilityDecisionRepository } from "../../test-utils/in-memory-capability-decision-repository";
 import { createInMemoryChatConversationRepository } from "../../test-utils/in-memory-chat-conversation-repository";
@@ -73,6 +74,7 @@ const makeDeps = (
   coaching: overrides.coaching ?? createInMemoryCoachingRepository(),
   coachingDayNotes:
     overrides.coachingDayNotes ?? createInMemoryCoachingDayNotesRepository(),
+  athleteNotes: overrides.athleteNotes ?? createInMemoryAthleteNoteRepository(),
   coachingSyncState:
     overrides.coachingSyncState ?? createInMemoryCoachingSyncStateRepository(),
   sessionMatch:
@@ -354,6 +356,26 @@ describe("deleteProfileWithCascade", () => {
     // Assert
     expect(await deps.capabilityDecisions.listByProfile("p1")).toEqual([]);
     expect(await deps.capabilityDecisions.listByProfile("p2")).toHaveLength(1);
+  });
+
+  it("should cascade the Athlete notes of the deleted profile only", async () => {
+    // Arrange
+    const deps = makeDeps();
+    for (const profileId of ["p1", "p2"]) {
+      await deps.athleteNotes.put({
+        id: `${profileId}:train2go:1`,
+        profileId,
+        text: "on the trainer",
+        updatedAt: NOW,
+      });
+    }
+
+    // Act
+    await deleteProfileWithCascade(deps, "p1");
+
+    // Assert
+    expect(await deps.athleteNotes.getById("p1:train2go:1")).toBeUndefined();
+    expect(await deps.athleteNotes.getById("p2:train2go:1")).toBeDefined();
   });
 
   it("should cascade both lab stores for the deleted profile only", async () => {

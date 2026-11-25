@@ -8,6 +8,7 @@
 import type { ConnectionRepository } from "../application/connections/connection-repository.port";
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
 import type { AiModelBindingRepository } from "./ai-model-binding-repository";
+import type { AthleteNoteRepository } from "./athlete-note-repository";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 import type { CapabilityDecisionRepository } from "./capability-decision-repository";
 import type { ChatConversationRepository } from "./chat-conversation-repository";
@@ -34,8 +35,6 @@ import type { TombstoneRepository } from "./tombstone-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
-export type { AiModelBindingRepository } from "./ai-model-binding-repository";
-export type { ChatConversationRepository } from "./chat-conversation-repository";
 export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
   CoachingRepository,
@@ -75,6 +74,8 @@ export type PersistencePort = HealthRepositories &
     coachingSyncState: CoachingSyncStateRepository;
     // Day-scoped coaching comment threads (Train2Go coach/athlete notes).
     coachingDayNotes: CoachingDayNotesRepository;
+    // The athlete's own note per Coaching Activity (never sent to Train2Go).
+    athleteNotes: AthleteNoteRepository;
     // Per-profile integration policies (training-zones import/export gating).
     integrationPolicy: IntegrationPolicyRepository;
     // Profile-scoped repos routed through PersistencePort so the cascade and

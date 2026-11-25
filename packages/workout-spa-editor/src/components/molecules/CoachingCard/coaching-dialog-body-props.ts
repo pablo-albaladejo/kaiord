@@ -22,6 +22,8 @@ export type CoachingDialogBodyProps = {
   manualCreating: boolean;
   onClose: () => void;
   onAiProcess: () => void;
+  /** Rebuild the matched Workout in place (explicit, billed). */
+  onRegenerate: () => void;
   onAiCancel: () => void;
   onEditManually: () => void;
   onOpenPicker: () => void;

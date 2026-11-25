@@ -7,27 +7,34 @@
  * single matched card (per spa-coaching-integration). On any failure
  * the use case writes nothing — see design D3.
  *
+ * How the Workout is built (the AI, or the steps table without it) is
+ * chosen in one place, `chooseCoachingBuilder`, which also adds the
+ * Athlete note to the coach's text.
+ *
  * The LLM call is plumbed in as a port (`generateKrd`) so the use case
  * does not depend on the SPA's lib/generate-workout module; the dialog
  * wires the actual provider-aware implementation at the composition
  * root.
  *
- * Two-branch existing-workout shape (see
+ * Existing-workout shape (see
  * `convert-coaching-activity-with-ai-idempotency.ts` header for the
  * full contract):
  *   - existing workout, `state !== "raw"` → `ensureMatchForExisting`
- *     (no LLM call, auto-heal session_match if missing).
+ *     (no LLM call, auto-heal session_match if missing), unless the
+ *     athlete asked to regenerate → `regenerateInPlace`.
  *   - existing workout, `state === "raw"` → `processExistingRawInPlace`
  *     (bill the LLM, transition raw → structured in place, preserve
  *     the existing session_match row).
  *   - no existing workout → `performAiCreation` (create new workout +
  *     session_match atomically).
- *
- * Both branches that build a KRD take it from the session's steps table
- * when it has one, without calling the LLM (`coaching-krd-source.ts`).
  */
 import { namespaceSourceId } from "../../types/coaching-activity-record";
-import { performAiCreation } from "./convert-coaching-activity-with-ai-helpers";
+import { chooseCoachingBuilder } from "./choose-coaching-builder";
+import { readAthleteNoteText } from "./coaching-prompt-text";
+import {
+  performAiCreation,
+  resolveCoachingSport,
+} from "./convert-coaching-activity-with-ai-helpers";
 import {
   ensureMatchForExisting,
   processExistingRawInPlace,
@@ -37,6 +44,7 @@ import type {
   ConvertWithAiInput,
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
+import { regenerateInPlace } from "./regenerate-coaching-workout";
 
 export type {
   ConvertWithAiDeps,
@@ -63,17 +71,16 @@ export const convertCoachingActivityWithAi = async (
     activity.source,
     nsSourceId
   );
-  if (existing) {
-    if (existing.state === "raw") {
-      return processExistingRawInPlace(
-        deps,
-        activity,
-        existing,
-        input.abortSignal
-      );
-    }
+  if (existing && existing.state !== "raw" && !input.regenerate)
     return ensureMatchForExisting(deps, activity, existing);
-  }
 
-  return performAiCreation(deps, activity, nsSourceId, input.abortSignal);
+  const note = await readAthleteNoteText(deps.athleteNotes, activity.id);
+  const resolved = resolveCoachingSport(activity);
+  const build = chooseCoachingBuilder(deps, activity, note, resolved);
+  const signal = input.abortSignal;
+  if (!existing)
+    return performAiCreation(deps, activity, nsSourceId, build, signal);
+  return existing.state === "raw"
+    ? processExistingRawInPlace(deps, activity, existing, build, signal)
+    : regenerateInPlace(deps, activity, existing, build, signal);
 };

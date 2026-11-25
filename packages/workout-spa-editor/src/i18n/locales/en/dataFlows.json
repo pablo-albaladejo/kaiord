@@ -14,6 +14,7 @@
     "messages": "your messages",
     "workouts": "workouts",
     "coachingPlan": "your coach's plan and comments",
+    "athleteNote": "your notes on your coach's activities",
     "dataSources": "which source feeds each kind of data",
     "workoutDescription": "the workout you describe",
     "aiInstructions": "your instructions for the AI",

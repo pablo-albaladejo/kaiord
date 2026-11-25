@@ -15,8 +15,7 @@
  *     left `raw` during the call is not written and emits `skipped`. Re-uses
  *     the same `generateKrd` port as the create-new flow so flow (f)
  *     of the coaching-dialog redesign is observable through the same
- *     route-mock surface as flow (a, c). A session with a steps table is
- *     structured from the table instead, without the LLM (aiMeta null).
+ *     route-mock surface as flow (a, c).
  */
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { WorkoutRecord } from "../../types/calendar-record";
@@ -24,7 +23,8 @@ import type { CoachingActivityRecord } from "../../types/coaching-activity-recor
 import { withFallbackName } from "../../utils/structured-workout";
 import { updateWorkoutRecord } from "../save-workout-edits";
 import { transitionToStructured } from "../workout-transitions";
-import { generateCoachingKrd, pickAiMeta } from "./coaching-krd-source";
+import type { CoachingBuilder } from "./choose-coaching-builder";
+import { pickAiMeta } from "./coaching-ai-meta";
 import { forceKrdSport } from "./coaching-krd-sport";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import type {
@@ -57,20 +57,17 @@ export const processExistingRawInPlace = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
   existingWorkout: WorkoutRecord,
+  build: CoachingBuilder,
   abortSignal?: AbortSignal
 ): Promise<ConvertWithAiResult> => {
   const resolved = resolveT2GSport(activity.sport);
   try {
-    const generated = await generateCoachingKrd(
-      deps,
-      { activity, resolved },
-      abortSignal
-    );
+    const built = await build(abortSignal);
     // Force the resolved sport onto the KRD too (not just the LLM hint) so a
     // known Train2Go sport is never persisted as the model's `generic` guess.
-    const named = withFallbackName(generated.krd, activity.title);
+    const named = withFallbackName(built.krd, activity.title);
     const krd = resolved ? forceKrdSport(named, resolved) : named;
-    const aiMeta = generated.aiMeta && pickAiMeta(generated.aiMeta);
+    const aiMeta = built.aiMeta && pickAiMeta(built.aiMeta);
     // Onto the row as stored after the LLM call: a move made meanwhile keeps
     // its date, and a row that left `raw` is left alone and reported as
     // skipped rather than as a success (AC-30).

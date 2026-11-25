@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useMatchSession } from "../../../hooks/use-match-session";
-import { useUnmatchSession } from "../../../hooks/use-unmatch-session";
+import { useSplitSession } from "../../../hooks/use-split-session";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
@@ -36,7 +36,7 @@ export const useCoachingDialogActions = (
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const matchSession = useMatchSession();
-  const unmatchSession = useUnmatchSession();
+  const splitSession = useSplitSession();
   const { success: showSuccess } = useToastContext();
   const t = useTranslate("coaching");
 
@@ -71,14 +71,14 @@ export const useCoachingDialogActions = (
     if (!targetProfileId || matchState?.kind !== "matched" || splitting) return;
     setSplitting(true);
     try {
-      await unmatchSession({
+      await splitSession({
         profileId: targetProfileId,
         matchId: matchState.matchId,
       });
     } finally {
       setSplitting(false);
     }
-  }, [targetProfileId, matchState, splitting, unmatchSession]);
+  }, [targetProfileId, matchState, splitting, splitSession]);
 
   return {
     matching,
