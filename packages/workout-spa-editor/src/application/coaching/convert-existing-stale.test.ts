@@ -43,6 +43,7 @@ const depsOf = (persistence: Persistence, duringLlm: () => Promise<void>) => ({
     await duringLlm();
     return { krd: fakeKrd(), aiMeta: fakeAiMeta() };
   },
+  readStepsTable: () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "m-new",
   clock: () => NOW,

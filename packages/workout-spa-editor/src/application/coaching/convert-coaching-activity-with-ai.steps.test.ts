@@ -202,4 +202,32 @@ describe("convertCoachingActivityWithAi with a steps table", () => {
     expect(stored?.aiMeta).toBeNull();
     expect(totalSeconds(workout?.steps ?? [])).toBe(TABLE_SECONDS);
   });
+
+  it("should give the AI the table when its values cannot become a workout", async () => {
+    // Arrange
+    // 9000 W is out of the KRD's power range: the table parses, the build fails.
+    const tooStrong: CoachingStepGroup[] = [
+      {
+        repeat: 1,
+        steps: [{ ...row(60, "R9"), powerWatts: { min: 100, max: 9000 } }],
+      },
+    ];
+    const activity = stubActivity({ structuredSteps: tooStrong });
+    const athleteNotes = createInMemoryAthleteNoteRepository();
+    await athleteNotes.put({
+      id: activity.id,
+      profileId: activity.profileId,
+      text: "easier please",
+      updatedAt: NOW,
+    });
+    const deps = { ...setup(activity), athleteNotes };
+
+    // Act
+    await convert(deps, activity.id);
+
+    // Assert
+    expect(deps.generateKrd).toHaveBeenCalledOnce();
+    const { text } = vi.mocked(deps.generateKrd).mock.calls[0][0];
+    expect(text).toContain("Steps table:\n60 s R9, 100-9000 W, HR 110-125 bpm");
+  });
 });

@@ -41,6 +41,7 @@ const depsOf = (
   generateKrd: vi
     .fn()
     .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() }),
+  readStepsTable: () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "m-new",
   clock: () => NOW,

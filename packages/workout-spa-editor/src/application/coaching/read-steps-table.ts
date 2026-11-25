@@ -1,13 +1,12 @@
 /**
- * The Train2Go steps table (#1684) read for `chooseCoachingBuilder`: the
- * Workout it describes (`structured-steps-krd.ts`) and the same rows as
- * text for the AI when an Athlete note sends the build there.
+ * The Train2Go steps table read for `chooseCoachingBuilder`: its rows as
+ * text for the AI, and the Workout it describes (`structured-steps-krd.ts`).
  *
- * Returns `null` when there is nothing whole to read: no table on the
- * record (the Connector only stores one it read cell by cell), a sport the
- * KRD cannot hold (a rest day, an unmapped key), or a value out of range.
- * The build then goes to the AI from the coach's text, never from part of
- * a table.
+ * Returns `null` only when the record has no table (the Connector only
+ * stores one it read cell by cell). A table whose Workout the KRD cannot
+ * hold (a rest day, an unmapped sport key, a value out of range) keeps its
+ * text with a `null` KRD, so the AI still reads it; a Workout is never
+ * built from part of a table.
  */
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type {
@@ -16,12 +15,12 @@ import type {
 } from "../../types/coaching-structured-steps";
 import type { ReadStepsTable } from "./choose-coaching-builder";
 import { resolveCoachingSport } from "./convert-coaching-activity-with-ai-helpers";
-import { buildStructuredStepsKrd } from "./structured-steps-krd";
+import { buildStructuredStepsKrd, heartRateText } from "./structured-steps-krd";
 
 const rowText = (row: CoachingStructuredStep): string =>
   `${row.durationSeconds} s ${row.zone}, ` +
   `${row.powerWatts.min}-${row.powerWatts.max} W, ` +
-  `HR ${row.heartRateBpm.min}-${row.heartRateBpm.max} bpm`;
+  heartRateText(row);
 
 const groupText = (group: CoachingStepGroup): string =>
   group.repeat > 1
@@ -39,13 +38,15 @@ export const createReadStepsTable =
   (clock: () => string): ReadStepsTable =>
   (activity: CoachingActivityRecord) => {
     const groups = activity.structuredSteps;
+    if (!groups) return null;
     const sport = resolveCoachingSport(activity);
-    if (!groups || !sport) return null;
-    const krd = buildStructuredStepsKrd({
-      groups,
-      sport,
-      name: activity.title.trim() || undefined,
-      created: clock(),
-    });
-    return krd ? { krd, text: stepsTableText(groups) } : null;
+    const krd = sport
+      ? buildStructuredStepsKrd({
+          groups,
+          sport,
+          name: activity.title.trim() || undefined,
+          created: clock(),
+        })
+      : undefined;
+    return { text: stepsTableText(groups), krd: krd ?? null };
   };

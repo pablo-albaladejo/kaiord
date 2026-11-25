@@ -35,6 +35,7 @@ const buildDeps = (
   generateKrd: vi
     .fn()
     .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() }),
+  readStepsTable: () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",
   clock: () => NOW,

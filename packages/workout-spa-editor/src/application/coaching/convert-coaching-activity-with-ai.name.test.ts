@@ -37,6 +37,7 @@ const buildDeps = (
     krd: buildCoachingTemplateKrd("running", aiName),
     aiMeta: fakeAiMeta(),
   }),
+  readStepsTable: () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",
   clock: () => "2026-05-04T10:00:00.000Z",

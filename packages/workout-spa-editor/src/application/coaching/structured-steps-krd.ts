@@ -31,6 +31,10 @@ export type StructuredStepsKrdInput = {
   created: string;
 };
 
+/** A row's heart-rate range, as the step's note and in the AI's table. */
+export const heartRateText = (row: CoachingStructuredStep): string =>
+  `HR ${row.heartRateBpm.min}-${row.heartRateBpm.max} bpm`;
+
 const toStep = (row: CoachingStructuredStep, stepIndex: number) => ({
   stepIndex,
   name: row.zone,
@@ -41,7 +45,7 @@ const toStep = (row: CoachingStructuredStep, stepIndex: number) => ({
     type: "power" as const,
     value: { unit: "range" as const, ...row.powerWatts },
   },
-  notes: `HR ${row.heartRateBpm.min}-${row.heartRateBpm.max} bpm`,
+  notes: heartRateText(row),
 });
 
 const toSteps = (groups: CoachingStepGroup[]) => {

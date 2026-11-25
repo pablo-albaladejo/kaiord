@@ -33,8 +33,8 @@ export type ConvertWithAiDeps = {
   transaction: PersistencePort["transaction"];
   analytics: Analytics;
   generateKrd: GenerateKrdPort;
-  /** The steps-table seam (#1684); absent, every build goes to the AI. */
-  readStepsTable?: ReadStepsTable;
+  /** Reads the activity's steps table; `null` when it has none. */
+  readStepsTable: ReadStepsTable;
   newWorkoutId: () => string;
   newMatchId: () => string;
   clock: () => string;
