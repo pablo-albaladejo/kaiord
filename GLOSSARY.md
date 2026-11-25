@@ -33,6 +33,11 @@ _Avoid_: Feature flag, module, plugin, add-on
 What a coach prescribes for a given day, as the coach wrote it, before it has any structure.
 _Avoid_: Session, training, plan, raw workout
 
+**Athlete note**:
+What the athlete adds to a Coaching Activity for the assistant to read alongside the coach's text; the coach's text itself is never changed.
+The athlete reads "Your note" ("Tu nota").
+_Avoid_: Prompt, edit, override
+
 **Workout**:
 A training prescription structured into steps with durations and targets, ready to be executed on a device.
 _Avoid_: Session, training, structured workout, plan
