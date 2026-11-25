@@ -79,7 +79,7 @@ export const convertCoachingActivityWithAi = async (
   const build = chooseCoachingBuilder(deps, activity, note, resolved);
   const signal = input.abortSignal;
   if (!existing)
-    return performAiCreation(deps, activity, nsSourceId, build, signal);
+    return performAiCreation(deps, activity, nsSourceId, build, resolved, signal);
   return existing.state === "raw"
     ? processExistingRawInPlace(deps, activity, existing, build, signal)
     : regenerateInPlace(deps, activity, existing, build, signal);

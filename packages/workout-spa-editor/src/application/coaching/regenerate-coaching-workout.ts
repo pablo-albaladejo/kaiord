@@ -22,29 +22,13 @@ import type {
   ConvertWithAiDeps,
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
-import { ensureSessionMatch } from "./ensure-session-match";
-import { sessionMatchDate } from "./session-match-date";
-
-const healMatch = (
-  deps: ConvertWithAiDeps,
-  activity: CoachingActivityRecord,
-  workout: WorkoutRecord
-) =>
-  ensureSessionMatch(deps.sessionMatches, {
-    profileId: activity.profileId,
-    coachingActivityId: activity.id,
-    workoutId: workout.id,
-    date: sessionMatchDate(workout, activity),
-    source: "auto-coaching",
-    newId: deps.newMatchId,
-    clock: deps.clock,
-  });
+import { ensureAutoCoachingMatch } from "./ensure-auto-coaching-match";
 
 /** Named after the activity when the build gives no name, with its notes. */
 const regeneratedKrd = (krd: KRD, activity: CoachingActivityRecord): KRD =>
   withCoachNotes(withFallbackName(krd, activity.title), activity.description);
 
-const replaced = (
+const regeneratedRecord = (
   fresh: WorkoutRecord,
   krd: KRD,
   aiMeta: AiMeta | null,
@@ -77,12 +61,12 @@ export const regenerateInPlace = async (
     const krd = regeneratedKrd(built.krd, activity);
     aiMeta = built.aiMeta && pickAiMeta(built.aiMeta);
     await updateWorkoutRecord(deps, existing.id, (fresh) =>
-      replaced(fresh, krd, aiMeta, deps.clock())
+      regeneratedRecord(fresh, krd, aiMeta, deps.clock())
     );
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }
-  await healMatch(deps, activity, existing);
+  await ensureAutoCoachingMatch(deps, activity, existing);
   deps.analytics.event("coaching.convert_with_ai.success", {
     created: false,
     regenerated: true,

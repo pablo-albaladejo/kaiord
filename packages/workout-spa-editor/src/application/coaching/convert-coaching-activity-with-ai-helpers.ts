@@ -4,8 +4,9 @@
  */
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+import type { Sport } from "../../types/schemas";
 import type { CoachingBuild, CoachingBuilder } from "./choose-coaching-builder";
-import { coachingSportArgs, type ResolvedSport } from "./coaching-krd-sport";
+import type { ResolvedSport } from "./coaching-krd-sport";
 import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import type {
@@ -13,8 +14,7 @@ import type {
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
 import { dropDanglingMatch } from "./drop-dangling-match";
-import { ensureSessionMatch } from "./ensure-session-match";
-import { sessionMatchDate } from "./session-match-date";
+import { ensureAutoCoachingMatch } from "./ensure-auto-coaching-match";
 
 /** The KRD sport a Train2Go key resolves to; `null` for unmapped sports. */
 export const resolveCoachingSport = (
@@ -28,25 +28,19 @@ const persistFreshWorkout = async (
   built: CoachingBuild,
   resolved: ResolvedSport | null
 ): Promise<string> => {
+  // The build already carries the resolved sport; the record carries it too.
   const workout = buildStructuredCoachingWorkout({
     id: deps.newWorkoutId(),
     activity,
     namespacedSourceId: nsSourceId,
     aiMeta: built.aiMeta,
     now: deps.clock(),
-    ...coachingSportArgs(built.krd, resolved, activity.sport),
+    krd: built.krd,
+    ...(resolved ?? { sport: activity.sport as Sport }),
   });
   await deps.workouts.put(workout);
   await dropDanglingMatch(deps, activity);
-  await ensureSessionMatch(deps.sessionMatches, {
-    profileId: activity.profileId,
-    coachingActivityId: activity.id,
-    workoutId: workout.id,
-    date: sessionMatchDate(workout, activity),
-    source: "auto-coaching",
-    newId: deps.newMatchId,
-    clock: deps.clock,
-  });
+  await ensureAutoCoachingMatch(deps, activity, workout);
   return workout.id;
 };
 
@@ -55,6 +49,7 @@ export const performAiCreation = async (
   activity: CoachingActivityRecord,
   nsSourceId: string,
   build: CoachingBuilder,
+  resolved: ResolvedSport | null,
   abortSignal: AbortSignal | undefined
 ): Promise<ConvertWithAiResult> => {
   let built: CoachingBuild;
@@ -63,7 +58,6 @@ export const performAiCreation = async (
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }
-  const resolved = resolveT2GSport(activity.sport);
   const workoutId = await persistFreshWorkout(
     deps,
     activity,

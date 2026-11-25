@@ -36,17 +36,3 @@ export const forceKrdSport = (krd: KRD, resolved: ResolvedSport): KRD => {
       : {}),
   };
 };
-
-/**
- * Bundle the deterministic sport for a coaching workout: the force-set KRD
- * plus the record `sport`/`subSport`. When the raw key is unmapped
- * (`resolved === null`) the KRD and the raw key pass through unchanged.
- */
-export const coachingSportArgs = (
-  krd: KRD,
-  resolved: ResolvedSport | null,
-  rawSport: string
-): { krd: KRD; sport: Sport; subSport?: SubSport } =>
-  resolved
-    ? { krd: forceKrdSport(krd, resolved), ...resolved }
-    : { krd, sport: rawSport as Sport };
