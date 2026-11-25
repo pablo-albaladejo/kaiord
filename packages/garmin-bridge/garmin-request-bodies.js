@@ -6,7 +6,8 @@
  * App's Garmin Connector builds and never an arbitrary payload:
  *   - `workout`: the GCN @kaiord/garmin's writer emits (one segment of
  *     executable steps and repeat groups of executable steps, every key
- *     named, Garmin's own type keys, bounded strings and counts);
+ *     named, Garmin's own type keys, bounded strings and counts, the
+ *     workout description cut to DESCRIPTION_MAX by the writer);
  *   - `fit-file`: the body-composition upload (garmin-fit-check.js);
  *   - `schedule`: one calendar date.
  */
@@ -23,6 +24,7 @@ const garminRequestBodies = (() => {
   const MAX_REPEAT_STEPS = 50;
   const NAME_MAX = 255;
   const NOTES_MAX = 256;
+  const DESCRIPTION_MAX = 1024;
 
   const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const keyOf = (keys) => ({
@@ -152,6 +154,7 @@ const garminRequestBodies = (() => {
     type: "object",
     fields: {
       workoutName: { type: "string", min: 1, max: NAME_MAX },
+      description: { type: "string", max: DESCRIPTION_MAX, optional: true },
       sportType: SPORT_TYPE,
       workoutSegments: {
         type: "array",
@@ -191,7 +194,7 @@ const garminRequestBodies = (() => {
     schedule: { type: "object", fields: { date: { type: "date" } } },
   };
 
-  return { BODY_SCHEMAS, MAX_STEPS, MAX_REPEAT_STEPS };
+  return { BODY_SCHEMAS, MAX_STEPS, MAX_REPEAT_STEPS, DESCRIPTION_MAX };
 })();
 
 if (typeof module !== "undefined") {

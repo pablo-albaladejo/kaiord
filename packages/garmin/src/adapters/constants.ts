@@ -20,3 +20,11 @@ export const GARMIN_NAME_MAX = 255;
  * two values is therefore intentional, not an accidental discrepancy.
  */
 export const GARMIN_STEP_NOTES_MAX = 256;
+
+/**
+ * Maximum length we send for a workout's free-text `description`. Garmin
+ * publishes no bound for it; this is a conservative cap, matched by the
+ * Garmin bridge's request gate, so a long coach text is cut on write rather
+ * than refused.
+ */
+export const GARMIN_DESCRIPTION_MAX = 1024;

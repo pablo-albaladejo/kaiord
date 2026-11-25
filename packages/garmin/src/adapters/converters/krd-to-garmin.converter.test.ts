@@ -1,10 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import type { KRD } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import {
   CADENCE_RPM,
+  DESCRIPTION_MAX_LENGTH,
+  DESCRIPTION_OVERSIZED_INPUT_LENGTH,
   POOL_LENGTH_METERS,
   REPETITION,
 } from "../../test-utils/constants";
@@ -233,6 +236,57 @@ describe("convertKRDToGarmin", () => {
 
       // Assert
       expect(step.description).toBeUndefined();
+    });
+  });
+
+  describe("workout description", () => {
+    const krdWithNotes = (notes: string): KRD => ({
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: "2026-01-01T00:00:00Z", sport: "cycling" },
+      extensions: {
+        structured_workout: {
+          name: "Coach text",
+          sport: "cycling",
+          notes,
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "open",
+              target: { type: "open" },
+              intensity: "warmup",
+            },
+          ],
+        },
+      },
+    });
+
+    it("should send the coach's text as the workout description", () => {
+      // Arrange
+      const krd = krdWithNotes("Easy spin, then three hard efforts.");
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect(parsed.description).toBe("Easy spin, then three hard efforts.");
+    });
+
+    it("should cut a description longer than 1024 characters to 1024", () => {
+      // Arrange
+      const krd = krdWithNotes("a".repeat(DESCRIPTION_OVERSIZED_INPUT_LENGTH));
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect(parsed.description).toBe("a".repeat(DESCRIPTION_MAX_LENGTH));
     });
   });
 

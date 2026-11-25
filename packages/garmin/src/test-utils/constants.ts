@@ -129,6 +129,12 @@ export const NOTES_MAX_LENGTH = 256;
 // Input length used in description-truncation test fixtures (above NOTES_MAX_LENGTH).
 export const NOTES_OVERSIZED_INPUT_LENGTH = 300;
 
+// Workout description truncation limit (the bridge's cap).
+export const DESCRIPTION_MAX_LENGTH = 1024;
+
+// Input length used in workout-description truncation tests (above DESCRIPTION_MAX_LENGTH).
+export const DESCRIPTION_OVERSIZED_INPUT_LENGTH = 1500;
+
 // Generic stepIndex sample value used in assertions.
 export const STEP_INDEX = {
   FIVE: 5,
