@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers -- a steps table is literal durations, watts and bpm, clearer inline */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -206,5 +207,31 @@ describe("parseDailyHtml", () => {
     expect(activities[0]?.description).toContain(
       "[aquí](https://youtu.be/x?t=1&list=ab)"
     );
+  });
+
+  it("should carry the session's structured steps next to its description", () => {
+    // Arrange
+    const html = fixture("daily-with-steps.html");
+
+    // Act
+    const [activity] = parseDailyHtml(html);
+
+    // Assert
+    expect(activity?.description).toBe(
+      'Rodaje de prueba siguiendo las zonas de potencia.\nIncluye 3 x 30" de pedalada a una pierna.'
+    );
+    expect(activity?.steps).toHaveLength(19);
+    expect(activity?.steps?.[1]).toMatchObject({ repeat: 5 });
+  });
+
+  it("should carry no steps for a session without a steps grid", () => {
+    // Arrange
+    const html = fixture("daily.html");
+
+    // Act
+    const [activity] = parseDailyHtml(html);
+
+    // Assert
+    expect(activity).not.toHaveProperty("steps");
   });
 });

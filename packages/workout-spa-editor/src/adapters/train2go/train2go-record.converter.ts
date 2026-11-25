@@ -58,6 +58,7 @@ export const toCoachingActivityRecord = (
     status: TRAIN2GO_STATUS_MAP[activity.status] ?? "pending",
     completionPercent: activity.completion,
     description: activity.description,
+    ...(activity.steps ? { structuredSteps: activity.steps } : {}),
     fetchedAt,
   };
 };

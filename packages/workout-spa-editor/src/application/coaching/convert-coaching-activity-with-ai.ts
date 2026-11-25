@@ -22,12 +22,12 @@
  *     the existing session_match row).
  *   - no existing workout → `performAiCreation` (create new workout +
  *     session_match atomically).
+ *
+ * Both branches that build a KRD take it from the session's steps table
+ * when it has one, without calling the LLM (`coaching-krd-source.ts`).
  */
 import { namespaceSourceId } from "../../types/coaching-activity-record";
-import {
-  performAiCreation,
-  resolvePromptText,
-} from "./convert-coaching-activity-with-ai-helpers";
+import { performAiCreation } from "./convert-coaching-activity-with-ai-helpers";
 import {
   ensureMatchForExisting,
   processExistingRawInPlace,
@@ -75,6 +75,5 @@ export const convertCoachingActivityWithAi = async (
     return ensureMatchForExisting(deps, activity, existing);
   }
 
-  const text = resolvePromptText(activity);
-  return performAiCreation(deps, activity, nsSourceId, text, input.abortSignal);
+  return performAiCreation(deps, activity, nsSourceId, input.abortSignal);
 };
