@@ -1,7 +1,7 @@
 /**
  * LinkedWorkoutSection — matched-state body for `CoachingActivityDialog`.
  * Shows the matched workout's title, sport, and duration; renders a
- * "Split" button that disables itself while `unmatchSession` is in
+ * "Split" button that disables itself while the split is in
  * flight.
  */
 

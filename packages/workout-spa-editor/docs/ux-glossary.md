@@ -32,6 +32,7 @@ The trace and reflection that motivate this glossary live in
 | **Step**             | A single interval inside a workout                             |
 | **Repetition block** | A grouped sequence of steps that repeats N times               |
 | **Coach**            | The external coaching prescription source (Train2Go etc.)      |
+| **Your note**        | The athlete's note on a coach's activity; Spanish "Tu nota"    |
 | **Zone**             | A training intensity band (HR or power), defined per profile   |
 | **Profile**          | The athlete identity (zones · linked accounts · personal data) |
 | **Calendar week**    | The Monday-anchored week shown on `/calendar`                  |

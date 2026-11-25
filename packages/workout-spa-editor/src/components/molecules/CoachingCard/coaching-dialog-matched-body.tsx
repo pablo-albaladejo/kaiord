@@ -5,11 +5,12 @@
  * `ExecutedWorkoutsSection` slots wired up.
  */
 import { isMovableSession } from "../../../application/session-movability";
+import { AiProcessingOverlay } from "./AiProcessingOverlay";
 import type { CoachingDialogBodyProps } from "./coaching-dialog-body-props";
 import { DialogGarminDrift } from "./DialogGarminDrift";
 import { ExecutedWorkoutsSection } from "./ExecutedWorkoutsSection";
 import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
-import { MatchedActions } from "./MatchedActions";
+import { MatchedWorkoutActions } from "./MatchedWorkoutActions";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 type MatchedState = Extract<CoachingDialogState, { kind: "matched" }>;
@@ -29,8 +30,8 @@ export const renderMatchedBody = (
     <>
       <LinkedWorkoutSection
         workout={workout}
-        splitting={false}
-        onSplit={() => undefined}
+        splitting={props.splitting}
+        onSplit={props.onSplit}
       />
       <DialogGarminDrift workout={workout} locked={!movability.movable} />
       {executed.length > 0 ? (
@@ -39,17 +40,25 @@ export const renderMatchedBody = (
           onOpenExecuted={props.onOpenExecuted}
         />
       ) : null}
-      <MatchedActions
-        workout={workout}
-        splitting={props.splitting}
-        onClose={props.onClose}
-        onOpenEditor={props.onOpenEditor}
-        onAiProcess={props.onAiProcess}
-        onPushToGarmin={props.onPushToGarmin}
-        onSplit={props.onSplit}
-        movability={movability}
-        onMoveTo={props.onMoveTo}
-      />
+      {props.aiProgress ? (
+        <AiProcessingOverlay
+          progress={props.aiProgress}
+          onCancel={props.onAiCancel}
+        />
+      ) : (
+        <MatchedWorkoutActions
+          workout={workout}
+          splitting={props.splitting}
+          onClose={props.onClose}
+          onOpenEditor={props.onOpenEditor}
+          onAiProcess={props.onAiProcess}
+          onPushToGarmin={props.onPushToGarmin}
+          onSplit={props.onSplit}
+          onRegenerate={props.onRegenerate}
+          movability={movability}
+          onMoveTo={props.onMoveTo}
+        />
+      )}
     </>
   );
 };

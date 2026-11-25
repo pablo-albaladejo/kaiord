@@ -1,6 +1,6 @@
 /**
  * useCoachingDialogActions tests — exercises every match/split branch
- * by injecting fake `useMatchSession` / `useUnmatchSession` modules.
+ * by injecting fake `useMatchSession` / `useSplitSession` modules.
  */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -14,8 +14,8 @@ const mockShowSuccess = vi.fn();
 vi.mock("../../../hooks/use-match-session", () => ({
   useMatchSession: () => mockMatch,
 }));
-vi.mock("../../../hooks/use-unmatch-session", () => ({
-  useUnmatchSession: () => mockUnmatch,
+vi.mock("../../../hooks/use-split-session", () => ({
+  useSplitSession: () => mockUnmatch,
 }));
 vi.mock("../../../contexts/ToastContext", () => ({
   useToastContext: () => ({
@@ -182,7 +182,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
     workout: { id: "w-1" } as never,
   };
 
-  it("should invoke useUnmatchSession with profileId + matchId from matchState", async () => {
+  it("should invoke useSplitSession with profileId + matchId from matchState", async () => {
     // Arrange
 
     mockUnmatch.mockResolvedValue(undefined);

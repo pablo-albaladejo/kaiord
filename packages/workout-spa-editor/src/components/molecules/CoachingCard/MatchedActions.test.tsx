@@ -36,6 +36,8 @@ const renderWithState = (state: WorkoutState) =>
       onAiProcess={vi.fn()}
       onPushToGarmin={vi.fn()}
       onSplit={vi.fn()}
+      onRegenerate={vi.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -69,6 +71,10 @@ describe("MatchedActions", () => {
         onAiProcess={vi.fn()}
         onPushToGarmin={onPushToGarmin}
         onSplit={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -93,6 +99,10 @@ describe("MatchedActions", () => {
         onAiProcess={vi.fn()}
         onPushToGarmin={onPushToGarmin}
         onSplit={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -144,6 +154,10 @@ describe("MatchedActions", () => {
         onAiProcess={vi.fn()}
         onPushToGarmin={vi.fn()}
         onSplit={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -151,5 +165,68 @@ describe("MatchedActions", () => {
     const splitBtn = screen.getByTestId("coaching-dialog-split");
     expect(splitBtn).toBeDisabled();
     expect(splitBtn).toHaveTextContent("Splitting…");
+  });
+
+  it("should offer Regenerate for a Workout that is Ready and run it on click", () => {
+    // Arrange
+    const onRegenerate = vi.fn();
+    render(
+      <MatchedActions
+        workout={buildWorkout("structured")}
+        splitting={false}
+        onClose={vi.fn()}
+        onOpenEditor={vi.fn()}
+        onAiProcess={vi.fn()}
+        onPushToGarmin={vi.fn()}
+        onSplit={vi.fn()}
+        onRegenerate={onRegenerate}
+        onDelete={vi.fn()}
+      />
+    );
+
+    // Act
+    fireEvent.click(screen.getByTestId("coaching-dialog-regenerate"));
+
+    // Assert
+    expect(onRegenerate).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("coaching-dialog-regenerate")).toHaveTextContent(
+      "Regenerate"
+    );
+  });
+
+  it("should not offer Regenerate while the Workout is still to prepare", () => {
+    // Arrange
+
+    // Act
+    renderWithState("raw");
+
+    // Assert
+    expect(
+      screen.queryByTestId("coaching-dialog-regenerate")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should offer Delete workout in every state and run it on click", () => {
+    // Arrange
+    const onDelete = vi.fn();
+    render(
+      <MatchedActions
+        workout={buildWorkout("pushed")}
+        splitting={false}
+        onClose={vi.fn()}
+        onOpenEditor={vi.fn()}
+        onAiProcess={vi.fn()}
+        onPushToGarmin={vi.fn()}
+        onSplit={vi.fn()}
+        onRegenerate={vi.fn()}
+        onDelete={onDelete}
+      />
+    );
+
+    // Act
+    fireEvent.click(screen.getByTestId("coaching-dialog-delete-workout"));
+
+    // Assert
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });

@@ -23,6 +23,11 @@ Coaching-plan use cases: link/unlink a Train2Go account, convert a coaching acti
 - `convert-coaching-activity-error-mapper.ts` — translates AI errors into domain errors.
 - `coaching-workout-builder.ts` — builds the KRD payload from the converted activity.
 - `coaching-template.ts` / `.test.ts` — converts an activity into a library template instead of a workout.
+- `choose-coaching-builder.ts` — the one place that chooses how a Workout is built: the steps table without the AI when there is one and no Athlete note (the `readStepsTable` seam, #1684), else the AI with the coach's text and the note (`coaching-prompt-text.ts`).
+- `regenerate-coaching-workout.ts` — Regenerate: rebuild an existing Workout in place (same Match, same Day; back to Ready); `regenerate-warnings.ts` says what the athlete confirms first.
+- `set-athlete-note.ts` — add, edit or clear the Athlete note.
+- `delete-coaching-workout.ts` — delete a Workout with its Match, and the Undo of both; `drop-dangling-match.ts` clears a Match left pointing at a deleted Workout.
+- `split-coaching-workout.ts` — Split that stays split: the Match goes and the Workout built from the Activity is detached.
 - `ensure-session-match.ts` — idempotently creates the `sessionMatch` row tying the activity to its produced workout.
 - `attempt-link.ts` + `attempt-link-helpers.ts` / `.test.ts` — opportunistic linking flow.
 

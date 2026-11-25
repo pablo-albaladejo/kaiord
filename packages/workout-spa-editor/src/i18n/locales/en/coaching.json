@@ -125,7 +125,9 @@
     "openEditor": "Open editor",
     "pushToGarmin": "Send to Garmin",
     "split": "Split",
-    "splitting": "Splitting…"
+    "splitting": "Splitting…",
+    "regenerate": "Regenerate",
+    "deleteWorkout": "Delete workout"
   },
   "linked": {
     "heading": "Linked workout",
@@ -223,5 +225,25 @@
     "executedChip": "Executed",
     "planPrefix": "Plan ·",
     "actualPrefix": "Actual ·"
+  },
+  "regenerate": {
+    "title": "Regenerate this workout?",
+    "edited": "You edited this workout by hand: regenerating replaces your changes.",
+    "onWatch": "It goes back to “Ready”. The earlier version stays in Garmin's library until you remove it there.",
+    "confirm": "Regenerate",
+    "cancel": "Cancel"
+  },
+  "deleteWorkout": {
+    "title": "Delete this workout?",
+    "message": "The workout leaves your calendar and your coach's activity goes back to “To prepare”. You can undo it for a few seconds.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "athleteNote": {
+    "label": "Your note",
+    "hint": "The assistant reads it with your coach's text, which stays as your coach wrote it. It is never sent to Train2Go.",
+    "placeholder": "For example: on the trainer, skip the single-leg part",
+    "save": "Save note",
+    "clear": "Clear note"
   }
 }

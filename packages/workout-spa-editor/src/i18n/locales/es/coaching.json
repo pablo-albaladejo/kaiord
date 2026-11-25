@@ -125,7 +125,9 @@
     "openEditor": "Abrir editor",
     "pushToGarmin": "Enviar a Garmin",
     "split": "Separar",
-    "splitting": "Separando…"
+    "splitting": "Separando…",
+    "regenerate": "Regenerar",
+    "deleteWorkout": "Borrar entreno"
   },
   "linked": {
     "heading": "Entreno vinculado",
@@ -223,5 +225,25 @@
     "executedChip": "Hecho",
     "planPrefix": "Plan ·",
     "actualPrefix": "Real ·"
+  },
+  "regenerate": {
+    "title": "¿Regenerar este entreno?",
+    "edited": "Editaste este entreno a mano: al regenerarlo se pierden tus cambios.",
+    "onWatch": "Vuelve a “Listo”. La versión anterior sigue en la biblioteca de Garmin hasta que la borres allí.",
+    "confirm": "Regenerar",
+    "cancel": "Cancelar"
+  },
+  "deleteWorkout": {
+    "title": "¿Borrar este entreno?",
+    "message": "El entreno sale de tu calendario y la actividad de tu entrenador vuelve a “Por preparar”. Puedes deshacerlo durante unos segundos.",
+    "confirm": "Borrar",
+    "cancel": "Cancelar"
+  },
+  "athleteNote": {
+    "label": "Tu nota",
+    "hint": "El asistente la lee junto al texto de tu entrenador, que se queda tal como lo escribió. Nunca se envía a Train2Go.",
+    "placeholder": "Por ejemplo: en el rodillo, sin la parte a una pierna",
+    "save": "Guardar nota",
+    "clear": "Borrar nota"
   }
 }

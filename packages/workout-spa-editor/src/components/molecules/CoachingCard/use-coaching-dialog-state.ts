@@ -12,7 +12,7 @@
  *
  * This is a thin live-query layer; mutations live in the use cases
  * (convertCoachingActivityWithAi, convertCoachingActivityManual,
- * matchSession, unmatchSession).
+ * matchSession, splitCoachingWorkout).
  */
 import { useLiveQuery } from "dexie-react-hooks";
 

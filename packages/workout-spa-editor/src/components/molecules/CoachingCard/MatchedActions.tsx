@@ -3,26 +3,25 @@
  *
  * Buttons toggled by the matched workout's `state`:
  *   - raw       → [Process with AI] [Open editor]
- *   - structured→ [Open editor] [Send to Garmin]
- *   - ready     → [Open editor] [Send to Garmin]
- *   - pushed    → [Open editor]
- *   - any other → [Open editor]
+ *   - structured→ [Regenerate] [Open editor] [Send to Garmin]
+ *   - ready     → [Regenerate] [Open editor] [Send to Garmin]
+ *   - pushed    → [Regenerate] [Open editor]
+ *   - any other → [Regenerate] [Open editor] (skipped: [Open editor])
  *
- * [Move to another day] joins every state inside the calendar's move flow,
- * disabled with the reason once the session is done (design §3.8).
+ * [Split] and [Delete workout] join every state, and [Move to another day]
+ * does inside the calendar's move flow, disabled with the reason once the
+ * session is done (design §3.8).
  *
- * `[Process with AI]` for raw workouts re-uses the dialog's AI handler
- * (the use case detects the existing workout id and transitions raw →
- * structured in place rather than creating a new record).
- *
- * `[Send to Garmin]` is wired through `CoachingActivityDialog` to
- * `useGarminPush(workout)` — see issue #553. The hook accepts the
- * Dexie-backed `WorkoutRecord` directly (Option α) so the dialog
- * pushes the persisted state.
+ * `[Process with AI]` for raw workouts re-uses the dialog's AI handler (the
+ * use case transitions raw → structured in place). `[Regenerate]` is the
+ * explicit, billed rebuild of a Workout the athlete already has; its
+ * confirmations live in `MatchedWorkoutActions`.
  */
 import type { Movability } from "../../../application/session-movability";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { MatchedActionButton } from "./matched-action-button";
+import { MatchedWorkoutButtons } from "./matched-workout-buttons";
 import { MoveSessionAction } from "./MoveSessionAction";
 
 export type MatchedActionsProps = {
@@ -33,15 +32,14 @@ export type MatchedActionsProps = {
   onAiProcess: () => void;
   onPushToGarmin: () => void;
   onSplit: () => void;
+  onRegenerate: () => void;
+  onDelete: () => void;
   movability?: Movability;
   onMoveTo?: (date: string) => void;
 };
 
 export function MatchedActions(props: MatchedActionsProps) {
   const t = useTranslate("coaching");
-  const state = props.workout.state;
-  const showAi = state === "raw";
-  const showPush = state === "structured" || state === "ready";
   return (
     <div className="flex flex-wrap justify-end gap-2 pt-3">
       <button
@@ -51,48 +49,25 @@ export function MatchedActions(props: MatchedActionsProps) {
       >
         {t("actions.close")}
       </button>
-      <button
-        type="button"
-        data-testid="coaching-dialog-split"
+      <MatchedActionButton
+        testId="coaching-dialog-split"
         disabled={props.splitting}
         onClick={props.onSplit}
-        className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
       >
         {props.splitting ? t("actions.splitting") : t("actions.split")}
-      </button>
+      </MatchedActionButton>
+      <MatchedActionButton
+        testId="coaching-dialog-delete-workout"
+        onClick={props.onDelete}
+      >
+        {t("actions.deleteWorkout")}
+      </MatchedActionButton>
       <MoveSessionAction
         date={props.workout.date}
         movability={props.movability}
         onMoveTo={props.onMoveTo}
       />
-      {showPush && (
-        <button
-          type="button"
-          data-testid="coaching-dialog-push"
-          onClick={props.onPushToGarmin}
-          className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
-        >
-          {t("actions.pushToGarmin")}
-        </button>
-      )}
-      {showAi && (
-        <button
-          type="button"
-          data-testid="coaching-dialog-ai-process"
-          onClick={props.onAiProcess}
-          className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger"
-        >
-          {t("actions.processWithAi")}
-        </button>
-      )}
-      <button
-        type="button"
-        data-testid="coaching-dialog-open-editor"
-        onClick={props.onOpenEditor}
-        className="rounded-md bg-surface-elevated px-3 py-1 text-sm text-ink-strong hover:bg-surface"
-      >
-        {t("actions.openEditor")}
-      </button>
+      <MatchedWorkoutButtons {...props} />
     </div>
   );
 }

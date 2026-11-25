@@ -40,7 +40,10 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `ai-run-progress.ts` / `.test.ts` — in-flight run state (`AiRunProgress`, with `phaseStartedAt`) and begin/end/cancel bookkeeping on the abort-controller lock.
 - `AiErrorState.tsx` / `.test.tsx` — error pane for AI failures.
 - `MatchToPicker.tsx` / `.test.tsx` + `MatchToPickerItem.tsx` — pickable-workout picker used to link a workout to the activity.
-- `MatchedActions.tsx` / `.test.tsx` — action buttons in the matched body.
+- `MatchedActions.tsx` / `.test.tsx` + `matched-workout-buttons.tsx` + `matched-action-button.tsx` — action buttons in the matched body (Split, Delete workout, Regenerate, Send, Open editor).
+- `MatchedWorkoutActions.tsx` + `MatchedWorkoutConfirms.tsx` — the bar with its Regenerate and Delete workout confirmations (hand edits, on the watch, the Garmin notice).
+- `AthleteNoteField.tsx` / `.test.tsx` + `use-athlete-note.ts` — "Your note", the Athlete note under the coach's text.
+- `use-start-ai-run.ts` + `start-ai-ctx.ts` — one AI run (build or Regenerate) of the dialog.
 - `NoWorkoutActions.tsx` + `no-workout-buttons.tsx` — action buttons in the no-workout body.
 - `LinkedWorkoutSection.tsx` / `.test.tsx` + `linked-workout-utils.ts` — section showing the linked workout.
 - `ExecutedWorkoutsSection.tsx` / `.test.tsx` — Train2Go three-slot executed-activity section (1-N, from #597 / #599).
