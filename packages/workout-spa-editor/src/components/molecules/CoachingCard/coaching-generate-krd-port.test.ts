@@ -1,13 +1,14 @@
 /**
- * Tests for the pure helpers backing `useCoachingAi`. Exercises the
+ * Tests for the coaching dialog's `GenerateKrdPort`. Exercises the
  * generated `aiMeta` shape returned by the `GenerateKrdPort` adapter,
  * including the resolved `modelId` flowing into `aiMeta.model`.
  */
 import { describe, expect, it, vi } from "vitest";
 
+import { NoAiProviderError } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import { buildGenerateKrdPort } from "./use-coaching-ai-helpers";
+import { buildGenerateKrdPort } from "./coaching-generate-krd-port";
 
 vi.mock("../../../lib/generate-workout", () => ({
   generateWorkoutKrd: vi.fn(async () => ({ kind: "krd-stub" })),
@@ -20,14 +21,15 @@ const provider: LlmProviderConfig = {
 } as unknown as LlmProviderConfig;
 
 const DEPS = { persistence: {} as never, usage: { emit: () => undefined } };
+const CHOICE = { provider, modelId: "gpt-4o-mini" };
+const chooseModel = () => CHOICE;
 
 describe("buildGenerateKrdPort", () => {
   it("should populate aiMeta with provider type, resolved model, prompt version and timestamp", async () => {
     // Arrange
     const port = buildGenerateKrdPort(
       DEPS,
-      provider,
-      "gpt-4o-mini",
+      chooseModel,
       () => "2026-05-07T12:00:00Z"
     );
 
@@ -47,8 +49,7 @@ describe("buildGenerateKrdPort", () => {
     // Arrange
     const port = buildGenerateKrdPort(
       DEPS,
-      provider,
-      "gpt-4o-mini",
+      chooseModel,
       () => "2026-05-07T12:00:00Z"
     );
 
@@ -66,10 +67,9 @@ describe("buildGenerateKrdPort", () => {
     const onProgress = vi.fn();
     const port = buildGenerateKrdPort(
       DEPS,
-      provider,
-      "gpt-4o-mini",
+      chooseModel,
       () => "2026-05-07T12:00:00Z",
-      onProgress
+      { onProgress }
     );
     const abortSignal = new AbortController().signal;
 
@@ -80,5 +80,38 @@ describe("buildGenerateKrdPort", () => {
     expect(generateWorkoutKrd).toHaveBeenCalledWith(
       expect.objectContaining({ abortSignal, onProgress })
     );
+  });
+
+  it("should choose the model only when the AI is called, and say it started", async () => {
+    // Arrange
+    const choose = vi.fn(chooseModel);
+    const onAiStart = vi.fn();
+    const port = buildGenerateKrdPort(DEPS, choose, () => "t", { onAiStart });
+
+    // Act
+    const before = choose.mock.calls.length;
+    await port({ text: "warmup", sport: "cycling" });
+
+    // Assert
+    expect(before).toBe(0);
+    expect(choose).toHaveBeenCalledOnce();
+    expect(onAiStart).toHaveBeenCalledWith(CHOICE);
+  });
+
+  it("should fail with no provider, without starting the AI, when none is configured", async () => {
+    // Arrange
+    vi.mocked(generateWorkoutKrd).mockClear();
+    const onAiStart = vi.fn();
+    const port = buildGenerateKrdPort(DEPS, () => null, () => "t", {
+      onAiStart,
+    });
+
+    // Act
+    const run = port({ text: "warmup", sport: "cycling" });
+
+    // Assert
+    await expect(run).rejects.toBeInstanceOf(NoAiProviderError);
+    expect(onAiStart).not.toHaveBeenCalled();
+    expect(generateWorkoutKrd).not.toHaveBeenCalled();
   });
 });

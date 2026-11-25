@@ -22,15 +22,15 @@ import type { RunAiInput } from "./use-coaching-ai-helpers";
 
 const navigateMock = vi.fn();
 const runConvertMock = vi.fn();
+const PROVIDER = { id: "p-1", type: "openai", model: "gpt-4o-mini", apiKey: "k" };
+let providers: (typeof PROVIDER)[] = [PROVIDER];
 
 vi.mock("wouter", () => ({
   useLocation: () => ["/calendar", navigateMock],
 }));
 
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
-  useAiProvidersLive: () => [
-    { id: "p-1", type: "openai", model: "gpt-4o-mini", apiKey: "k" },
-  ],
+  useAiProvidersLive: () => providers,
 }));
 
 vi.mock("./use-coaching-ai-helpers", async (orig) => {
@@ -69,6 +69,61 @@ describe("useCoachingAi", () => {
   beforeEach(() => {
     navigateMock.mockClear();
     runConvertMock.mockReset();
+    providers = [PROVIDER];
+  });
+
+  /** The run reaches the AI: it chooses the model and reports the start. */
+  const startTheAi = (input: RunAiInput) => {
+    const choice = input.chooseModel();
+    if (choice) input.onAiStart?.(choice);
+  };
+
+  it("should build without a provider and show no AI progress when the run needs no AI", async () => {
+    // Arrange
+    providers = [];
+    runConvertMock.mockResolvedValue({ ok: true, workoutId: "w", created: true });
+    const onClose = vi.fn();
+    const seen: unknown[] = [];
+    const { result } = renderHook(
+      () => {
+        const ai = useCoachingAi(activity, "profile-1", onClose, vi.fn());
+        seen.push(ai.progress);
+        return ai;
+      },
+      { wrapper: wrap() }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.regenerateAi();
+    });
+
+    // Assert
+    expect(navigateMock).toHaveBeenCalledWith("/workout/w?from=coaching");
+    expect(result.current.failure).toBeNull();
+    expect(seen.every((p) => p === null)).toBe(true);
+  });
+
+  it("should say no provider is configured when the run needs the AI and none is", async () => {
+    // Arrange
+    providers = [];
+    runConvertMock.mockImplementation(async (input: RunAiInput) => {
+      startTheAi(input);
+      return { ok: false, reason: "no-provider" };
+    });
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
+      { wrapper: wrap() }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.startAi();
+    });
+
+    // Assert
+    expect(result.current.failure?.reason).toBe("no-provider");
+    expect(result.current.progress).toBeNull();
   });
 
   it("should navigate to the editor on AI success", async () => {
@@ -184,9 +239,10 @@ describe("useCoachingAi", () => {
   it("should clear the processing flag when cancelAi is invoked", async () => {
     // Arrange
     let resolveRun: (value: unknown) => void = () => undefined;
-    runConvertMock.mockImplementation(
-      () => new Promise((res) => (resolveRun = res))
-    );
+    runConvertMock.mockImplementation((input: RunAiInput) => {
+      startTheAi(input);
+      return new Promise((res) => (resolveRun = res));
+    });
     const { result } = renderHook(
       () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
       { wrapper: wrap() }
@@ -209,6 +265,7 @@ describe("useCoachingAi", () => {
     // Arrange
     let report: (p: GenerateProgress) => void = () => undefined;
     runConvertMock.mockImplementation((input: RunAiInput) => {
+      startTheAi(input);
       report = input.onProgress ?? report;
       return new Promise(() => undefined);
     });
@@ -241,6 +298,7 @@ describe("useCoachingAi", () => {
     let input: RunAiInput | undefined;
     runConvertMock.mockImplementation((i: RunAiInput) => {
       input = i;
+      startTheAi(i);
       return new Promise(() => undefined);
     });
     const { result } = renderHook(
@@ -267,9 +325,10 @@ describe("useCoachingAi", () => {
   it("should not navigate when the cancel lands before the run settles", async () => {
     // Arrange
     let settle: (value: unknown) => void = () => undefined;
-    runConvertMock.mockImplementation(
-      () => new Promise((res) => (settle = res))
-    );
+    runConvertMock.mockImplementation((input: RunAiInput) => {
+      startTheAi(input);
+      return new Promise((res) => (settle = res));
+    });
     const onClose = vi.fn();
     const { result } = renderHook(
       () => useCoachingAi(activity, "profile-1", onClose, vi.fn()),

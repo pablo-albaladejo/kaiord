@@ -1,8 +1,9 @@
 /**
  * Pure helper for `useCoachingAi.startAi` extracted to keep the hook
  * file under the per-file/per-function line caps. Owns the in-flight
- * lock check, provider lookup, use-case invocation, success-navigate,
- * and failure-toast dispatch. The toast call itself stays in the hook
+ * lock check, use-case invocation, success-navigate, and failure-toast
+ * dispatch. The provider is looked up only if the build asks the AI, and
+ * the progress (with the model's name) shows only then. The toast call itself stays in the hook
  * so the R-PIIInterpolation guard finds the literal alongside its
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
@@ -23,17 +24,14 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (ctx.activity.description === undefined) {
     await ctx.expandActivity(ctx.activity);
   }
-  const resolved = resolveModelForPurpose(
-    "workout_generation",
-    ctx.providers ?? [],
-    ctx.bindings ?? []
-  );
-  if (!resolved) return ctx.setFailure({ reason: "no-provider" });
   ctx.setFailure(null);
-  const { controller, onProgress } = beginAiRun(
-    ctx,
-    ctx.nameModel(resolved.provider.type, resolved.modelId)
-  );
+  const { controller, onAiStart, onProgress } = beginAiRun(ctx);
+  const chooseModel = () =>
+    resolveModelForPurpose(
+      "workout_generation",
+      ctx.providers ?? [],
+      ctx.bindings ?? []
+    );
   // The view-model `activity.id` is `${source}:${sourceId}`; the
   // persistence record id (what `coaching.getById` keys on) is the
   // composite `${profileId}:${source}:${sourceId}` — see
@@ -43,10 +41,11 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   try {
     result = await runConvertWithAi({
       activityId: `${ctx.profileId}:${ctx.activity.id}`,
-      provider: resolved.provider,
-      modelId: resolved.modelId,
+      chooseModel,
       abortSignal: controller.signal,
       regenerate: ctx.regenerate,
+      onAiStart: (choice) =>
+        onAiStart(ctx.nameModel(choice.provider.type, choice.modelId)),
       onProgress,
       deps: ctx.deps,
       analytics: ctx.analytics,
@@ -70,8 +69,8 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
     ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     return;
   }
-  if (result.reason !== "ai-cancelled") {
-    ctx.setFailure({ reason: result.reason, error: result.error });
-    ctx.onFailureToast();
-  }
+  if (result.reason === "ai-cancelled") return;
+  ctx.setFailure({ reason: result.reason, error: result.error });
+  // No provider is a setup step shown inline, not a failed run.
+  if (result.reason !== "no-provider") ctx.onFailureToast();
 };

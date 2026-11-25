@@ -27,7 +27,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `use-coaching-dialog-state.ts` / `.test.tsx` — explicit state machine for the dialog flow.
 - `use-coaching-dialog-actions.ts` / `.test.tsx` + `use-coaching-dialog-helpers.ts` — action surface (match, unmatch, convert, manual, AI).
 - `use-coaching-state-observed.ts` — observable wrapper used by tests.
-- `use-coaching-ai-handler.ts` / `.test.tsx` + `use-coaching-ai-helpers.ts` / `.test.ts` — AI-conversion handler.
+- `use-coaching-ai-handler.ts` / `.test.tsx` + `use-coaching-ai-helpers.ts` — AI-conversion handler; `coaching-generate-krd-port.ts` / `.test.ts` — the `GenerateKrdPort`, which picks the provider only when the AI is asked.
 - `use-coaching-manual-handler.ts` / `.test.tsx` — manual-conversion handler.
 - `use-coaching-convert.ts` / `.test.tsx` — entry point composing AI + manual handlers.
 - `use-coaching-auto-heal.ts` — opportunistic SHORT-form → COMPOSITE id healing (R-SessionMatchIdShape).

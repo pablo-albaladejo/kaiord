@@ -31,7 +31,8 @@ describe("beginAiRun", () => {
     // Arrange
     vi.useFakeTimers({ now: T0 });
     const { slot, read } = slotWithState();
-    const { onProgress } = beginAiRun(slot, "Claude Sonnet 5");
+    const { onAiStart, onProgress } = beginAiRun(slot);
+    onAiStart("Claude Sonnet 5");
 
     // Act
     vi.setSystemTime(T0 + LATER_MS);
@@ -43,5 +44,18 @@ describe("beginAiRun", () => {
     expect(read()?.startedAt).toBe(T0);
     expect(read()?.phaseStartedAt).toBe(T0 + LATER_MS);
     expect(read()?.update?.items).toBe(2);
+  });
+
+  it("should show no progress until the AI is asked", () => {
+    // Arrange
+    const { slot, read } = slotWithState();
+
+    // Act
+    const { onProgress } = beginAiRun(slot);
+    onProgress({ phase: "generating", attempt: 1, maxAttempts: 3, items: 1 });
+
+    // Assert
+    expect(slot.abortRef.current).not.toBeNull();
+    expect(read()).toBeNull();
   });
 });

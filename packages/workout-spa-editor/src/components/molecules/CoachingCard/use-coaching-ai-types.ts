@@ -2,7 +2,7 @@ import type { AiFailureReason } from "../../../application/coaching/convert-coac
 import type { AiRunProgress } from "./ai-run-progress";
 
 export type AiFailureState = {
-  reason: AiFailureReason | "not-found" | "no-provider";
+  reason: AiFailureReason | "not-found";
   error?: string;
 };
 

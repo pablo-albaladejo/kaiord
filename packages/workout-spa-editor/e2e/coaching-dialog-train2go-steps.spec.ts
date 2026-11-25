@@ -1,14 +1,15 @@
 /* eslint-disable no-magic-numbers -- a steps table is literal durations, watts and bpm, clearer inline */
 /**
- * E2E: a Train2Go session that comes with its steps table converts from the
- * table, without the AI (#1684).
+ * E2E: a Train2Go Coaching Activity that comes with its steps table
+ * converts from the table, without the AI.
  *
  * The activity is seeded as the Train2Go Connector stores it after the
  * daily read: description plus `structuredSteps` (synthetic, invented
- * values). A provider is configured and every LLM endpoint is routed, so a
- * call to the AI would be seen; the assertion is that none is made and the
- * stored workout holds the table's steps and repeat. The dialog shows the
- * coach's table before and after the Workout is built.
+ * values). Every LLM endpoint is routed, so a call to the AI would be seen;
+ * the assertion is that none is made and the stored workout holds the
+ * table's steps and repeat. The dialog shows the coach's table before and
+ * after the Workout is built. With no provider configured at all, the build
+ * and Regenerate still work and no AI progress is shown.
  */
 import type { Page, Route } from "@playwright/test";
 
@@ -102,7 +103,29 @@ const seed = async (page: Page, day: string, ts: string) => {
   );
 };
 
-test.describe("Train2Go session with a steps table", () => {
+const routeLlm = async (page: Page) => {
+  const calls = { count: 0 };
+  const countLlm = async (route: Route) => {
+    calls.count += 1;
+    await route.abort();
+  };
+  await page.route("**/api.anthropic.com/**", countLlm);
+  await page.route("**/api.openai.com/**", countLlm);
+  await page.route("**/generativelanguage.googleapis.com/**", countLlm);
+  return calls;
+};
+
+const storedStructured = (page: Page) =>
+  page.evaluate(async (profileId) => {
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    const all = await db.table("workouts").toArray();
+    return all.filter(
+      (w) => w.profileId === profileId && w.state === "structured"
+    );
+  }, PROFILE_ID);
+
+test.describe("Train2Go Coaching Activity with a steps table", () => {
   test("shows the coach's table and converts from it without calling the AI", async ({
     page,
   }) => {
@@ -110,14 +133,7 @@ test.describe("Train2Go session with a steps table", () => {
     await page.goto("/calendar");
     await waitForDexieReady(page);
     await clearDexie(page);
-    let llmCalls = 0;
-    const countLlm = async (route: Route) => {
-      llmCalls += 1;
-      await route.abort();
-    };
-    await page.route("**/api.anthropic.com/**", countLlm);
-    await page.route("**/api.openai.com/**", countLlm);
-    await page.route("**/generativelanguage.googleapis.com/**", countLlm);
+    const llm = await routeLlm(page);
     await seedAiProvider(page);
     const day = getWeekDates(0)[2];
     await seed(page, day, new Date(day + "T08:00:00Z").toISOString());
@@ -143,15 +159,8 @@ test.describe("Train2Go session with a steps table", () => {
 
     // Assert
     await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
-    const stored = await page.evaluate(async (profileId) => {
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db;
-      const all = await db.table("workouts").toArray();
-      return all.filter(
-        (w) => w.profileId === profileId && w.state === "structured"
-      );
-    }, PROFILE_ID);
-    expect(llmCalls).toBe(0);
+    const stored = await storedStructured(page);
+    expect(llm.count).toBe(0);
     expect(stored).toHaveLength(1);
     expect(stored[0]?.aiMeta).toBeNull();
     const krd = stored[0]?.krd as {
@@ -175,5 +184,43 @@ test.describe("Train2Go session with a steps table", () => {
         .getByTestId("coaching-activity-dialog")
         .getByTestId("coaching-dialog-steps")
     ).toBeVisible();
+  });
+
+  test("builds and regenerates from the table with no AI provider configured", async ({
+    page,
+  }) => {
+    // Arrange
+    await page.goto("/calendar");
+    await waitForDexieReady(page);
+    await clearDexie(page);
+    const llm = await routeLlm(page);
+    const day = getWeekDates(0)[2];
+    await seed(page, day, new Date(day + "T08:00:00Z").toISOString());
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    await page.getByTestId(`coaching-card-${SOURCE}:${SOURCE_ID}`).click();
+    const dialog = page.getByTestId("coaching-activity-dialog");
+
+    // Act — the first build
+    await dialog.getByTestId("coaching-dialog-ai-process").click();
+
+    // Assert
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    expect(await storedStructured(page)).toHaveLength(1);
+
+    // Act — Regenerate
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    await page.getByTestId(`matched-card-${SOURCE}:${SOURCE_ID}`).click();
+    await dialog.getByTestId("coaching-dialog-regenerate").click();
+
+    // Assert
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    await expect(page.getByTestId("coaching-dialog-ai-processing")).toHaveCount(
+      0
+    );
+    await expect(page.getByTestId("coaching-dialog-ai-error")).toHaveCount(0);
+    const stored = await storedStructured(page);
+    expect(stored).toHaveLength(1);
+    expect(stored[0]?.aiMeta).toBeNull();
+    expect(llm.count).toBe(0);
   });
 });
