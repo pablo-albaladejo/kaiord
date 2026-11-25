@@ -388,7 +388,9 @@
     "label": "Notes & Coaching Cues",
     "placeholder": "Add coaching cues or notes for this step...",
     "count": "{{n}} / {{max}} characters",
-    "over": "({{n}} over limit)"
+    "over": "({{n}} over limit)",
+    "ai": "AI",
+    "aiTitle": "Written by the AI"
   },
   "paste": {
     "label": "Paste Step",

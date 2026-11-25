@@ -118,6 +118,36 @@ describe("StepCard", () => {
     expect(screen.getByText("Easy pace, focus on form")).toBeInTheDocument();
   });
 
+  it("should label a note the AI wrote on its own as AI", () => {
+    // Arrange
+    const aiNoted: WorkoutStep = {
+      ...mockStep,
+      notes: "Spin easy",
+      extensions: { kaiord: { noteOrigin: "ai" } },
+    };
+
+    // Act
+    render(<StepCard step={aiNoted} />);
+
+    // Assert
+    expect(screen.getByText("Spin easy")).toBeInTheDocument();
+    expect(screen.getByTitle("Written by the AI")).toHaveTextContent("AI");
+  });
+
+  it("should not label a note taken from the coach's text", () => {
+    // Arrange
+    const coachNoted: WorkoutStep = {
+      ...mockStep,
+      notes: "Single-leg pedalling",
+    };
+
+    // Act
+    render(<StepCard step={coachNoted} />);
+
+    // Assert
+    expect(screen.queryByTitle("Written by the AI")).not.toBeInTheDocument();
+  });
+
   it("should call onSelect when clicked", () => {
     // Arrange
 

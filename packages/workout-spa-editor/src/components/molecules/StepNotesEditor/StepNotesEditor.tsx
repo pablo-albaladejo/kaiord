@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { AiNoteLabel } from "./AiNoteLabel";
 import { getCharacterCountClasses, getTextareaClasses } from "./styles";
 
 export type StepNotesEditorProps = {
@@ -8,6 +9,8 @@ export type StepNotesEditorProps = {
   onChange: (notes: string) => void;
   disabled?: boolean;
   className?: string;
+  /** The note shown is the AI's own, unedited: it carries the AI label. */
+  aiWritten?: boolean;
 };
 
 const MAX_CHARACTERS = 256;
@@ -17,6 +20,7 @@ export const StepNotesEditor = ({
   onChange,
   disabled = false,
   className = "",
+  aiWritten = false,
 }: StepNotesEditorProps) => {
   const t = useTranslate("editor");
   const [localValue, setLocalValue] = useState(value);
@@ -31,12 +35,15 @@ export const StepNotesEditor = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label
-        htmlFor="step-notes"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-      >
-        {t("notes.label")}
-      </label>
+      <div className="flex items-center">
+        {aiWritten && <AiNoteLabel />}
+        <label
+          htmlFor="step-notes"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          {t("notes.label")}
+        </label>
+      </div>
       <textarea
         id="step-notes"
         value={localValue}

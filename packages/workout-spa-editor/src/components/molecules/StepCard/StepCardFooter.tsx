@@ -1,7 +1,10 @@
+import { isAiNote } from "@kaiord/core";
+
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutStep } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
+import { AiNoteLabel } from "../StepNotesEditor/AiNoteLabel";
 import { targetTypeLabel } from "./format-target";
 import { getTargetIcon } from "./icons";
 
@@ -26,7 +29,10 @@ export function StepCardFooter({ step }: StepCardFooterProps) {
       </div>
 
       {step.notes && (
-        <p className="mt-3 text-xs text-ink-muted italic">{step.notes}</p>
+        <p className="mt-3 text-xs text-ink-muted italic">
+          {isAiNote(step) && <AiNoteLabel />}
+          {step.notes}
+        </p>
       )}
     </>
   );
