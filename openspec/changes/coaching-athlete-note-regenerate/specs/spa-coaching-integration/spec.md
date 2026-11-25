@@ -81,7 +81,7 @@ The athlete SHALL be able to add, edit and clear an Athlete note on a Coaching A
 
 ### Requirement: Regenerate an AI-built Workout
 
-The matched-workout actions SHALL offer `[Regenerate]` ("Regenerar") for a matched workout in any state but `raw` and `skipped`. Regenerate is an explicit, billed action: it calls `convertCoachingActivityWithAi` with `regenerate: true`, which builds the Workout again (through the same builder choice) and replaces it in place: the same `id`, `date` and `SessionMatch`; `state="structured"` (the athlete reads "Ready"), the new `krd` and `aiMeta` (null when no model took part), `garminPushId: null` and `modifiedAt: null`. A failed or cancelled build writes nothing. The in-flight lock that ignores a second click while a run is pending SHALL cover Regenerate too.
+The matched-workout actions SHALL offer `[Regenerate]` ("Regenerar") for a matched workout in any state but `raw` and `skipped`. Regenerate is an explicit action, billed when the model builds it: it calls `convertCoachingActivityWithAi` with `regenerate: true`, which builds the Workout again (through the same builder choice) and replaces it in place: the same `id`, `date` and `SessionMatch`; `state="structured"` (the athlete reads "Ready"), the new `krd` and `aiMeta` (null when no model took part), `garminPushId: null` and `modifiedAt: null`. A failed or cancelled build writes nothing. The in-flight lock that ignores a second click while a run is pending SHALL cover Regenerate too.
 
 Before regenerating, the dialog SHALL ask for confirmation when the athlete edited the Workout by hand (`modifiedAt` after `aiMeta.processedAt`, or any `modifiedAt` without `aiMeta`, as in `spa-workout-state-machine` "STALE conflict resolution") or when the Workout is on the watch (`pushed`/`modified`, a `garminPushId`, or a Garmin placement row). The confirmation SHALL say that hand edits are replaced and, for a Workout on the watch, that it goes back to "Ready" and the earlier version stays in Garmin's library until the athlete removes it there. Kaiord SHALL NOT delete it from Garmin's library.
 
@@ -133,7 +133,7 @@ The matched-workout actions SHALL offer `[Delete workout]` ("Borrar entreno"), b
 
 ### Requirement: Split stays split
 
-Both Split buttons of the matched dialog (the linked-workout section and the action bar) SHALL split the session. Splitting SHALL remove the `SessionMatch` and, when the workout was built from that Coaching Activity (its `sourceId` is the activity's namespaced source id), detach it by clearing its `sourceId`, stamped newer so the split syncs. The dialog's auto-heal, which pairs a workout found by the activity's source id, SHALL therefore not pair them again; the activity is "To prepare" and the workout stands on its own. A workout matched by hand SHALL keep its own `sourceId`.
+Both Split buttons of the matched dialog (the linked-workout section and the action bar) SHALL split the Coaching Activity from its Workout. Splitting SHALL remove the `SessionMatch` and, when the workout was built from that Coaching Activity (its `sourceId` is the activity's namespaced source id), detach it by clearing its `sourceId`, stamped newer so the split syncs. The dialog's auto-heal, which pairs a workout found by the activity's source id, SHALL therefore not pair them again; the activity is "To prepare" and the workout stands on its own. A workout matched by hand SHALL keep its own `sourceId`.
 
 #### Scenario: Split survives the auto-heal
 

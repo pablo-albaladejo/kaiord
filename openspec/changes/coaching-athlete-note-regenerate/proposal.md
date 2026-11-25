@@ -15,7 +15,7 @@ button of the linked-workout section does nothing.
   a new `athleteNotes` store (Dexie v41), synced, backed up, cascaded and
   re-keyed like Workouts. The AI reads it after the coach's text, which is
   never changed; it never goes to Train2Go. GLOSSARY.md gets the term.
-- **Regenerate.** An explicit, billed rebuild in place (same Match, same Day),
+- **Regenerate.** An explicit rebuild in place (same Match, same Day), billed when the AI builds it,
   confirmed after hand edits and warned when on the watch (back to Ready; the
   earlier version stays in Garmin's library). The builder is chosen in one
   place, `chooseCoachingBuilder`: with a steps table and no note the table is
