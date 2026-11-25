@@ -105,7 +105,7 @@ describe("convertCoachingActivityWithAi with a steps table", () => {
     expect(workout?.notes).toBe(activity.description);
   });
 
-  it("should use the AI as before when the session has no table", async () => {
+  it("should use the AI as before when the activity has no table", async () => {
     // Arrange
     const activity = stubActivity();
     const deps = setup(activity);

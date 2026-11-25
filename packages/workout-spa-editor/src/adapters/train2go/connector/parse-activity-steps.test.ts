@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { parseSessionSteps } from "./parse-session-steps";
+import { parseActivitySteps } from "./parse-activity-steps";
 
 // Synthetic: Train2Go's markup shape with invented zones and values.
 const fixture = readFileSync(
@@ -37,19 +37,19 @@ const block = (z: object) => [
   single(2 * 60, z),
 ];
 
-const sumSeconds = (groups: ReturnType<typeof parseSessionSteps>): number =>
+const sumSeconds = (groups: ReturnType<typeof parseActivitySteps>): number =>
   (groups ?? []).reduce(
     (total, g) =>
       total + g.repeat * g.steps.reduce((t, s) => t + s.durationSeconds, 0),
     0
   );
 
-describe("parseSessionSteps", () => {
+describe("parseActivitySteps", () => {
   it("should read every row of the grid in order, repeats included", () => {
     // Arrange
 
     // Act
-    const groups = parseSessionSteps(fixture);
+    const groups = parseActivitySteps(fixture);
 
     // Assert
     expect(groups).toStrictEqual([
@@ -73,22 +73,22 @@ describe("parseSessionSteps", () => {
     ]);
   });
 
-  it("should add up to the session's 100 minutes", () => {
+  it("should add up to the activity's 100 minutes", () => {
     // Arrange
 
     // Act
-    const groups = parseSessionSteps(fixture);
+    const groups = parseActivitySteps(fixture);
 
     // Assert
     expect(sumSeconds(groups)).toBe(100 * 60);
   });
 
-  it("should read nothing when the session has no steps grid", () => {
+  it("should read nothing when the activity has no steps grid", () => {
     // Arrange
     const html = `<div class="activity-description"><p>Libre</p></div>`;
 
     // Act
-    const groups = parseSessionSteps(html);
+    const groups = parseActivitySteps(html);
 
     // Assert
     expect(groups).toBeUndefined();
@@ -108,7 +108,7 @@ describe("parseSessionSteps", () => {
     const html = fixture.replace(from, to);
 
     // Act
-    const groups = parseSessionSteps(html);
+    const groups = parseActivitySteps(html);
 
     // Assert
     expect(groups).toBeUndefined();
@@ -123,7 +123,7 @@ describe("parseSessionSteps", () => {
     );
 
     // Act
-    const groups = parseSessionSteps(html);
+    const groups = parseActivitySteps(html);
 
     // Assert
     expect(html).not.toBe(fixture);
@@ -139,7 +139,7 @@ describe("parseSessionSteps", () => {
     const html = fixture.slice(0, lastRepeat);
 
     // Act
-    const groups = parseSessionSteps(html);
+    const groups = parseActivitySteps(html);
 
     // Assert
     expect(groups).toBeUndefined();

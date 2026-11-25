@@ -1,6 +1,6 @@
 /**
- * Regenerate (owner decision 2, #1685): an explicit, billed rebuild of an
- * AI-built Workout, replaced in place (same Match, same Day). The builder is
+ * Regenerate: an explicit rebuild of a built Workout (billed when the AI
+ * builds it), replaced in place (same Match, same Day). The builder is
  * chosen in one place: a steps table and no Athlete note re-reads the table
  * without the AI; otherwise the AI gets the coach's text and the note.
  */

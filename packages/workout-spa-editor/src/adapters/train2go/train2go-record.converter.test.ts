@@ -130,7 +130,7 @@ describe("toCoachingActivityRecord", () => {
     expect(result.completionPercent).toBe(COMPLETION_PERCENT);
   });
 
-  it("should keep the session's structured steps on the record", () => {
+  it("should keep the activity's structured steps on the record", () => {
     // Arrange
     const steps = [
       {
@@ -154,7 +154,7 @@ describe("toCoachingActivityRecord", () => {
     expect(coachingActivityRecordSchema.safeParse(result).success).toBe(true);
   });
 
-  it("should leave the record without steps when the session has none", () => {
+  it("should leave the record without steps when the activity has none", () => {
     // Arrange
 
     // Act

@@ -73,7 +73,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 
 ### Internal
 
-- `../../hooks/{use-match-session,use-unmatch-session,use-matched-sessions,use-pickable-workouts}`.
+- `../../hooks/{use-match-session,use-split-coaching-workout,use-matched-sessions,use-pickable-workouts}`.
 - `../../application/coaching/{convert-coaching-activity*,heal-session-match-id-shape,attempt-link}`.
 - `../../store/ai-runtime-store`.
 - `../../types/{coaching-activity-record,session-match,errors}`.

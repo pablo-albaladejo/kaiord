@@ -32,3 +32,5 @@ export type CoachingStructuredStep = z.infer<
   typeof coachingStructuredStepSchema
 >;
 export type CoachingStepGroup = z.infer<typeof coachingStepGroupSchema>;
+/** A power or heart-rate range of one row, `min <= max`. */
+export type CoachingStepRange = z.infer<typeof rangeSchema>;

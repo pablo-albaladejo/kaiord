@@ -10,11 +10,12 @@
  *
  * [Split] and [Delete workout] join every state, and [Move to another day]
  * does inside the calendar's move flow, disabled with the reason once the
- * session is done (design §3.8).
+ * Coaching Activity is done (design §3.8).
  *
  * `[Process with AI]` for raw workouts re-uses the dialog's AI handler (the
  * use case transitions raw → structured in place). `[Regenerate]` is the
- * explicit, billed rebuild of a Workout the athlete already has; its
+ * explicit rebuild of a Workout the athlete already has (billed when the AI
+ * builds it, not when the steps table does); its
  * confirmations live in `MatchedWorkoutActions`.
  */
 import type { Movability } from "../../../application/session-movability";

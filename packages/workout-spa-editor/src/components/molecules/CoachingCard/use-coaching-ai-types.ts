@@ -12,7 +12,7 @@ export type UseCoachingAi = {
   failure: AiFailureState | null;
   clearFailure: () => void;
   startAi: () => Promise<void>;
-  /** Rebuild the existing Workout in place: explicit and billed. */
+  /** Rebuild the existing Workout in place: explicit, billed when the AI builds it. */
   regenerateAi: () => Promise<void>;
   cancelAi: () => void;
 };

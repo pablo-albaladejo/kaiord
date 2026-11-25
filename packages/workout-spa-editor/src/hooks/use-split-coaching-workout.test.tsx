@@ -1,5 +1,5 @@
 /**
- * useSplitSession — wraps the splitCoachingWorkout use case. Idempotent on
+ * useSplitCoachingWorkout — wraps the splitCoachingWorkout use case. Idempotent on
  * a missing row.
  */
 
@@ -9,9 +9,9 @@ import { describe, expect, it } from "vitest";
 
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
-import { useSplitSession } from "./use-split-session";
+import { useSplitCoachingWorkout } from "./use-split-coaching-workout";
 
-describe("useSplitSession", () => {
+describe("useSplitCoachingWorkout", () => {
   const wrap = (persistence = createInMemoryPersistence()) => {
     const Wrapper = ({ children }: { children: ReactNode }) => (
       <PersistenceProvider persistence={persistence}>
@@ -34,7 +34,7 @@ describe("useSplitSession", () => {
       source: "manual",
       executedWorkoutIds: [],
     });
-    const { result } = renderHook(() => useSplitSession(), {
+    const { result } = renderHook(() => useSplitCoachingWorkout(), {
       wrapper: Wrapper,
     });
 
@@ -52,7 +52,7 @@ describe("useSplitSession", () => {
     const { Wrapper } = wrap();
 
     // Act
-    const { result } = renderHook(() => useSplitSession(), {
+    const { result } = renderHook(() => useSplitCoachingWorkout(), {
       wrapper: Wrapper,
     });
 

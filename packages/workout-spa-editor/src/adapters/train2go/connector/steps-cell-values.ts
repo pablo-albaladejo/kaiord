@@ -1,13 +1,13 @@
 /**
- * The values in a session's steps grid: durations (`N min`, `N seg`,
+ * The values in a Coaching Activity's steps grid: durations (`N min`, `N seg`,
  * `M:SS min`), ranges (`lo-hi`), repeat counts and zone labels. Each reader
  * returns `undefined` for anything else, never a guess.
  */
+import type { CoachingStepRange } from "../../../types/coaching-structured-steps";
+
 const MAX_WATTS = 5000;
 const MAX_BPM = 300;
 const MAX_ZONE_LABEL = 32;
-
-export type Range = { min: number; max: number };
 
 export const readDurationSeconds = (text: string): number | undefined => {
   const min = text.match(/^(\d+) min$/);
@@ -21,7 +21,10 @@ export const readDurationSeconds = (text: string): number | undefined => {
 
 const positive = (n: number): number | undefined => (n > 0 ? n : undefined);
 
-const readRange = (text: string, cap: number): Range | undefined => {
+const readRange = (
+  text: string,
+  cap: number
+): CoachingStepRange | undefined => {
   const m = text.match(/^(\d+)\s*-\s*(\d+)$/);
   if (!m) return undefined;
   const range = { min: Number(m[1]), max: Number(m[2]) };

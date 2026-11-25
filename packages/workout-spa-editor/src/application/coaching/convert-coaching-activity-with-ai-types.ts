@@ -15,7 +15,7 @@ import type { AiFailureReason } from "./convert-coaching-activity-error-mapper";
 export type ConvertWithAiInput = {
   activityId: string;
   abortSignal?: AbortSignal;
-  /** Rebuild an existing Workout in place: explicit and billed. */
+  /** Rebuild an existing Workout in place: explicit, billed when the AI builds it. */
   regenerate?: boolean;
 };
 

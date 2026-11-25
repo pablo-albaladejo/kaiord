@@ -1,5 +1,5 @@
 /**
- * What one cell of a session's steps grid holds, told by its class and its
+ * What one cell of a Coaching Activity's steps grid holds, told by its class and its
  * icon (Train2Go marks nothing else): duration (clock), zone (no icon, bold),
  * power (bolt), heart rate (heart) or repeat count (repeat, left border).
  * Recovery rows use muted cells with their own icons. A cell that matches

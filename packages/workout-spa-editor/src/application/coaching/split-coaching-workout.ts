@@ -8,7 +8,10 @@
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
-import { buildCoachingActivityId } from "../../types/coaching-activity-record";
+import {
+  buildCoachingActivityId,
+  platformSourceId,
+} from "../../types/coaching-activity-record";
 import { CrossProfileMatchError } from "../../types/session-match-errors";
 import { updateWorkoutRecord } from "../save-workout-edits";
 
@@ -20,10 +23,8 @@ export type SplitDeps = Pick<
 export type SplitInput = { profileId: string; matchId: string };
 
 const builtFrom = (workout: WorkoutRecord, coachingActivityId: string) => {
-  const prefix = `${workout.profileId}:`;
-  const sourceId = workout.sourceId;
-  if (!sourceId?.startsWith(prefix)) return false;
-  const platformId = sourceId.slice(prefix.length);
+  const platformId = platformSourceId(workout.profileId, workout.sourceId);
+  if (platformId === undefined) return false;
   return (
     buildCoachingActivityId(workout.profileId, workout.source, platformId) ===
     coachingActivityId

@@ -1,5 +1,5 @@
 /**
- * Delete workout (owner decision 3, #1685): the Workout and its Match go
+ * Delete workout: the Workout and its Match go
  * together, so the Activity goes back to "To prepare"; Undo brings both back,
  * newer than their tombstones.
  */

@@ -1,10 +1,10 @@
 /**
- * Athlete note, Regenerate, Delete and Split for an AI-built Workout
- * (#1685): a Train2Go plan synced through the bridge stub is built with the
- * mocked AI, the athlete adds "Your note", regenerates (the note reaches the
- * model with the coach's text, the Workout is replaced in place), deletes the
- * Workout from the dialog and undoes it, then splits the session, which stays
- * split when the dialog opens again.
+ * Athlete note, Regenerate, Delete and Split for an AI-built Workout: a
+ * Train2Go plan synced through the bridge stub is built with the mocked AI,
+ * the athlete adds "Your note", regenerates (the note reaches the model with
+ * the coach's text, the Workout is replaced in place), deletes the Workout
+ * from the dialog and undoes it, then splits the Coaching Activity from its
+ * Workout, which stays split when the dialog opens again.
  */
 import type { Page, Route } from "@playwright/test";
 

@@ -1,8 +1,7 @@
 /**
  * Delete a Workout together with its Match, and the Undo that brings both
- * back. Removing only the Workout left its Match pointing at nothing, so the
- * Activity's next build stayed unmatched and later clicks never reached the
- * AI. Both deletes go through the tombstoning port; the Undo writes each row
+ * back, so no Match is left pointing at nothing (that would keep the
+ * Activity's next build from being matched). Both deletes go through the tombstoning port; the Undo writes each row
  * back newer than its tombstone, so it wins on every device.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
@@ -40,19 +39,23 @@ export const deleteWorkoutAndMatch = (
 const restoreMatch = (persistence: Restorer, match: SessionMatch) =>
   persistence.transaction(async () => {
     const { sessionMatch } = persistence;
-    const taken =
+    const slotInUse =
       (await sessionMatch.getById(match.id)) ??
       (await sessionMatch.getByActivityId(
         match.profileId,
         match.coachingActivityId
       ));
-    if (taken) return;
+    if (slotInUse) return;
     const tombstone = await persistence.tombstones.get(
       "sessionMatches",
       match.id
     );
-    const floor = tombstone ? Date.parse(tombstone.deletedAt) + 1 : 0;
-    const updatedAt = new Date(Math.max(Date.now(), floor)).toISOString();
+    const newerThanTombstone = tombstone
+      ? Date.parse(tombstone.deletedAt) + 1
+      : 0;
+    const updatedAt = new Date(
+      Math.max(Date.now(), newerThanTombstone)
+    ).toISOString();
     await sessionMatch.put({ ...match, updatedAt });
   });
 

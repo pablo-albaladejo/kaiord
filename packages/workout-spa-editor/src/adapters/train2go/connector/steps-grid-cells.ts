@@ -1,5 +1,5 @@
 /**
- * The direct children of a session's steps grid (`<div class="grid">`), in
+ * The direct children of a Coaching Activity's steps grid (`<div class="grid">`), in
  * document order, read without a DOM like the other Train2Go parsers. The
  * grid has no data attributes: each child is a cell, five per row.
  * `undefined` when there is no grid, or it never closes.

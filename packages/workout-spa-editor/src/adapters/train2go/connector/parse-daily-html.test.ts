@@ -209,7 +209,7 @@ describe("parseDailyHtml", () => {
     );
   });
 
-  it("should carry the session's structured steps next to its description", () => {
+  it("should carry the activity's structured steps next to its description", () => {
     // Arrange
     const html = fixture("daily-with-steps.html");
 
@@ -224,7 +224,7 @@ describe("parseDailyHtml", () => {
     expect(activity?.steps?.[1]).toMatchObject({ repeat: 5 });
   });
 
-  it("should carry no steps for a session without a steps grid", () => {
+  it("should carry no steps for an activity without a steps grid", () => {
     // Arrange
     const html = fixture("daily.html");
 

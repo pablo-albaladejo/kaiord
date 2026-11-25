@@ -15,7 +15,7 @@ export type Train2GoActivity = {
   status: number;
   description?: string;
   completion?: number;
-  /** The session's steps table, only when every cell of it was read. */
+  /** The activity's steps table, only when every cell of it was read. */
   steps?: CoachingStepGroup[];
 };
 

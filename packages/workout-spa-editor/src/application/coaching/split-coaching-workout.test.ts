@@ -1,5 +1,5 @@
 /**
- * Split stays split (owner decision 4, #1685): the athlete's split is
+ * Split stays split: the athlete's split is
  * recorded on the Workout, so nothing pairs it with its Coaching Activity
  * again: the Activity is "To prepare" and the Workout stands on its own.
  */

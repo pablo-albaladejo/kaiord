@@ -1,11 +1,11 @@
 /**
- * A session's structured steps, read from the steps grid in its daily
+ * A Coaching Activity's structured steps, read from the steps grid in its daily
  * block: rows of duration, zone, power (W), heart rate (bpm) and repeat
  * count. A repeat cell spanning N rows (`grid-row: span N`) covers the work
  * row and the N-1 recovery rows under it.
  *
  * Fails closed: with no grid, or with any cell it cannot read, it returns
- * `undefined` and the session is converted the way it was before, never
+ * `undefined` and the activity is converted from the coach's text, never
  * from a half-read table.
  */
 import type {
@@ -65,15 +65,15 @@ const readGroup = (
   return { group: { repeat, steps }, next };
 };
 
-export const parseSessionSteps = (
+export const parseActivitySteps = (
   html: string
 ): CoachingStepGroup[] | undefined => {
   const cells = readGridCells(html)?.map(readCell);
   if (!cells?.length || cells.some((c) => !c)) return undefined;
-  const read = cells as ReadCell[];
+  const readCells = cells as ReadCell[];
   const groups: CoachingStepGroup[] = [];
-  for (let at = 0; at < read.length;) {
-    const g = readGroup(read, at);
+  for (let at = 0; at < readCells.length;) {
+    const g = readGroup(readCells, at);
     if (!g) return undefined;
     groups.push(g.group);
     at = g.next;
