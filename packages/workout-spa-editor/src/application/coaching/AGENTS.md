@@ -22,6 +22,7 @@ Coaching-plan use cases: link/unlink a Train2Go account, convert a coaching acti
 - `convert-coaching-activity-with-ai-idempotency.ts` — same-input dedup.
 - `convert-coaching-activity-error-mapper.ts` — translates AI errors into domain errors.
 - `coaching-workout-builder.ts` — builds the KRD payload from the converted activity.
+- `coaching-krd-source.ts` — where the KRD comes from: the session's steps table (`structured-steps-krd.ts`, power as target, heart rate in the step note) when the record has one, the AI otherwise.
 - `coaching-template.ts` / `.test.ts` — converts an activity into a library template instead of a workout.
 - `ensure-session-match.ts` — idempotently creates the `sessionMatch` row tying the activity to its produced workout.
 - `attempt-link.ts` + `attempt-link-helpers.ts` / `.test.ts` — opportunistic linking flow.

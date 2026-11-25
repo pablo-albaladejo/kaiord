@@ -3,9 +3,8 @@
  * use-case file to keep it under the line caps; not public API.
  */
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
-import type { AiMeta } from "../../types/calendar-fragments";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
-import type { KRD } from "../../types/schemas";
+import { type CoachingKrd, generateCoachingKrd } from "./coaching-krd-source";
 import { coachingSportArgs, type ResolvedSport } from "./coaching-krd-sport";
 import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
@@ -16,16 +15,11 @@ import type {
 import { ensureSessionMatch } from "./ensure-session-match";
 import { sessionMatchDate } from "./session-match-date";
 
-export const resolvePromptText = (activity: CoachingActivityRecord): string =>
-  activity.description?.trim()
-    ? activity.description
-    : `${activity.title} (${activity.sport})`;
-
 const persistFreshWorkout = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
   nsSourceId: string,
-  generated: { krd: KRD; aiMeta: AiMeta },
+  generated: CoachingKrd,
   resolved: ResolvedSport | null
 ): Promise<string> => {
   const workout = buildStructuredCoachingWorkout({
@@ -53,19 +47,16 @@ export const performAiCreation = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
   nsSourceId: string,
-  text: string,
   abortSignal: AbortSignal | undefined
 ): Promise<ConvertWithAiResult> => {
   const resolved = resolveT2GSport(activity.sport);
-  let generated: { krd: KRD; aiMeta: AiMeta };
+  let generated: CoachingKrd;
   try {
-    generated = await deps.generateKrd({
-      text,
-      // Resolved KRD sport hint; raw Train2Go keys make the LLM guess
-      // `generic`. Raw key kept only for unmapped sports.
-      sport: resolved?.sport ?? activity.sport,
-      abortSignal,
-    });
+    generated = await generateCoachingKrd(
+      deps,
+      { activity, resolved },
+      abortSignal
+    );
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }

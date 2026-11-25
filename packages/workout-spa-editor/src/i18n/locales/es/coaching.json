@@ -223,5 +223,17 @@
     "executedChip": "Hecho",
     "planPrefix": "Plan ·",
     "actualPrefix": "Real ·"
+  },
+  "steps": {
+    "title": "Pasos del entrenador",
+    "duration": "Duración",
+    "zone": "Zona",
+    "power": "Potencia",
+    "heartRate": "Frecuencia cardiaca",
+    "repeat": "{{value}} ×",
+    "minutes": "{{value}} min",
+    "seconds": "{{value}} s",
+    "watts": "{{min}}–{{max}} W",
+    "bpm": "{{min}}–{{max}} ppm"
   }
 }

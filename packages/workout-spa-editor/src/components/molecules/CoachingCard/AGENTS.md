@@ -14,6 +14,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `CoachingActivityCard.tsx` / `.test.tsx` — calendar card surface for a coaching activity.
 - `CoachingActivityDialog.tsx` / `.test.tsx` (+ `.bootstrap.test.tsx`, `.states.test.tsx`) — top-level dialog component.
 - `CoachingActivityDialogContent.tsx` — content slot used by the dialog.
+- `CoachingStepsTable.tsx` — the coach's steps table as written (duration, zone, W, bpm, "N ×" repeat groups), under the coach's text; nothing when the table is missing or not whole.
 - `coaching-dialog-shell.tsx` / `.test.tsx` — Radix Dialog shell.
 - `coaching-dialog-body.tsx`, `coaching-dialog-body-props.ts`, `coaching-dialog-matched-body.tsx` — body variants (unmatched flow vs matched-with-executed flow).
 - `coaching-dialog-parts.tsx` — sub-parts (header / footer / sections).

@@ -17,6 +17,8 @@
 
 import { z } from "zod";
 
+import { coachingStructuredStepsSchema } from "./coaching-structured-steps";
+
 export const coachingActivityStatusSchema = z.enum([
   "pending",
   "completed",
@@ -51,6 +53,12 @@ export const coachingActivityRecordSchema = z
     status: coachingActivityStatusSchema,
     completionPercent: z.number().min(0).max(100).optional(),
     description: z.string().optional(),
+    /**
+     * The session's steps table, read whole from the Platform (only then
+     * present). Fetched with the description, so it is absent where the
+     * description is.
+     */
+    structuredSteps: coachingStructuredStepsSchema.optional(),
     fetchedAt: z.iso.datetime(),
     /**
      * Provenance stamped on every synced row (F1.3): the bridge that produced
