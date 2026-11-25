@@ -22,6 +22,7 @@ import { DialogMeta } from "./coaching-dialog-meta";
 import { DialogDescription, DialogHeader } from "./coaching-dialog-parts";
 import { CoachingDialogZoneProfile } from "./coaching-dialog-zone-profile";
 import { CoachingDayComments } from "./CoachingDayComments";
+import { CoachingStepsTable } from "./CoachingStepsTable";
 import { useCoachingDayComments } from "./use-coaching-day-comments";
 import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
@@ -63,6 +64,7 @@ export function CoachingActivityDialogContent(
         description={activity.description}
       />
       <DialogDescription activity={activity} load={descriptionLoad} />
+      <CoachingStepsTable steps={activity.structuredSteps} />
       {matched ? renderMatchedBody(props, matched) : renderNoWorkoutBody(props)}
       <CoachingDayComments comments={comments} />
     </div>

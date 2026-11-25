@@ -19,7 +19,7 @@ import {
   readWatts,
   readZoneLabel,
 } from "./steps-cell-values";
-import { type CellKind, type ReadCell,readCell } from "./steps-grid-cell-kind";
+import { type CellKind, type ReadCell, readCell } from "./steps-grid-cell-kind";
 import { readGridCells } from "./steps-grid-cells";
 
 const ROW: readonly CellKind[] = ["duration", "zone", "power", "hr"];

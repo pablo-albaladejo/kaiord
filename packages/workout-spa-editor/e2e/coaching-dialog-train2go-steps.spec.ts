@@ -7,7 +7,8 @@
  * daily read: description plus `structuredSteps` (synthetic, invented
  * values). A provider is configured and every LLM endpoint is routed, so a
  * call to the AI would be seen; the assertion is that none is made and the
- * stored workout holds the table's steps and repeat.
+ * stored workout holds the table's steps and repeat. The dialog shows the
+ * coach's table before and after the Workout is built.
  */
 import type { Page, Route } from "@playwright/test";
 
@@ -102,7 +103,9 @@ const seed = async (page: Page, day: string, ts: string) => {
 };
 
 test.describe("Train2Go session with a steps table", () => {
-  test("converts from the table without calling the AI", async ({ page }) => {
+  test("shows the coach's table and converts from it without calling the AI", async ({
+    page,
+  }) => {
     // Arrange
     await page.goto("/calendar");
     await waitForDexieReady(page);
@@ -124,7 +127,18 @@ test.describe("Train2Go session with a steps table", () => {
     const card = page.getByTestId(`coaching-card-${SOURCE}:${SOURCE_ID}`);
     await card.waitFor({ timeout: 10_000 });
     await card.click();
-    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    const dialog = page.getByTestId("coaching-activity-dialog");
+    await expect(dialog).toBeVisible();
+    // The coach's table is shown next to the coach's text, as written.
+    const table = dialog.getByTestId("coaching-dialog-steps");
+    await expect(dialog).toContainText("Coach's steps");
+    await expect(table.getByRole("row")).toHaveCount(1 + 1 + 1 + 2 + 1);
+    await expect(table.getByTestId("coaching-dialog-steps-repeat")).toHaveText(
+      "4 ×"
+    );
+    await expect(table.getByRole("row").nth(1)).toHaveText(
+      "10 minR0100–140 W110–125 bpm"
+    );
     await page.getByTestId("coaching-dialog-ai-process").click();
 
     // Assert
@@ -152,5 +166,14 @@ test.describe("Train2Go session with a steps table", () => {
       target: { type: "power", value: { unit: "range", min: 100, max: 140 } },
       notes: "HR 110-125 bpm",
     });
+
+    // Once the Workout is built, the coach's table is still shown.
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    await page.getByTestId(`matched-card-${SOURCE}:${SOURCE_ID}`).click();
+    await expect(
+      page
+        .getByTestId("coaching-activity-dialog")
+        .getByTestId("coaching-dialog-steps")
+    ).toBeVisible();
   });
 });

@@ -223,5 +223,17 @@
     "executedChip": "Executed",
     "planPrefix": "Plan ·",
     "actualPrefix": "Actual ·"
+  },
+  "steps": {
+    "title": "Coach's steps",
+    "duration": "Duration",
+    "zone": "Zone",
+    "power": "Power",
+    "heartRate": "Heart rate",
+    "repeat": "{{value}} ×",
+    "minutes": "{{value}} min",
+    "seconds": "{{value}} s",
+    "watts": "{{min}}–{{max}} W",
+    "bpm": "{{min}}–{{max}} bpm"
   }
 }
