@@ -133,6 +133,12 @@ export {
   workoutSchema,
   workoutStepSchema,
 } from "./schemas";
+export {
+  clearNoteOrigin,
+  isAiNote,
+  markAiNote,
+  STEP_NOTE_MAX,
+} from "./step-note";
 export { isRepetitionBlock } from "./type-guards";
 export type { ToleranceViolation, ValidationError } from "./types/errors";
 export {
