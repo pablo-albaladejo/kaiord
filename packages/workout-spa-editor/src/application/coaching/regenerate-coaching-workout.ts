@@ -23,6 +23,7 @@ import type {
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
 import { ensureAutoCoachingMatch } from "./ensure-auto-coaching-match";
+import { canRegenerate } from "./regenerate-warnings";
 
 /** Named after the activity when the build gives no name, with its notes. */
 const regeneratedKrd = (krd: KRD, activity: CoachingActivityRecord): KRD =>
@@ -34,7 +35,7 @@ const regeneratedRecord = (
   aiMeta: AiMeta | null,
   now: string
 ): WorkoutRecord | undefined =>
-  fresh.state === "raw" || fresh.state === "skipped"
+  !canRegenerate(fresh.state)
     ? undefined
     : {
         ...fresh,

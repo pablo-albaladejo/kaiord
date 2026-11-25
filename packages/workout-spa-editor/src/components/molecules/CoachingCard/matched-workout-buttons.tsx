@@ -1,3 +1,4 @@
+import { canRegenerate } from "../../../application/coaching/regenerate-warnings";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { MatchedActionButton } from "./matched-action-button";
@@ -15,7 +16,7 @@ export function MatchedWorkoutButtons(props: MatchedWorkoutButtonsProps) {
   const t = useTranslate("coaching");
   const state = props.workout.state;
   const showAi = state === "raw";
-  const showRegenerate = state !== "raw" && state !== "skipped";
+  const showRegenerate = canRegenerate(state);
   const showPush = state === "structured" || state === "ready";
   return (
     <>

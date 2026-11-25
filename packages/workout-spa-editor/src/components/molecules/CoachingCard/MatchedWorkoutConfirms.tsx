@@ -1,9 +1,10 @@
 import type { RegenerateWarnings } from "../../../application/coaching/regenerate-warnings";
 import { useTranslate } from "../../../i18n/use-translate";
 import { ConfirmationModal } from "../ConfirmationModal";
+import type { MatchedConfirm } from "./use-coaching-dialog-state";
 
 export type MatchedWorkoutConfirmsProps = {
-  open: "regenerate" | "delete" | null;
+  open: MatchedConfirm | null;
   warnings: RegenerateWarnings;
   /** The Workout is placed on Garmin: deleting here leaves it there. */
   onGarmin: boolean;

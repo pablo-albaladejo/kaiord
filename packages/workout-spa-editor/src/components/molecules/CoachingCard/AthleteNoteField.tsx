@@ -6,11 +6,11 @@
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { OUTLINE_BUTTON } from "./matched-action-button";
 import { useAthleteNote } from "./use-athlete-note";
 
 const INPUT_ID = "coaching-athlete-note";
-const BUTTON =
-  "rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800";
+const BUTTON = `${OUTLINE_BUTTON} text-xs`;
 
 export type AthleteNoteFieldProps = {
   profileId: string | null;

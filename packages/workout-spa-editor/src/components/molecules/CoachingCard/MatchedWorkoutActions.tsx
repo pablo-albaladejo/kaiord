@@ -5,46 +5,46 @@
  * there. Delete removes the Workout and its Match (Undo brings both back),
  * so the Activity goes back to "To prepare".
  */
-import { useState } from "react";
-
 import { regenerateWarnings } from "../../../application/coaching/regenerate-warnings";
 import { useGarminLedgerRow } from "../../../hooks/use-garmin-ledger-row";
 import { useDeleteWorkoutWithUndo } from "../../pages/WorkoutDetail/use-delete-workout-with-undo";
 import { MatchedActions, type MatchedActionsProps } from "./MatchedActions";
 import { MatchedWorkoutConfirms } from "./MatchedWorkoutConfirms";
+import { useMatchedConfirm } from "./use-coaching-dialog-state";
 
 export type MatchedWorkoutActionsProps = Omit<MatchedActionsProps, "onDelete">;
 
-const stay = () => undefined;
+/** A delete from the dialog leaves the athlete where they are. */
+const stayInDialog = () => undefined;
 
 export function MatchedWorkoutActions(props: MatchedWorkoutActionsProps) {
   const { workout } = props;
-  const [open, setOpen] = useState<"regenerate" | "delete" | null>(null);
+  const confirm = useMatchedConfirm();
   const onGarmin = useGarminLedgerRow(workout.id) !== undefined;
   const warnings = regenerateWarnings(workout, onGarmin);
-  const deleteWithUndo = useDeleteWorkoutWithUndo(stay);
+  const deleteWithUndo = useDeleteWorkoutWithUndo(stayInDialog);
   const requestRegenerate = () =>
     warnings.edited || warnings.onWatch
-      ? setOpen("regenerate")
+      ? confirm.ask("regenerate")
       : props.onRegenerate();
   return (
     <>
       <MatchedActions
         {...props}
         onRegenerate={requestRegenerate}
-        onDelete={() => setOpen("delete")}
+        onDelete={() => confirm.ask("delete")}
       />
       <MatchedWorkoutConfirms
-        open={open}
+        open={confirm.open}
         warnings={warnings}
         onGarmin={onGarmin}
-        onCancel={() => setOpen(null)}
+        onCancel={confirm.close}
         onRegenerate={() => {
-          setOpen(null);
+          confirm.close();
           props.onRegenerate();
         }}
         onDelete={() => {
-          setOpen(null);
+          confirm.close();
           void deleteWithUndo(workout);
         }}
       />
