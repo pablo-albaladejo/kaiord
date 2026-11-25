@@ -17,7 +17,8 @@ export const cutRawStepNotes = (raw: unknown): unknown => {
   if (!isRecord(raw)) return raw;
   const cut = (step: unknown): unknown => {
     if (!isRecord(step)) return step;
-    if (Array.isArray(step.steps)) return { ...step, steps: step.steps.map(cut) };
+    if (Array.isArray(step.steps))
+      return { ...step, steps: step.steps.map(cut) };
     return typeof step.notes === "string"
       ? { ...step, notes: step.notes.slice(0, STEP_NOTE_MAX) }
       : step;
@@ -44,7 +45,10 @@ export const carryNoteOrigins = (workout: Workout, raw: unknown): Workout => {
       const rawStep = rawSteps[i];
       if (!isRepetitionBlock(step)) return markStep(step, rawStep);
       const inner = isRecord(rawStep) ? rawStepsOf(rawStep) : [];
-      return { ...step, steps: step.steps.map((s, j) => markStep(s, inner[j])) };
+      return {
+        ...step,
+        steps: step.steps.map((s, j) => markStep(s, inner[j])),
+      };
     }),
   };
 };

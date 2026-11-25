@@ -172,6 +172,8 @@ describe("createWorkoutParserAgent step notes", () => {
     const workout = throughWire(raw);
 
     // Assert
-    expect(workout.steps[0]).toMatchObject({ notes: "n".repeat(STEP_NOTE_MAX) });
+    expect(workout.steps[0]).toMatchObject({
+      notes: "n".repeat(STEP_NOTE_MAX),
+    });
   });
 });
