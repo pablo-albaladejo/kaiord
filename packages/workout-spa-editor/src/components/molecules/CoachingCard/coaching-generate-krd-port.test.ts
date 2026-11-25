@@ -102,9 +102,14 @@ describe("buildGenerateKrdPort", () => {
     // Arrange
     vi.mocked(generateWorkoutKrd).mockClear();
     const onAiStart = vi.fn();
-    const port = buildGenerateKrdPort(DEPS, () => null, () => "t", {
-      onAiStart,
-    });
+    const port = buildGenerateKrdPort(
+      DEPS,
+      () => null,
+      () => "t",
+      {
+        onAiStart,
+      }
+    );
 
     // Act
     const run = port({ text: "warmup", sport: "cycling" });

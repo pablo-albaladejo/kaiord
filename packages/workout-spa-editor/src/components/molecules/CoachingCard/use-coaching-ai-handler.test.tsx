@@ -22,7 +22,12 @@ import type { RunAiInput } from "./use-coaching-ai-helpers";
 
 const navigateMock = vi.fn();
 const runConvertMock = vi.fn();
-const PROVIDER = { id: "p-1", type: "openai", model: "gpt-4o-mini", apiKey: "k" };
+const PROVIDER = {
+  id: "p-1",
+  type: "openai",
+  model: "gpt-4o-mini",
+  apiKey: "k",
+};
 let providers: (typeof PROVIDER)[] = [PROVIDER];
 
 vi.mock("wouter", () => ({
@@ -81,7 +86,11 @@ describe("useCoachingAi", () => {
   it("should build without a provider and show no AI progress when the run needs no AI", async () => {
     // Arrange
     providers = [];
-    runConvertMock.mockResolvedValue({ ok: true, workoutId: "w", created: true });
+    runConvertMock.mockResolvedValue({
+      ok: true,
+      workoutId: "w",
+      created: true,
+    });
     const onClose = vi.fn();
     const seen: unknown[] = [];
     const { result } = renderHook(
