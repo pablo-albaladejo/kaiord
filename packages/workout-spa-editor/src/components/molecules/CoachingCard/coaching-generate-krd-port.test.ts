@@ -6,9 +6,17 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { NoAiProviderError } from "../../../application/coaching/convert-coaching-activity-error-mapper";
+import { generateStepNotes } from "../../../lib/generate-step-notes";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import { buildGenerateKrdPort } from "./coaching-generate-krd-port";
+import {
+  buildGenerateKrdPort,
+  buildGenerateStepNotesPort,
+} from "./coaching-generate-krd-port";
+
+vi.mock("../../../lib/generate-step-notes", () => ({
+  generateStepNotes: vi.fn(async () => []),
+}));
 
 vi.mock("../../../lib/generate-workout", () => ({
   generateWorkoutKrd: vi.fn(async () => ({ kind: "krd-stub" })),
@@ -118,5 +126,38 @@ describe("buildGenerateKrdPort", () => {
     await expect(run).rejects.toBeInstanceOf(NoAiProviderError);
     expect(onAiStart).not.toHaveBeenCalled();
     expect(generateWorkoutKrd).not.toHaveBeenCalled();
+  });
+});
+
+describe("buildGenerateStepNotesPort", () => {
+  const INPUT = { coachText: "A una pierna", steps: ["30 s R1"] };
+
+  it("should make no notes call, and add no notes, when no provider is configured", async () => {
+    // Arrange
+    vi.mocked(generateStepNotes).mockClear();
+    const port = buildGenerateStepNotesPort(DEPS, () => null);
+
+    // Act
+    const notes = await port(INPUT);
+
+    // Assert
+    expect(notes).toBeNull();
+    expect(generateStepNotes).not.toHaveBeenCalled();
+  });
+
+  it("should choose the model only when the notes are asked for", async () => {
+    // Arrange
+    const choose = vi.fn(chooseModel);
+    const port = buildGenerateStepNotesPort(DEPS, choose);
+
+    // Act
+    const before = choose.mock.calls.length;
+    await port(INPUT);
+
+    // Assert
+    expect(before).toBe(0);
+    expect(generateStepNotes).toHaveBeenCalledWith(
+      expect.objectContaining({ input: INPUT, modelId: "gpt-4o-mini" })
+    );
   });
 });

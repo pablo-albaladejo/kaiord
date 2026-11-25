@@ -65,6 +65,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   // A cancel that lands after the run settled must not navigate away.
   if (controller.signal.aborted) return;
   if (result.ok) {
+    if (result.stepNotesFailed) ctx.onStepNotesToast();
     ctx.onClose();
     ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     return;

@@ -29,6 +29,7 @@
   "flows": {
     "assistant": "While you chat with the assistant, what it reads to answer you",
     "generation": "When you generate a workout with AI",
+    "coachingStepNotes": "When you build a workout from your coach's steps table, for its step notes",
     "assistantWorkout": "When the assistant creates a workout after reading your health data",
     "labImport": "When you read a lab document with AI",
     "providerKeyCheck": "When you save a key, to check it",

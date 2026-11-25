@@ -36,6 +36,7 @@ const buildDeps = (
     .fn()
     .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() }),
   readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",
   clock: () => NOW,

@@ -55,6 +55,7 @@ export const DATA_FLOWS = {
     ],
     withheld: "goesWithout",
   },
+  coachingStepNotes: { to: PROVIDERS, kinds: ["coachingPlan"] },
   assistantWorkout: {
     to: PROVIDERS,
     kinds: ["workoutDescription", ...ASSISTANT_HEALTH_KINDS],
@@ -96,8 +97,3 @@ export const providerHealthKinds = (): HealthDataKind[] => [
     ).flatMap(healthKindsOf)
   ),
 ];
-
-export const flowsTo = (destination: DestinationId): DataFlowId[] =>
-  DATA_FLOW_IDS.filter((id) =>
-    (DATA_FLOWS[id].to as readonly DestinationId[]).includes(destination)
-  );

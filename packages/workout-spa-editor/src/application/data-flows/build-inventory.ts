@@ -4,7 +4,7 @@
  * read from the flow registry. `active` says whether a destination is set up
  * for this athlete now.
  */
-import { DATA_FLOWS, type DataFlowId, flowsTo } from "./data-flows";
+import { DATA_FLOW_IDS, DATA_FLOWS, type DataFlowId } from "./data-flows";
 import type { DataKind } from "./data-kinds";
 import {
   type Destination,
@@ -12,6 +12,11 @@ import {
   type DestinationId,
   DESTINATIONS,
 } from "./destinations";
+
+const flowsTo = (destination: DestinationId): DataFlowId[] =>
+  DATA_FLOW_IDS.filter((id) =>
+    (DATA_FLOWS[id].to as readonly DestinationId[]).includes(destination)
+  );
 
 export type InventoryDestination = {
   id: DestinationId;

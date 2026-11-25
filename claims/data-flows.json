@@ -189,6 +189,20 @@
       ]
     },
     {
+      "id": "app.dataflows.en.flows.coachingStepNotes",
+      "text": "When you build a workout from your coach's steps table, for its step notes",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-step-notes.test.ts",
+          "title": "should send only the coach's text and the step lines, and record the coaching plan in its Trace"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
       "id": "app.dataflows.en.flows.labImport",
       "text": "When you read a lab document with AI",
       "proof": [
@@ -708,6 +722,20 @@
         {
           "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
           "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.coachingStepNotes",
+      "text": "Cuando creas un entrenamiento desde la tabla de pasos de tu entrenador, para sus notas de paso",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-step-notes.test.ts",
+          "title": "should send only the coach's text and the step lines, and record the coaching plan in its Trace"
         },
         {
           "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",

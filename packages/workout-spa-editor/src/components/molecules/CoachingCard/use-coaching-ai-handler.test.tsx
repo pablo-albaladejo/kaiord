@@ -13,7 +13,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AnalyticsProvider } from "../../../contexts/analytics-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
-import { ToastContextProvider } from "../../../contexts/ToastContext";
+import {
+  ToastContextProvider,
+  useToastContext,
+} from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useCoachingAi } from "./use-coaching-ai-handler";
@@ -155,6 +158,36 @@ describe("useCoachingAi", () => {
 
     // Assert
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(navigateMock).toHaveBeenCalledWith("/workout/w-new?from=coaching");
+  });
+
+  it("should say the step notes could not be added when the Workout went without them", async () => {
+    // Arrange
+    runConvertMock.mockResolvedValue({
+      ok: true,
+      workoutId: "w-new",
+      created: true,
+      stepNotesFailed: true,
+    });
+    const { result } = renderHook(
+      () => ({
+        ai: useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
+        toast: useToastContext(),
+      }),
+      { wrapper: wrap() }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.ai.startAi();
+    });
+
+    // Assert
+    await waitFor(() =>
+      expect(result.current.toast.toasts.map((t) => t.title)).toContain(
+        "The step notes could not be added. Regenerate to try again."
+      )
+    );
     expect(navigateMock).toHaveBeenCalledWith("/workout/w-new?from=coaching");
   });
 

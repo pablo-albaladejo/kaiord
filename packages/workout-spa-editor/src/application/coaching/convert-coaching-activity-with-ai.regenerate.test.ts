@@ -42,6 +42,7 @@ const depsOf = (
     .fn()
     .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() }),
   readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "m-new",
   clock: () => NOW,

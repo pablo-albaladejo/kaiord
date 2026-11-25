@@ -53,6 +53,7 @@ const setup = (activity: CoachingActivityRecord, existing?: WorkoutRecord) => {
       aiMeta: fakeAiMeta(),
     }),
     readStepsTable: createReadStepsTable(() => NOW),
+    generateStepNotes: vi.fn().mockResolvedValue(null),
     newWorkoutId: () => "w-new",
     newMatchId: () => "M-new",
     clock: () => NOW,

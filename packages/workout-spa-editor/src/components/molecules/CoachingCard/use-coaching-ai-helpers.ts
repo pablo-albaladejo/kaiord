@@ -11,6 +11,7 @@ import type { GenerationDeps } from "../../../lib/generate-workout";
 import {
   type AiRunHooks,
   buildGenerateKrdPort,
+  buildGenerateStepNotesPort,
   type ChooseAiModel,
 } from "./coaching-generate-krd-port";
 
@@ -44,6 +45,11 @@ export const runConvertWithAi = (input: RunAiInput) =>
         input.deps,
         input.chooseModel,
         isoNow,
+        input
+      ),
+      generateStepNotes: buildGenerateStepNotesPort(
+        input.deps,
+        input.chooseModel,
         input
       ),
       readStepsTable: createReadStepsTable(isoNow),

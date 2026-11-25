@@ -37,6 +37,7 @@ const convertDeps = (persistence: Persistence) => ({
   analytics: buildStubAnalytics(),
   generateKrd: vi.fn(),
   readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "m-new",
   clock: () => NOW,

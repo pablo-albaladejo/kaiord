@@ -63,6 +63,7 @@ const NOT_SHIPPED =
 const FLOW_SITES: Record<string, readonly DataFlowId[]> = {
   "hooks/chat/build-chat-agent.ts": ["assistant"],
   "lib/generate-workout.ts": ["generation", "assistantWorkout"],
+  "lib/generate-step-notes.ts": ["coachingStepNotes"],
   "application/lab/extraction/run-lab-extraction.use-case.ts": ["labImport"],
   "components/organisms/SettingsPanel/save-with-key-check.ts": [
     "providerKeyCheck",
