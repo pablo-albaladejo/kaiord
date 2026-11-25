@@ -27,7 +27,7 @@ const PASSPHRASE = "kaiord-spa-v1";
 // (no store change), v37 backfilled the nutrition `updatedAt` sync clock,
 // v38 added the device-local `traces` store (excluded), and v39 made
 // `usageEvents` device-local (excluded) without Trace ids.
-const SCHEMA_HEAD = 40;
+const SCHEMA_HEAD = 41;
 
 describe("createDexieSnapshotPort", () => {
   const db = sharedKaiordDatabase("snapshot");

@@ -96,6 +96,13 @@ const makeSeedRow = (
         comments: [],
         fetchedAt: NOW,
       };
+    case "athleteNotes":
+      return {
+        id: `${profileId}:train2go:1`,
+        profileId,
+        text: "x",
+        updatedAt: NOW,
+      };
     case "coachingSyncState":
       return { source: "train2go", profileId, lastSyncedAt: NOW };
     case "sessionMatches":
@@ -285,6 +292,7 @@ const performCascadeOrchestration = async (
         workouts: persistence.workouts,
         coaching: persistence.coaching,
         coachingDayNotes: persistence.coachingDayNotes,
+        athleteNotes: persistence.athleteNotes,
         coachingSyncState: persistence.coachingSyncState,
         sessionMatch: persistence.sessionMatch,
         autoMatchDismissal: persistence.autoMatchDismissal,

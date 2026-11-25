@@ -40,6 +40,7 @@ export const AUTO_PROFILE_REKEY_RULES: Readonly<Record<string, RekeyRule>> = {
   activities: BY_PROVENANCE,
   coachingActivities: BY_ID,
   coachingDayNotes: BY_ID,
+  athleteNotes: BY_ID,
   // One match per planned activity and per workout within a profile; the
   // target's existing match is never overwritten (spa-session-match).
   sessionMatches: {

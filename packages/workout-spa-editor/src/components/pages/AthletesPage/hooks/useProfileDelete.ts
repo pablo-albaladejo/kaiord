@@ -51,6 +51,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               workouts: persistence.workouts,
               coaching: persistence.coaching,
               coachingDayNotes: persistence.coachingDayNotes,
+              athleteNotes: persistence.athleteNotes,
               coachingSyncState: persistence.coachingSyncState,
               sessionMatch: persistence.sessionMatch,
               autoMatchDismissal: persistence.autoMatchDismissal,
