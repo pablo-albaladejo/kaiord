@@ -1,3 +1,4 @@
+import { STEP_NOTE_MAX } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { assertBasisOnPowerOnly } from "./assert-basis-on-power";
@@ -113,5 +114,64 @@ describe("createWorkoutParserAgent validate", () => {
 
     // Assert
     expect(check).not.toThrow();
+  });
+});
+
+describe("createWorkoutParserAgent step notes", () => {
+  const throughWire = (raw: unknown) => {
+    const agent = createWorkoutParserAgent("");
+    return agent.validate(agent.outputSchema.parse(raw));
+  };
+  const noted = (notes: string, noteOrigin?: string) => ({
+    ...rawStep("open", {}),
+    target: { type: "open" },
+    notes,
+    ...(noteOrigin ? { noteOrigin } : {}),
+  });
+
+  it("should keep the coach's cue on each step through the wire schema", () => {
+    // Arrange
+    const raw = rawWorkout({
+      repeatCount: 3,
+      steps: [noted("Pedaleo a una pierna")],
+    });
+
+    // Act
+    const workout = throughWire(raw);
+
+    // Assert
+    expect(workout.steps[0]).toMatchObject({
+      steps: [{ notes: "Pedaleo a una pierna" }],
+    });
+  });
+
+  it("should mark a note the AI wrote on its own and not a coach's cue", () => {
+    // Arrange
+    const raw = rawWorkout(
+      noted("Spin easy", "ai"),
+      noted("Stay seated", "coach")
+    );
+
+    // Act
+    const workout = throughWire(raw);
+
+    // Assert
+    expect(workout.steps[0]).toMatchObject({
+      notes: "Spin easy",
+      extensions: { kaiord: { noteOrigin: "ai" } },
+    });
+    expect(workout.steps[1]).not.toHaveProperty("extensions");
+    expect(workout.steps[1]).not.toHaveProperty("noteOrigin");
+  });
+
+  it("should cut a note longer than a step holds to the step's limit", () => {
+    // Arrange
+    const raw = rawWorkout(noted("n".repeat(STEP_NOTE_MAX * 2)));
+
+    // Act
+    const workout = throughWire(raw);
+
+    // Assert
+    expect(workout.steps[0]).toMatchObject({ notes: "n".repeat(STEP_NOTE_MAX) });
   });
 });

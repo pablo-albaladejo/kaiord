@@ -42,6 +42,10 @@ const stepSchema = z.object({
   targetType: z.string(),
   target: targetSchema,
   intensity: z.string(),
+  // The coach's cue for the step; `noteOrigin: "ai"` when the model wrote it
+  // with no cue from the coach behind it.
+  notes: z.string().optional(),
+  noteOrigin: z.enum(["coach", "ai"]).optional(),
 });
 
 const blockSchema = z.object({

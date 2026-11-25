@@ -6,6 +6,7 @@ import { resolveZoneTargets } from "../adapters/resolve-zone-targets";
 import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
 import type { AthleteZoneTables } from "../types";
 import { assertBasisOnPowerOnly } from "./assert-basis-on-power";
+import { carryNoteOrigins, cutRawStepNotes } from "./carry-step-notes";
 import type { AgentDefinition } from "./definition-types";
 
 const MAX_NAME_LENGTH = 40;
@@ -36,9 +37,10 @@ export const createWorkoutParserAgent = (
   outputSchema: aiWorkoutSchema,
   validate: (raw) => {
     assertBasisOnPowerOnly(raw);
-    return normalizeName(
-      reindexSteps(workoutSchema.parse(resolveZoneTargets(raw, zones)))
+    const parsed = workoutSchema.parse(
+      resolveZoneTargets(cutRawStepNotes(raw), zones)
     );
+    return normalizeName(reindexSteps(carryNoteOrigins(parsed, raw)));
   },
   countItems: (partial) => {
     const steps = (partial as { steps?: unknown } | undefined)?.steps;
