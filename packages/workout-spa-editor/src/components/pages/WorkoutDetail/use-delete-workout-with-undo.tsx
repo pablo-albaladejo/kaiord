@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 
-import { restoreDeletedWorkout } from "../../../application/restore-deleted-workout";
+import {
+  deleteWorkoutAndMatch,
+  restoreWorkoutAndMatch,
+} from "../../../application/coaching/delete-coaching-workout";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -13,8 +16,10 @@ const UNDO_CLASS =
   "inline-flex h-8 shrink-0 items-center justify-center rounded-md px-3 text-sm font-medium hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20";
 
 /**
- * Deletes through the tombstoning port, runs `onDeleted` (leave the page),
- * then offers Undo, which writes the row back newer than its tombstone.
+ * Deletes the workout and its Match through the tombstoning port, runs
+ * `onDeleted` (leave the page), then offers Undo, which writes both back
+ * newer than their tombstones. Shared by the detail page and the coaching
+ * dialog, so a delete from either never leaves a Match pointing at nothing.
  */
 export function useDeleteWorkoutWithUndo(onDeleted: () => void) {
   const persistence = usePersistence();
@@ -23,8 +28,9 @@ export function useDeleteWorkoutWithUndo(onDeleted: () => void) {
 
   return useCallback(
     async (record: WorkoutRecord) => {
-      await persistence.workouts.delete(record.id);
+      const deleted = await deleteWorkoutAndMatch(persistence, record.id);
       onDeleted();
+      if (!deleted) return;
       toast({
         title: t("delete.done"),
         variant: "info",
@@ -32,7 +38,7 @@ export function useDeleteWorkoutWithUndo(onDeleted: () => void) {
         action: (
           <button
             type="button"
-            onClick={() => void restoreDeletedWorkout(persistence, record)}
+            onClick={() => void restoreWorkoutAndMatch(persistence, deleted)}
             data-testid="undo-delete-workout"
             className={UNDO_CLASS}
           >
