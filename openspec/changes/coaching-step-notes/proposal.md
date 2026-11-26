@@ -15,14 +15,15 @@ nothing when the step starts:
 ## What Changes
 
 - **Garmin bridge.** The gate admits the workout `description` up to 1024
-  characters; the Garmin writer cuts a longer coach text to that cap.
+  characters and a step `description` up to 200; the Garmin writer cuts a
+  longer text to each cap. Both caps are provisional until measured.
 - **AI path.** The parser's output carries each step's note and whether the
   coach or the AI wrote it. The prompt (1.4.0) asks for the coach's cue, in
   the coach's language, with the Athlete note applied.
 - **Steps-table path.** The steps still come from the table. When an AI is
   configured, a separate notes-only call writes each step's note; it can
-  only add notes. Each note reads the cue first, then the HR range, within a
-  step's 256 characters, the cue cut, never the HR range. A failed call keeps
+  only add notes. Each note reads the cue first, then the HR range, within
+  the 200 characters Garmin takes, the cue cut, never the HR range. A failed call keeps
   the table Workout with its HR ranges and a notice says so; Regenerate
   tries again.
 - **Origin label.** A note the AI wrote on its own carries an "AI" label in

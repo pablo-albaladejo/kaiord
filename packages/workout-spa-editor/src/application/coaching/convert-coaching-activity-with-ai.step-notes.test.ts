@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { StepNote, StepNotesInput } from "@kaiord/ai/agents";
-import { isAiNote, STEP_NOTE_MAX } from "@kaiord/core";
+import { isAiNote, type KRD } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { parseActivitySteps } from "../../adapters/train2go/connector/parse-activity-steps";
@@ -41,6 +41,12 @@ const TABLE = parseActivitySteps(
 const COACH_TEXT =
   'Rodaje de prueba siguiendo las zonas de potencia. Incluye 3 x 30" de pedalada a una pierna.';
 const CUE = "Pedalada a una pierna";
+const silentLogger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+};
 const NOW = "2026-11-25T10:00:00.000Z";
 
 /** A model that puts the coach's cue on every 30 s step. */
@@ -199,19 +205,29 @@ describe("convertCoachingActivityWithAi step notes from a steps table", () => {
     ).toBe(true);
   });
 
-  it("should cut the note text, never the HR range, to fit a step", async () => {
+  it("should cut a long coach cue, never the HR range, in the note sent to Garmin", async () => {
     // Arrange
+    const cue =
+      "Pedalada a una pierna, alternando cada 30 segundos, con la cadera quieta, el tronco relajado y la rodilla alineada con el pie, empujando y tirando del pedal en todo el recorrido sin perder la cadencia ni la postura.";
     const long = async (): Promise<StepNote[]> => [
-      { step: 1, text: "n".repeat(STEP_NOTE_MAX), origin: "coach" },
+      { step: 1, text: cue.repeat(2), origin: "coach" },
     ];
+    const { deps, result } = await convert(long);
+    const stored = await deps.workouts.getById(
+      result.ok ? result.workoutId : ""
+    );
 
     // Act
-    const { workout } = await convert(long);
+    const { createGarminWriter } = await import("@kaiord/garmin");
+    const gcn = JSON.parse(
+      await createGarminWriter(silentLogger)(stored?.krd as KRD)
+    );
 
     // Assert
-    const first = leaves(workout?.steps)[0]?.notes ?? "";
-    expect(first).toHaveLength(STEP_NOTE_MAX);
-    expect(first.endsWith(" · HR 60-120 bpm")).toBe(true);
+    const sent: string = gcn.workoutSegments[0].workoutSteps[0].description;
+    expect(sent.length).toBeLessThanOrEqual(200);
+    expect(sent.startsWith("Pedalada a una pierna")).toBe(true);
+    expect(sent.endsWith(" · HR 60-120 bpm")).toBe(true);
   });
 
   it("should mark a note the AI wrote on its own and not the coach's cue", async () => {

@@ -23,7 +23,9 @@ const garminRequestBodies = (() => {
   const MAX_STEPS = 100;
   const MAX_REPEAT_STEPS = 50;
   const NAME_MAX = 255;
-  const NOTES_MAX = 256;
+  // A step description: the bound @kaiord/garmin's writer cuts a step's
+  // notes to (GARMIN_STEP_NOTES_MAX), so a longer one is not a body it built.
+  const NOTES_MAX = 200;
   const DESCRIPTION_MAX = 1024;
 
   const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

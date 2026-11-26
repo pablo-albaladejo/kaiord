@@ -6,6 +6,9 @@
  * is ever written here, so the call cannot change a duration, a target or a
  * repeat. Each note reads the cue first, then the step's HR range; when the
  * two run over what a step holds, the cue is cut, never the HR range.
+ *
+ * Garmin holds a shorter step note than KRD does, so the note is built to
+ * fit Garmin: its writer then never cuts it and the HR range arrives whole.
  */
 import type { StepNote, StepNotesInput } from "@kaiord/ai/agents";
 import {
@@ -26,6 +29,16 @@ export type GenerateStepNotesPort = (
 
 const SEPARATOR = " · ";
 
+/**
+ * The step description @kaiord/garmin's writer sends (its
+ * `GARMIN_STEP_NOTES_MAX`, kept here because the App loads that package
+ * lazily); the step-notes test writes a table note through it.
+ */
+const GARMIN_STEP_NOTE_MAX = 200;
+
+/** The longest note a table step gets: what both KRD and Garmin hold. */
+const NOTE_MAX = Math.min(STEP_NOTE_MAX, GARMIN_STEP_NOTE_MAX);
+
 type Step = WorkoutStep | RepetitionBlock;
 
 const leavesOf = (steps: Step[]): WorkoutStep[] =>
@@ -42,8 +55,8 @@ const stepLine = (step: WorkoutStep): string =>
 
 /** The cue first, then the HR range, cutting the cue to fit a step. */
 export const composeStepNote = (cue: string, hrRange?: string): string => {
-  if (!hrRange) return cue.slice(0, STEP_NOTE_MAX);
-  const room = STEP_NOTE_MAX - hrRange.length - SEPARATOR.length;
+  if (!hrRange) return cue.slice(0, NOTE_MAX);
+  const room = NOTE_MAX - hrRange.length - SEPARATOR.length;
   const cut = cue.slice(0, Math.max(room, 0)).trim();
   return cut ? `${cut}${SEPARATOR}${hrRange}` : hrRange;
 };

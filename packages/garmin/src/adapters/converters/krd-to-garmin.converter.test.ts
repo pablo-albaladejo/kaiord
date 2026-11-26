@@ -8,8 +8,10 @@ import {
   CADENCE_RPM,
   DESCRIPTION_MAX_LENGTH,
   DESCRIPTION_OVERSIZED_INPUT_LENGTH,
+  NOTES_MAX_LENGTH,
   POOL_LENGTH_METERS,
   REPETITION,
+  STEP_DESCRIPTION_MAX_LENGTH,
 } from "../../test-utils/constants";
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 import { convertKRDToGarmin } from "./krd-to-garmin.converter";
@@ -287,6 +289,25 @@ describe("convertKRDToGarmin", () => {
 
       // Assert
       expect(parsed.description).toBe("a".repeat(DESCRIPTION_MAX_LENGTH));
+    });
+
+    it("should cut a step description longer than 200 characters to 200", () => {
+      // Arrange
+      const krd = krdWithNotes("Coach text");
+      const workout = krd.extensions?.structured_workout as {
+        steps: Array<{ notes?: string }>;
+      };
+      workout.steps[0].notes = "n".repeat(NOTES_MAX_LENGTH);
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect(parsed.workoutSegments[0].workoutSteps[0].description).toBe(
+        "n".repeat(STEP_DESCRIPTION_MAX_LENGTH)
+      );
     });
   });
 

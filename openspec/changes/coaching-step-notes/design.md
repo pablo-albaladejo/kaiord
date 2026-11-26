@@ -12,7 +12,14 @@ Workout-level note, sent as the workout's `description`.
 Garmin publishes no bound for a workout's `description`, and nothing in the
 repository (fixtures, captures, docs) shows one. The gate needs a bound, so
 it takes a conservative 1024, and the writer cuts a longer coach text to it
-rather than have the send refused. The step `description` keeps its 256.
+rather than have the send refused.
+
+The step `description` sent to Garmin drops from 256 to 200 (owner decision,
+26 Nov 2026): Garmin Connect's web workout builder counts a step note up to
+200, and a FIT string holds at most 254 bytes. The writer cuts a longer step
+note to 200 and the gate refuses one over it. Reading a step note from
+Garmin stays bound by KRD's 256. Both caps are provisional until the live
+Garmin capture measures them (task 1.4).
 
 ### D2. The note origin lives in the step's extensions
 
@@ -52,8 +59,9 @@ refused call keeps the table Workout with its HR ranges and returns
 
 ### D5. Cue first, then the HR range
 
-The note reads `<cue> · HR <min>-<max> bpm`. When the two run over 256, the
-cue is cut, never the HR range.
+The note reads `<cue> · HR <min>-<max> bpm`, built within Garmin's 200 so
+the writer never cuts it. When the two run over, the cue is cut, never the
+HR range.
 
 ## Risks
 
