@@ -11,6 +11,7 @@ import type { AiMeta } from "../../types/calendar-fragments";
 import type { KRD } from "../../types/schemas";
 import type { ReadStepsTable } from "./choose-coaching-builder";
 import type { AiFailureReason } from "./convert-coaching-activity-error-mapper";
+import type { GenerateStepNotesPort } from "./table-step-notes";
 
 export type ConvertWithAiInput = {
   activityId: string;
@@ -33,6 +34,8 @@ export type ConvertWithAiDeps = {
   transaction: PersistencePort["transaction"];
   analytics: Analytics;
   generateKrd: GenerateKrdPort;
+  /** Adds the step notes to a Workout read from a steps table. */
+  generateStepNotes: GenerateStepNotesPort;
   /** Reads the activity's steps table; `null` when it has none. */
   readStepsTable: ReadStepsTable;
   newWorkoutId: () => string;
@@ -41,5 +44,11 @@ export type ConvertWithAiDeps = {
 };
 
 export type ConvertWithAiResult =
-  | { ok: true; workoutId: string; created: boolean }
+  | {
+      ok: true;
+      workoutId: string;
+      created: boolean;
+      /** The Workout was built without its step notes: the notes call failed. */
+      stepNotesFailed?: true;
+    }
   | { ok: false; reason: AiFailureReason | "not-found"; error?: string };

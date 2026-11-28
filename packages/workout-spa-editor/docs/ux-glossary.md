@@ -31,6 +31,7 @@ The trace and reflection that motivate this glossary live in
 | **Template**         | A reusable workout saved in the library                        |
 | **Step**             | A single interval inside a workout                             |
 | **Repetition block** | A grouped sequence of steps that repeats N times               |
+| **Step note**        | The coach's cue for one step; "AI" when the AI wrote it        |
 | **Coach**            | The external coaching prescription source (Train2Go etc.)      |
 | **Your note**        | The athlete's note on a coach's activity; Spanish "Tu nota"    |
 | **Zone**             | A training intensity band (HR or power), defined per profile   |

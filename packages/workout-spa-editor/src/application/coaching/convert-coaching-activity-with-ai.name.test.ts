@@ -38,6 +38,7 @@ const buildDeps = (
     aiMeta: fakeAiMeta(),
   }),
   readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",
   clock: () => "2026-05-04T10:00:00.000Z",

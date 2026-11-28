@@ -1,13 +1,16 @@
 /**
  * The `GenerateKrdPort` the coaching dialog hands the use case. No React.
  * It picks its `LlmProviderConfig` only when the AI is asked, so a build
- * the steps table answers never needs a provider.
+ * the steps table answers never needs a provider. The step-notes port below
+ * does the same for the notes a table Workout's steps get.
  */
 import type { OnGenerateProgress } from "@kaiord/ai";
 import { PROMPT_VERSION } from "@kaiord/ai/prompts";
 
 import { NoAiProviderError } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import type { GenerateKrdPort } from "../../../application/coaching/convert-coaching-activity-with-ai";
+import type { GenerateStepNotesPort } from "../../../application/coaching/table-step-notes";
+import { generateStepNotes } from "../../../lib/generate-step-notes";
 import {
   generateWorkoutKrd,
   type GenerationDeps,
@@ -60,5 +63,28 @@ export const buildGenerateKrdPort = (
         processedAt: now(),
       },
     };
+  };
+};
+
+/**
+ * The `GenerateStepNotesPort`: `null`, with no call, when no provider is
+ * configured, so a table Workout goes with its HR ranges alone.
+ */
+export const buildGenerateStepNotesPort = (
+  deps: GenerationDeps,
+  chooseModel: ChooseAiModel,
+  hooks: Pick<AiRunHooks, "onAiStart"> = {}
+): GenerateStepNotesPort => {
+  return async ({ abortSignal, ...input }) => {
+    const choice = chooseModel();
+    if (!choice) return null;
+    hooks.onAiStart?.(choice);
+    return generateStepNotes({
+      deps,
+      input,
+      provider: choice.provider,
+      modelId: choice.modelId,
+      abortSignal,
+    });
   };
 };

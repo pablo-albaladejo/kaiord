@@ -7,7 +7,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-11-23
+**Last updated:** 2026-11-25
 
 This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord App, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a, not deployed yet), the Kaiord for Garmin Chrome extension, the Kaiord for Train2Go Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord for TrainingPeaks Chrome extension, and the Kaiord for WHOOP Chrome extension.
 
@@ -24,6 +24,8 @@ All workout-editor state (workouts, templates, sport-zone profiles, AI provider 
 If you configure the optional AI features inside the Kaiord App, your prompts and workout content are sent directly from your browser to the LLM provider you chose (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service. Kaiord does not receive or relay this data. Your API key is stored in your browser (IndexedDB), obfuscated with a fixed key that ships in Kaiord's public code rather than truly encrypted, so any script running on kaiord.com (including the third-party scripts it loads, such as analytics), any browser extension allowed on kaiord.com, and anyone with access to your browser profile can read it. It is sent with each request to the provider you configured, never to Kaiord. If you turn on cross-device sync, a copy is included in the sync snapshot stored in your own Google Drive, encrypted with your passphrase only if you turned on sync encryption.
 
 When you build a workout from one of your coach's activities with AI, the coach's text for that activity and your own note on it ("Your note"), if you wrote one, are sent to the LLM provider you configured. Your note is stored in your browser with the rest of your data and, if you enable cross-device sync, is included in the snapshot saved to your own cloud storage; it is never sent to Train2Go or to a Kaiord-operated server.
+
+When your coach's activity comes with a steps table, the Kaiord App builds the workout's steps from that table on your device. If you configured an AI provider, it then asks that provider, in a separate request, for each step's note: that request carries only the coach's text for the activity and, for each step, its duration and the coach's zone label; it carries none of your health data, and the provider's answer can only add notes, never change a step. If that request fails, the workout is kept with the heart-rate range as each step's note.
 
 When you use the in-app chat assistant, summaries of your locally stored history — including workout, coaching, and health data such as sleep — are sent to the LLM provider you configured, and only while you are actively conversing with the assistant (never in the background). Your chat transcripts are stored locally in your browser like the rest of your editor state and, if you enable cross-device sync, are included in the encrypted snapshot saved to your own cloud storage; they are never sent to a Kaiord-operated server.
 

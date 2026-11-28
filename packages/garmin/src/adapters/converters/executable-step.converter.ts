@@ -1,6 +1,11 @@
-import type { Logger, Target, TargetType, WorkoutStep } from "@kaiord/core";
+import {
+  type Logger,
+  STEP_NOTE_MAX,
+  type Target,
+  type TargetType,
+  type WorkoutStep,
+} from "@kaiord/core";
 
-import { GARMIN_STEP_NOTES_MAX } from "../constants";
 import { mapConditionToDuration } from "../mappers/condition.mapper";
 import { mapGarminEquipmentToKrd } from "../mappers/equipment.mapper";
 import { mapStepTypeToIntensity } from "../mappers/intensity.mapper";
@@ -85,10 +90,10 @@ const truncateNotes = (
   stepIndex: number,
   logger?: Logger
 ): string => {
-  if (notes.length <= GARMIN_STEP_NOTES_MAX) return notes;
+  if (notes.length <= STEP_NOTE_MAX) return notes;
   logger?.warn(
-    `Lossy conversion: step notes truncated to ${GARMIN_STEP_NOTES_MAX} characters`,
+    `Lossy conversion: step notes truncated to ${STEP_NOTE_MAX} characters`,
     { stepIndex, originalLength: notes.length }
   );
-  return notes.slice(0, GARMIN_STEP_NOTES_MAX);
+  return notes.slice(0, STEP_NOTE_MAX);
 };

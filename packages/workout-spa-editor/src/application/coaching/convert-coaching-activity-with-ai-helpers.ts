@@ -5,7 +5,11 @@
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { Sport } from "../../types/schemas";
-import type { CoachingBuild, CoachingBuilder } from "./choose-coaching-builder";
+import {
+  type CoachingBuild,
+  type CoachingBuilder,
+  stepNotesNotice,
+} from "./choose-coaching-builder";
 import type { ResolvedSport } from "./coaching-krd-sport";
 import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
@@ -66,5 +70,5 @@ export const performAiCreation = async (
     resolved
   );
   deps.analytics.event("coaching.convert_with_ai.success", { created: true });
-  return { ok: true, workoutId, created: true };
+  return { ok: true, workoutId, created: true, ...stepNotesNotice(built) };
 };

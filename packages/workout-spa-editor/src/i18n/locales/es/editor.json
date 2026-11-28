@@ -388,7 +388,9 @@
     "label": "Notas e indicaciones",
     "placeholder": "Añade indicaciones o notas para este paso...",
     "count": "{{n}} / {{max}} caracteres",
-    "over": "({{n}} por encima del límite)"
+    "over": "({{n}} por encima del límite)",
+    "ai": "IA",
+    "aiTitle": "Escrita por la IA"
   },
   "paste": {
     "label": "Pegar paso",

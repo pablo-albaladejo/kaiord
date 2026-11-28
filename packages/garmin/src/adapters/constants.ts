@@ -11,12 +11,20 @@
 export const GARMIN_NAME_MAX = 255;
 
 /**
- * Maximum length we retain for a step's free-text notes (`description`).
- * This is a deliberately conservative limit (one more than `GARMIN_NAME_MAX`)
- * that the FIT adapter also uses for its notes field, keeping notes
- * truncation consistent across the FIT and Garmin write paths. It is a
- * distinct concept from `GARMIN_NAME_MAX`: a name is a short title bound by
- * the API schema, whereas notes are longer prose. The off-by-one between the
- * two values is therefore intentional, not an accidental discrepancy.
+ * Maximum length we send for a step's free-text `description`. Garmin
+ * publishes no bound for it; Garmin Connect's web workout builder counts a
+ * step note up to 200 characters, so the writer cuts a longer one there and
+ * the Garmin bridge's request gate refuses anything over it. Provisional
+ * until a live Garmin capture measures the real limit. Reading is bound by
+ * the longest note a KRD step holds instead (`STEP_NOTE_MAX` in core).
  */
-export const GARMIN_STEP_NOTES_MAX = 256;
+export const GARMIN_STEP_NOTES_MAX = 200;
+
+/**
+ * Maximum length we send for a workout's free-text `description`. Garmin
+ * publishes no bound for it; this is a conservative cap, matched by the
+ * Garmin bridge's request gate, so a long coach text is cut on write rather
+ * than refused. Provisional until a live Garmin capture measures the real
+ * limit.
+ */
+export const GARMIN_DESCRIPTION_MAX = 1024;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { GARMIN_STEP_NOTES_MAX } from "../../constants";
 import {
   garminConditionTypeSchema,
   garminEquipmentTypeSchema,
@@ -15,7 +16,7 @@ export const executableStepDTOInputSchema = z.object({
   stepOrder: z.number().int().positive(),
   stepType: garminStepTypeSchema,
   childStepId: z.number().int().positive().nullable().optional(),
-  description: z.string().max(500).optional(),
+  description: z.string().max(GARMIN_STEP_NOTES_MAX).optional(),
 
   endCondition: garminConditionTypeSchema,
   endConditionValue: z.number().nonnegative(),

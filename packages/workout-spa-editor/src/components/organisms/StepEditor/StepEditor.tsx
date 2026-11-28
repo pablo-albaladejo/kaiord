@@ -1,3 +1,5 @@
+import { isAiNote } from "@kaiord/core";
+
 import type { WorkoutStep } from "../../../types/krd";
 import { StepEditorContent } from "./StepEditorContent";
 import { StepEditorWrapper } from "./StepEditorWrapper";
@@ -36,6 +38,7 @@ export const StepEditor = ({
         duration={state.duration}
         target={state.target}
         notes={state.notes}
+        aiWrittenNote={isAiNote(step) && state.notes === (step.notes ?? "")}
         intensity={state.intensity}
         onIntensityChange={state.setIntensity}
         durationError={state.durationError}

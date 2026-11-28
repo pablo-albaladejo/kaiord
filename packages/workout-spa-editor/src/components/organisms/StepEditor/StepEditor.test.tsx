@@ -94,6 +94,52 @@ describe("StepEditor", () => {
     );
   });
 
+  const aiNoted: WorkoutStep = {
+    ...mockStep,
+    notes: "Spin easy",
+    extensions: { kaiord: { noteOrigin: "ai" }, zwift: { cadence: 90 } },
+  };
+
+  it("should drop the AI label once the note is edited", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const onSave = vi.fn();
+    render(<StepEditor step={aiNoted} onSave={onSave} onCancel={vi.fn()} />);
+
+    // Act
+    await user.type(screen.getByLabelText("Notes & Coaching Cues"), "!");
+    await user.click(
+      screen.getByRole("button", { name: /close the step form/i })
+    );
+
+    // Assert
+    expect(screen.queryByTitle("Written by the AI")).not.toBeInTheDocument();
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notes: "Spin easy!",
+        extensions: { zwift: { cadence: 90 } },
+      })
+    );
+  });
+
+  it("should keep the AI label when the step is saved with its note unchanged", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const onSave = vi.fn();
+    render(<StepEditor step={aiNoted} onSave={onSave} onCancel={vi.fn()} />);
+
+    // Act
+    await user.click(
+      screen.getByRole("button", { name: /close the step form/i })
+    );
+
+    // Assert
+    expect(screen.getByTitle("Written by the AI")).toBeInTheDocument();
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ extensions: aiNoted.extensions })
+    );
+  });
+
   it("should call onCancel when cancel button is clicked", async () => {
     // Arrange
 

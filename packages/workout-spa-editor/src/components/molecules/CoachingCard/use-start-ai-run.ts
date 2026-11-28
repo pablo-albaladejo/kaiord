@@ -20,7 +20,8 @@ export type AiRunSlots = Pick<
 /**
  * One AI run of the coaching dialog: `false` builds the Workout (or re-uses
  * it), `true` regenerates it in place. The failure toast is a static string
- * (R-PIIInterpolation).
+ * (R-PIIInterpolation), as is the one saying a Workout went without its
+ * step notes.
  */
 export const useStartAiRun = (
   activity: CoachingActivity | null,
@@ -54,6 +55,7 @@ export const useStartAiRun = (
         onClose,
         navigate,
         onFailureToast: () => toast.error(t("hooks.aiProcessFailed")),
+        onStepNotesToast: () => toast.warning(t("hooks.stepNotesFailed")),
         nameModel,
       }),
     [

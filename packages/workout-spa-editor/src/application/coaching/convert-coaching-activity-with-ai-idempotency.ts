@@ -21,7 +21,10 @@ import type { CoachingActivityRecord } from "../../types/coaching-activity-recor
 import { withFallbackName } from "../../utils/structured-workout";
 import { updateWorkoutRecord } from "../save-workout-edits";
 import { transitionToStructured } from "../workout-transitions";
-import type { CoachingBuilder } from "./choose-coaching-builder";
+import {
+  type CoachingBuilder,
+  stepNotesNotice,
+} from "./choose-coaching-builder";
 import { pickAiMeta } from "./coaching-ai-meta";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import type {
@@ -70,7 +73,12 @@ export const processExistingRawInPlace = async (
       deps.analytics.event("coaching.convert_with_ai.skipped", {
         reason: "changed-meanwhile",
       });
-    return { ok: true, workoutId: existingWorkout.id, created: false };
+    return {
+      ok: true,
+      workoutId: existingWorkout.id,
+      created: false,
+      ...stepNotesNotice(built),
+    };
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }

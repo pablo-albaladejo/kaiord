@@ -42,6 +42,11 @@ _Avoid_: Prompt, edit, override
 A training prescription structured into steps with durations and targets, ready to be executed on a device.
 _Avoid_: Session, training, structured workout, plan
 
+**Step note**:
+The coach's cue for one stretch of a Workout, shown on the device when that step starts and on the step in the editor. It is taken from the coach's text, in the coach's language; when the coach wrote nothing for that stretch, the AI may write its own, which the editor labels "AI" until the athlete edits it.
+The athlete reads "Notes & Coaching Cues" ("Notas e indicaciones").
+_Avoid_: Description, comment, step name
+
 **Activity**:
 The record of what the athlete actually did.
 _Avoid_: Session, completed workout, recorded activity

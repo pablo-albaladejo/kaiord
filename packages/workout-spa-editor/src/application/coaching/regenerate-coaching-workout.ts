@@ -15,7 +15,10 @@ import {
   withFallbackName,
 } from "../../utils/structured-workout";
 import { updateWorkoutRecord } from "../save-workout-edits";
-import type { CoachingBuilder } from "./choose-coaching-builder";
+import {
+  type CoachingBuilder,
+  stepNotesNotice,
+} from "./choose-coaching-builder";
 import { pickAiMeta } from "./coaching-ai-meta";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import type {
@@ -57,8 +60,10 @@ export const regenerateInPlace = async (
   abortSignal?: AbortSignal
 ): Promise<ConvertWithAiResult> => {
   let aiMeta: AiMeta | null;
+  let notice: ReturnType<typeof stepNotesNotice>;
   try {
     const built = await build(abortSignal);
+    notice = stepNotesNotice(built);
     const krd = regeneratedKrd(built.krd, activity);
     aiMeta = built.aiMeta && pickAiMeta(built.aiMeta);
     await updateWorkoutRecord(deps, existing.id, (fresh) =>
@@ -73,5 +78,5 @@ export const regenerateInPlace = async (
     regenerated: true,
     ai: aiMeta !== null,
   });
-  return { ok: true, workoutId: existing.id, created: false };
+  return { ok: true, workoutId: existing.id, created: false, ...notice };
 };

@@ -196,6 +196,7 @@
   },
   "hooks": {
     "aiProcessFailed": "Failed to process activity with AI",
+    "stepNotesFailed": "The step notes could not be added. Regenerate to try again.",
     "workoutMatched": "Workout matched",
     "migratedOne": "1 workout matched to a coaching activity",
     "migratedMany": "Workouts matched to coaching activities",

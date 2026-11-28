@@ -26,5 +26,7 @@ export type StartAiCtx = {
   onClose: () => void;
   navigate: (to: string) => void;
   onFailureToast: () => void;
+  /** The Workout was built, but without its step notes. */
+  onStepNotesToast: () => void;
   nameModel: ModelNamer;
 };

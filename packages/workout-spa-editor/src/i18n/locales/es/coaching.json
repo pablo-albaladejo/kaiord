@@ -196,6 +196,7 @@
   },
   "hooks": {
     "aiProcessFailed": "No se pudo procesar la actividad con IA",
+    "stepNotesFailed": "No se pudieron añadir las notas de los pasos. Regenera para intentarlo de nuevo.",
     "workoutMatched": "Entreno emparejado",
     "migratedOne": "1 entreno emparejado con una actividad de coaching",
     "migratedMany": "Entrenos emparejados con actividades de coaching",

@@ -1,19 +1,23 @@
 /* eslint-disable no-magic-numbers -- a steps table is literal durations, watts and bpm, clearer inline */
 /**
  * E2E: a Train2Go Coaching Activity that comes with its steps table
- * converts from the table, without the AI.
+ * converts from the table; the AI only writes the step notes.
  *
  * The activity is seeded as the Train2Go Connector stores it after the
  * daily read: description plus `structuredSteps` (synthetic, invented
- * values). Every LLM endpoint is routed, so a call to the AI would be seen;
- * the assertion is that none is made and the stored workout holds the
- * table's steps and repeat. The dialog shows the coach's table before and
- * after the Workout is built. With no provider configured at all, the build
- * and Regenerate still work and no AI progress is shown.
+ * values). Every LLM endpoint is routed, so every call to the AI is seen:
+ * with a provider, the one call is the notes-only one, and the stored
+ * workout holds the table's steps and repeat with the coach's cue before
+ * each HR range. The dialog shows the coach's table before and after the
+ * Workout is built. With an Athlete note, Regenerate has the AI build the
+ * Workout and its notes change. With no provider configured at all, the
+ * build and Regenerate still work and no AI is called.
  */
 import type { Page, Route } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
+import { fulfillLlm } from "./fixtures/llm-sse";
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -103,11 +107,54 @@ const seed = async (page: Page, day: string, ts: string) => {
   );
 };
 
-const routeLlm = async (page: Page) => {
-  const calls = { count: 0 };
+const CUE = "Rueda suave";
+const NOTE = "quiero indicaciones de cadencia";
+const AI_CUE = "Cadencia alta, sentado";
+
+const message = (answer: unknown) => ({
+  ...LLM_CYCLING_RESPONSE,
+  content: [{ type: "text", text: JSON.stringify(answer) }],
+});
+
+/** The notes-only call: the coach's cue on the table's first step. */
+const NOTES_ANSWER = message({
+  notes: [{ step: 1, text: CUE, origin: "coach" }],
+});
+
+/** The AI's own build, its note following the Athlete note. */
+const parserAnswer = (withNote: boolean) =>
+  message({
+    name: "Rodaje con tabla",
+    sport: "cycling",
+    steps: [
+      {
+        stepIndex: 0,
+        durationType: "time",
+        duration: { type: "time", seconds: 600 },
+        targetType: "open",
+        target: { type: "open" },
+        intensity: "active",
+        notes: withNote ? AI_CUE : CUE,
+        noteOrigin: withNote ? "ai" : "coach",
+      },
+    ],
+  });
+
+const isNotesCall = (body: string) =>
+  body.includes("You write the note each step");
+
+/** `answer: false` aborts every call, so none could build a Workout. */
+const routeLlm = async (page: Page, answer = false) => {
+  const calls = { count: 0, bodies: [] as string[] };
   const countLlm = async (route: Route) => {
     calls.count += 1;
-    await route.abort();
+    const body = route.request().postData() ?? "";
+    calls.bodies.push(body);
+    if (!answer) return route.abort();
+    await fulfillLlm(
+      route,
+      isNotesCall(body) ? NOTES_ANSWER : parserAnswer(body.includes(NOTE))
+    );
   };
   await page.route("**/api.anthropic.com/**", countLlm);
   await page.route("**/api.openai.com/**", countLlm);
@@ -126,14 +173,14 @@ const storedStructured = (page: Page) =>
   }, PROFILE_ID);
 
 test.describe("Train2Go Coaching Activity with a steps table", () => {
-  test("shows the coach's table and converts from it without calling the AI", async ({
+  test("shows the coach's table, takes the steps from it and asks the AI only for the notes", async ({
     page,
   }) => {
     // Arrange
     await page.goto("/calendar");
     await waitForDexieReady(page);
     await clearDexie(page);
-    const llm = await routeLlm(page);
+    const llm = await routeLlm(page, true);
     await seedAiProvider(page);
     const day = getWeekDates(0)[2];
     await seed(page, day, new Date(day + "T08:00:00Z").toISOString());
@@ -160,7 +207,8 @@ test.describe("Train2Go Coaching Activity with a steps table", () => {
     // Assert
     await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
     const stored = await storedStructured(page);
-    expect(llm.count).toBe(0);
+    expect(llm.count).toBe(1);
+    expect(isNotesCall(llm.bodies[0] ?? "")).toBe(true);
     expect(stored).toHaveLength(1);
     expect(stored[0]?.aiMeta).toBeNull();
     const krd = stored[0]?.krd as {
@@ -173,8 +221,9 @@ test.describe("Train2Go Coaching Activity with a steps table", () => {
       name: "R0",
       duration: { type: "time", seconds: 600 },
       target: { type: "power", value: { unit: "range", min: 100, max: 140 } },
-      notes: "HR 110-125 bpm",
+      notes: `${CUE} · HR 110-125 bpm`,
     });
+    expect(steps[2]).toMatchObject({ notes: "HR 110-125 bpm" });
 
     // Once the Workout is built, the coach's table is still shown.
     await page.goto(`/calendar/${getWeekId(day)}`);
@@ -184,6 +233,46 @@ test.describe("Train2Go Coaching Activity with a steps table", () => {
         .getByTestId("coaching-activity-dialog")
         .getByTestId("coaching-dialog-steps")
     ).toBeVisible();
+  });
+
+  test("lets the Athlete note change the step notes on Regenerate", async ({
+    page,
+  }) => {
+    // Arrange
+    await page.goto("/calendar");
+    await waitForDexieReady(page);
+    await clearDexie(page);
+    const llm = await routeLlm(page, true);
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    await seed(page, day, new Date(day + "T08:00:00Z").toISOString());
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    await page.getByTestId(`coaching-card-${SOURCE}:${SOURCE_ID}`).click();
+    const dialog = page.getByTestId("coaching-activity-dialog");
+    await dialog.getByTestId("coaching-dialog-ai-process").click();
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    await expect(page.getByText(`${CUE} · HR 110-125 bpm`)).toBeVisible();
+    await expect(page.getByTitle("Written by the AI")).toHaveCount(0);
+
+    // Act
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    await page.getByTestId(`matched-card-${SOURCE}:${SOURCE_ID}`).click();
+    await page.getByRole("textbox", { name: "Your note" }).fill(NOTE);
+    await page.getByRole("button", { name: "Save note" }).click();
+    await expect(page.getByTestId("athlete-note-clear")).toBeVisible();
+    await dialog.getByTestId("coaching-dialog-regenerate").click();
+
+    // Assert
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    await expect(page.getByText(AI_CUE)).toBeVisible();
+    await expect(page.getByTitle("Written by the AI")).toBeVisible();
+    expect(llm.bodies.at(-1)).toContain(NOTE);
+    const stored = await storedStructured(page);
+    expect(stored).toHaveLength(1);
+    const krd = stored[0]?.krd as {
+      extensions: { structured_workout: { steps: { notes?: string }[] } };
+    };
+    expect(krd.extensions.structured_workout.steps[0]?.notes).toBe(AI_CUE);
   });
 
   test("builds and regenerates from the table with no AI provider configured", async ({
