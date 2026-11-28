@@ -114,3 +114,10 @@
       counted in the account's time zone, with no "schedule it for today or
       tomorrow"; notice and refusal copy tested in English and Spanish; store
       listing sentence and its claim updated.
+- [x] 6.11 (#1636, owner decision 2026-11-23) A send whose answer never
+      arrived is recorded on the ledger row (`unansweredSend`); the next
+      send reads that day through a new one-day closed-list entry, asks when
+      a workout of the same title is there or the read fails, and offers
+      "Send anyway" (en, es); use-case, hook, component and end-to-end tests
+      (`e2e/trainingpeaks-unanswered-send.spec.ts`); listing, justification,
+      privacy policy, checker rule and claims updated.

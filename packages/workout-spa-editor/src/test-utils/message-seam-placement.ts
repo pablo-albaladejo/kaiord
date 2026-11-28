@@ -7,6 +7,12 @@
  * `restartTab()` models a tab that died: a fresh in-tab join map and lock
  * manager over the same device storage. `openTab()` is a second tab of the
  * same browser: its own join map, the browser's one lock manager.
+ * `protocol: 2` is the current extension (raw answers), with the library
+ * delete it regains once the owner turns `GARMIN_LIBRARY_DELETES` on, or
+ * without it (`libraryDelete: false`, today's closed list); the default, 1,
+ * the previous one, which has no library delete. `libraryPort: false`
+ * hands the pipeline no library port, as production wires it while the
+ * switch is off.
  */
 import { vi } from "vitest";
 
@@ -18,6 +24,7 @@ import type { PlacementPipelineDeps } from "../application/garmin-placement/plac
 import { SCHEDULE_IDS_IN_FIND } from "../application/garmin-placement/placement-timing";
 import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
 import { createGarminCalendarPort } from "../adapters/garmin/connector/garmin-calendar-operations";
+import { createGarminLibraryPort } from "../adapters/garmin/connector/garmin-library-operations";
 import { buildGarminPushFn } from "../hooks/garmin-push-fn";
 import { GARMIN_LEDGER_BRIDGE_ID } from "../types/export-ledger";
 import { createFakeGarminPlatform } from "./fake-garmin-platform";
@@ -33,8 +40,15 @@ const pushFn = buildGarminPushFn(async (gcn) => {
     : { success: false, garminWorkoutId: null };
 });
 
-export const createMessageSeamConnector = (db: KaiordDatabase) => {
-  const garmin = createFakeGarminPlatform();
+export const createMessageSeamConnector = (
+  db: KaiordDatabase,
+  {
+    protocol = 1,
+    libraryDelete = true,
+    libraryPort = true,
+  }: { protocol?: number; libraryDelete?: boolean; libraryPort?: boolean } = {}
+) => {
+  const garmin = createFakeGarminPlatform({ protocol, libraryDelete });
   garmin.install();
   const ledgerRepo = createDexieExportLedgerRepository(db);
   type Tab = {
@@ -45,6 +59,9 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
   const deps = (on: Tab = tab): PlacementPipelineDeps => ({
     ledgerRepo,
     calendar: createGarminCalendarPort(() => EXTENSION_ID),
+    ...(libraryPort
+      ? { library: createGarminLibraryPort(() => EXTENSION_ID) }
+      : {}),
     scheduleIdsInFind: SCHEDULE_IDS_IN_FIND,
     now: () => Date.now(),
     sleep: async (ms) => {
@@ -87,8 +104,12 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
   const openTab = () => {
     const other: Tab = { joins: new Map(), locks: tab.locks };
     return {
-      send: (recordId: string, date: string, workoutName: string) =>
-        sendOn(other, recordId, date, workoutName),
+      send: (
+        recordId: string,
+        date: string,
+        workoutName: string,
+        content = "v1"
+      ) => sendOn(other, recordId, date, workoutName, content),
     };
   };
   const restartTab = () => {

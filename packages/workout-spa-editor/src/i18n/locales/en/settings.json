@@ -12,7 +12,7 @@
   },
   "tabs": {
     "general": "General",
-    "capabilities": "Capabilities",
+    "capabilities": "Features",
     "authority": "Which Platform decides",
     "ai": "AI",
     "sync": "Sync",
@@ -58,6 +58,7 @@
     "custom": "Custom…",
     "inherit": "Same as main model",
     "inheritRuns": "Runs {{model}}",
+    "notEvaluated": "{{model}} (not evaluated)",
     "retired": "{{model}} was retired by the provider — using {{successor}} instead.",
     "deprecated": "{{model}} is deprecated and will be retired — consider {{successor}}.",
     "deprecatedOn": "{{model}} is deprecated and will be retired on {{date}} — consider {{successor}}.",

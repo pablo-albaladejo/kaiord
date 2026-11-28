@@ -3,6 +3,7 @@ import { managedDataTypes } from "@kaiord/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
+import { memoryLocation } from "wouter/memory-location";
 
 import type { BridgeConnectionState } from "../../../adapters/bridge/bridge-connection-types";
 import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
@@ -343,6 +344,28 @@ describe("DataTypeRoutingSection", () => {
       screen.queryByTestId("routing-choice-weight-tanita-bridge")
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("authority-matrix-link")).toBeNull();
+  });
+
+  it("should bring the kind named in the link of the Authority notice into focus", () => {
+    // Arrange
+    const loc = memoryLocation({ path: "/connections?kind=weight" });
+
+    // Act
+    render(
+      <CapabilitiesFixture on={[]}>
+        <Router hook={loc.hook} searchHook={loc.searchHook}>
+          <DataTypeRoutingSection
+            profileId={PROFILE_ID}
+            byDataType={flows({})}
+          />
+        </Router>
+      </CapabilitiesFixture>
+    );
+
+    // Assert
+    expect(document.activeElement).toBe(
+      screen.getByTestId("routing-row-weight")
+    );
   });
 
   it("should link to the matrix only while it is on", () => {

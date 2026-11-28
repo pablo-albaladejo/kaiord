@@ -300,6 +300,42 @@ test("a landing privacy page without the redirect fails on each missing part", (
 // nothing else fires.
 
 const SOLO_CASES = [
+  [
+    TRAIN2GO,
+    "at most once every 5 minutes unless you press Refresh; it keeps what it read only in the extension's memory, never on disk, and never hands it to the Kaiord App",
+    "it keeps some of this",
+    "Train2Go popup reads kept in memory, at most once every 5 minutes",
+  ],
+  [
+    GARMIN,
+    "a workout's author (your name and profile pictures) and the people it is shared with, an activity's owner names and pictures and the places it started and ended",
+    "some details",
+    "Garmin personal fields removed from answers",
+  ],
+  [
+    TRAIN2GO,
+    "the extension removes from it your gender, birthday, body fat, BMI, height and smoking",
+    "some details",
+    "Train2Go personal fields removed from answers",
+  ],
+  [
+    TANITA,
+    "also removes each form field named as a first, last or full name, birth date, gender, email, phone or address",
+    "some details",
+    "Tanita personal fields removed from answers",
+  ],
+  [
+    TRAININGPEAKS,
+    "the personal details the Kaiord App does not read: a workout's comments (your coach's and yours)",
+    "some details",
+    "TrainingPeaks personal fields removed from answers",
+  ],
+  [
+    WHOOP,
+    "the personal details the Kaiord App does not read: a lab test's patient name, height and weight",
+    "some details",
+    "WHOOP personal fields removed from answers",
+  ],
   [GARMIN, "connect.garmin.com", "redacted.example", "Garmin host disclosed"],
   [GARMIN, "sso.garmin.com", "redacted.example", "Garmin SSO host disclosed"],
   [
@@ -338,6 +374,12 @@ const SOLO_CASES = [
     "Kaiord itself placed and has since superseded",
     "someone placed",
     "Garmin calendar delete limited to superseded Kaiord-placed entries",
+  ],
+  [
+    GARMIN,
+    "and the earlier version stays in your library",
+    "and the earlier version is deleted from your library",
+    "Garmin library workouts never deleted; an edit keeps the earlier version",
   ],
   [
     GARMIN,
@@ -543,6 +585,12 @@ const SOLO_CASES = [
     "TrainingPeaks workout read kept by the App to its id and day",
   ],
   [
+    TRAININGPEAKS,
+    "which keeps only their titles",
+    "which keeps all of them",
+    "TrainingPeaks day read only after an unanswered send, kept to titles",
+  ],
+  [
     WHOOP,
     "WHOOP's answer is handed to the Kaiord App as it came, without being read",
     "WHOOP's answer is read and handed on",
@@ -592,7 +640,7 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "`read:body`, `write:body` and `write:workouts` capabilities",
+    "`read:body` and `write:workouts` capabilities",
     "some capabilities",
     "TrainingPeaks body and workout scopes disclosed",
   ],
@@ -610,9 +658,9 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "but the Kaiord App does not send it today",
-    "and the Kaiord App may send it",
-    "TrainingPeaks unused weight write disclosed",
+    "writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent",
+    "writes what it writes",
+    "TrainingPeaks metric write refused",
   ],
   [
     TRAININGPEAKS,
@@ -1049,7 +1097,7 @@ test("gutting the rule set for a section that still exists is flagged", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /tanita-bridge Bridge extension covered/);
-  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 13/);
+  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 14/);
 });
 
 test("the rule-count floor is shrink-only, not a flat minimum", () => {

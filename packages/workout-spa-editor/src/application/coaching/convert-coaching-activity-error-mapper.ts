@@ -5,6 +5,8 @@
  * consistent.
  *
  * - AbortError → "ai-cancelled" (the user pressed Cancel / Escape)
+ * - `NoAiProviderError` → "no-provider" (the build needed the AI and none
+ *   is configured)
  * - provider rejects the model as unknown → "ai-model-unavailable"
  * - timeout-shaped errors → "ai-timeout"
  * - KRD validation / Zod errors → "ai-invalid-krd"
@@ -18,12 +20,21 @@ import type { Analytics } from "@kaiord/core";
 import { KrdValidationError } from "@kaiord/core";
 
 export type AiFailureReason =
+  | "no-provider"
   | "ai-error"
   | "ai-model-unavailable"
   | "ai-cancelled"
   | "ai-timeout"
   | "ai-invalid-krd"
   | "transport-error";
+
+/** Thrown by a `generateKrd` port asked to build when no AI is configured. */
+export class NoAiProviderError extends Error {
+  constructor() {
+    super("No AI provider is configured");
+    this.name = "NoAiProviderError";
+  }
+}
 
 const isAbort = (err: unknown): boolean => {
   if (err instanceof DOMException && err.name === "AbortError") return true;
@@ -52,6 +63,7 @@ const isInvalidKrd = (err: unknown): boolean => {
 };
 
 export const classifyAiFailure = (err: unknown): AiFailureReason => {
+  if (err instanceof NoAiProviderError) return "no-provider";
   if (isAbort(err)) return "ai-cancelled";
   if (isModelNotFoundError(err)) return "ai-model-unavailable";
   if (isTimeout(err)) return "ai-timeout";

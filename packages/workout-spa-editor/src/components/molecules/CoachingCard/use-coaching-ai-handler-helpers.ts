@@ -1,42 +1,19 @@
 /**
  * Pure helper for `useCoachingAi.startAi` extracted to keep the hook
  * file under the per-file/per-function line caps. Owns the in-flight
- * lock check, provider lookup, use-case invocation, success-navigate,
- * and failure-toast dispatch. The toast call itself stays in the hook
+ * lock check, use-case invocation, success-navigate, and failure-toast
+ * dispatch. The provider is looked up only if the build asks the AI, and
+ * the progress (with the model's name) shows only then. The toast call itself stays in the hook
  * so the R-PIIInterpolation guard finds the literal alongside its
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
-import { modelDisplayName, resolveModelForPurpose } from "@kaiord/ai/providers";
-import type { Analytics } from "@kaiord/core";
-import type { MutableRefObject } from "react";
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
 
-import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { classifyAiFailure } from "../../../application/coaching/convert-coaching-activity-error-mapper";
-import type { GenerationDeps } from "../../../lib/generate-workout";
 import { withOrigin } from "../../../routing/with-origin";
-import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import type { AiModelBinding } from "../../../types/ai-model-binding";
-import type { CoachingActivity } from "../../../types/coaching-activity";
-import { beginAiRun, endAiRun, type SetAiRunProgress } from "./ai-run-progress";
+import { beginAiRun, endAiRun } from "./ai-run-progress";
+import type { StartAiCtx } from "./start-ai-ctx";
 import { runConvertWithAi } from "./use-coaching-ai-helpers";
-
-type Reason = AiFailureReason | "not-found" | "no-provider";
-
-export type StartAiCtx = {
-  activity: CoachingActivity | null;
-  profileId: string | null;
-  expandActivity: (activity: CoachingActivity) => void;
-  providers: LlmProviderConfig[] | undefined;
-  bindings: AiModelBinding[] | undefined;
-  deps: GenerationDeps;
-  analytics: Analytics;
-  abortRef: MutableRefObject<AbortController | null>;
-  setFailure: (f: { reason: Reason; error?: string } | null) => void;
-  setProgress: SetAiRunProgress;
-  onClose: () => void;
-  navigate: (to: string) => void;
-  onFailureToast: () => void;
-};
 
 export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (!ctx.activity || !ctx.profileId || ctx.abortRef.current) return;
@@ -47,17 +24,14 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (ctx.activity.description === undefined) {
     await ctx.expandActivity(ctx.activity);
   }
-  const resolved = resolveModelForPurpose(
-    "workout_generation",
-    ctx.providers ?? [],
-    ctx.bindings ?? []
-  );
-  if (!resolved) return ctx.setFailure({ reason: "no-provider" });
   ctx.setFailure(null);
-  const { controller, onProgress } = beginAiRun(
-    ctx,
-    modelDisplayName(resolved.modelId)
-  );
+  const { controller, onAiStart, onProgress } = beginAiRun(ctx);
+  const chooseModel = () =>
+    resolveModelForPurpose(
+      "workout_generation",
+      ctx.providers ?? [],
+      ctx.bindings ?? []
+    );
   // The view-model `activity.id` is `${source}:${sourceId}`; the
   // persistence record id (what `coaching.getById` keys on) is the
   // composite `${profileId}:${source}:${sourceId}` — see
@@ -67,9 +41,11 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   try {
     result = await runConvertWithAi({
       activityId: `${ctx.profileId}:${ctx.activity.id}`,
-      provider: resolved.provider,
-      modelId: resolved.modelId,
+      chooseModel,
       abortSignal: controller.signal,
+      regenerate: ctx.regenerate,
+      onAiStart: (choice) =>
+        onAiStart(ctx.nameModel(choice.provider.type, choice.modelId)),
       onProgress,
       deps: ctx.deps,
       analytics: ctx.analytics,
@@ -89,12 +65,13 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   // A cancel that lands after the run settled must not navigate away.
   if (controller.signal.aborted) return;
   if (result.ok) {
+    if (result.stepNotesFailed) ctx.onStepNotesToast();
     ctx.onClose();
     ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     return;
   }
-  if (result.reason !== "ai-cancelled") {
-    ctx.setFailure({ reason: result.reason, error: result.error });
-    ctx.onFailureToast();
-  }
+  if (result.reason === "ai-cancelled") return;
+  ctx.setFailure({ reason: result.reason, error: result.error });
+  // No provider is a setup step shown inline, not a failed run.
+  if (result.reason !== "no-provider") ctx.onFailureToast();
 };

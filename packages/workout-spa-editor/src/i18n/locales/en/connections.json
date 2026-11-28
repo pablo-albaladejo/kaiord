@@ -121,6 +121,10 @@
     }
   },
   "authorityMatrixLink": "Choose which Platform decides each kind of data",
+  "authorityNotice": {
+    "decides": "{{decides}} now decides: {{kinds}}. Days only {{replaces}} reported don't change.",
+    "change": "Change it"
+  },
   "dataTypeHints": {
     "workout": "Completed structured sessions",
     "planned-session": "What you or your coach scheduled",

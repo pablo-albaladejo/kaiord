@@ -262,6 +262,35 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     expect(actions).not.toContain("read-details");
   });
 
+  test("(a2) the zones sync does not load — says so, with Reload, and asks Train2Go nothing", async ({
+    page,
+  }) => {
+    // Arrange: the zones sync is on, but its code cannot be fetched (the
+    // dev module, or the built chunk).
+    await page.route(
+      /\/coaching\/sync-zones\.ts|\/sync-zones-[\w-]{8}\.js/,
+      (route) => route.abort()
+    );
+    await seedProfile(page, true, undefined);
+
+    // Act
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+    await waitForBridgeAction(page, "read-week");
+
+    // Assert: the mount import and the week sync's fan-out each try once.
+    const toast = page
+      .getByRole("listitem")
+      .filter({ hasText: "Your zones were not synced." })
+      .first();
+    await expect(toast).toContainText(
+      "Part of the Kaiord App did not load, so nothing was asked of Train2Go."
+    );
+    await expect(toast.getByRole("button", { name: "Reload" })).toBeVisible();
+    await expect(toast).not.toContainText("not answering");
+    expect(await getBridgeCallActions(page)).not.toContain("read-details");
+  });
+
   test("(b) toggle-on with empty profile — silent fills, no dialog", async ({
     page,
   }) => {

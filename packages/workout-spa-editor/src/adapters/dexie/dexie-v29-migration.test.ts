@@ -14,7 +14,7 @@ import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { KaiordDatabase } from "./dexie-database";
 
 const SCHEMA_SEED = 28;
-const SCHEMA_HEAD = 40;
+const SCHEMA_HEAD = 41;
 const STORES_SEED = {
   profiles: "id",
   meta: "key",

@@ -5,35 +5,15 @@
  * the inline error state AND fires a single static toast (Amendment
  * C2 — R-PIIInterpolation: the message MUST be a bare string literal
  * or a top-level SCREAMING_SNAKE_CASE constant referring to one).
- * In-flight `AbortController` doubles as the re-entry lock.
+ * In-flight `AbortController` doubles as the re-entry lock, for a build
+ * and for a Regenerate alike.
  */
 import { useCallback, useRef, useState } from "react";
-import { useLocation } from "wouter";
 
-import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
-import { useAnalytics } from "../../../contexts/analytics-context";
-import { useToastContext } from "../../../contexts/ToastContext";
-import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
-import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
-import { useGenerationDeps } from "../../../hooks/use-generation-deps";
-import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { type AiRunProgress, cancelAiRun } from "./ai-run-progress";
-import { runStartAi, type StartAiCtx } from "./use-coaching-ai-handler-helpers";
-
-export type AiFailureState = {
-  reason: AiFailureReason | "not-found" | "no-provider";
-  error?: string;
-};
-
-export type UseCoachingAi = {
-  processing: boolean;
-  progress: AiRunProgress | null;
-  failure: AiFailureState | null;
-  clearFailure: () => void;
-  startAi: () => Promise<void>;
-  cancelAi: () => void;
-};
+import type { AiFailureState, UseCoachingAi } from "./use-coaching-ai-types";
+import { useStartAiRun } from "./use-start-ai-run";
 
 export const useCoachingAi = (
   activity: CoachingActivity | null,
@@ -41,54 +21,22 @@ export const useCoachingAi = (
   onClose: () => void,
   expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingAi => {
-  const deps = useGenerationDeps();
-  const analytics = useAnalytics();
-  const toast = useToastContext();
-  const t = useTranslate("coaching");
-  const providers = useAiProvidersLive();
-  const bindings = useAiModelBindingsLive(profileId);
-  const [, navigate] = useLocation();
   const [progress, setProgress] = useState<AiRunProgress | null>(null);
   const [failure, setFailure] = useState<AiFailureState | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-
-  const startAi = useCallback(async () => {
-    const ctx: StartAiCtx = {
-      activity,
-      profileId,
-      expandActivity,
-      providers,
-      bindings,
-      deps,
-      analytics,
-      abortRef,
-      setFailure,
-      setProgress,
-      onClose,
-      navigate,
-      onFailureToast: () => toast.error(t("hooks.aiProcessFailed")),
-    };
-    await runStartAi(ctx);
-  }, [
-    t,
-    activity,
-    profileId,
-    providers,
-    bindings,
-    deps,
-    analytics,
-    toast,
-    onClose,
-    navigate,
-    expandActivity,
-  ]);
+  const run = useStartAiRun(activity, profileId, onClose, expandActivity, {
+    abortRef,
+    setFailure,
+    setProgress,
+  });
 
   return {
     processing: progress !== null,
     progress,
     failure,
     clearFailure: useCallback(() => setFailure(null), []),
-    startAi,
+    startAi: useCallback(() => run(false), [run]),
+    regenerateAi: useCallback(() => run(true), [run]),
     cancelAi: useCallback(() => cancelAiRun({ abortRef, setProgress }), []),
   };
 };

@@ -1,6 +1,7 @@
 import type { Analytics } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInMemoryAthleteNoteRepository } from "../../test-utils/in-memory-athlete-note-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
@@ -28,11 +29,14 @@ const buildDeps = (
   coaching: buildStubCoachingRepo([]),
   workouts: buildStubWorkoutRepo(),
   sessionMatches: createInMemorySessionMatchRepository(),
+  athleteNotes: createInMemoryAthleteNoteRepository(),
   transaction: passThroughTransaction,
   analytics: buildStubAnalytics(),
   generateKrd: vi
     .fn()
     .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() }),
+  readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",
   clock: () => NOW,
@@ -345,8 +349,9 @@ describe("convertCoachingActivityWithAi", () => {
     // fire two calls without awaiting the first
     void convertCoachingActivityWithAi({ activityId: activity.id }, deps);
     void convertCoachingActivityWithAi({ activityId: activity.id }, deps);
-    await Promise.resolve();
-    await Promise.resolve();
+    // Let both calls reach the model (they read the activity, the workout
+    // and the Athlete note first).
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
     // both invocations call generateKrd (the application layer

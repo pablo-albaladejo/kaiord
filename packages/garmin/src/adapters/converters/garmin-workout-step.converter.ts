@@ -1,5 +1,6 @@
 import type { Logger, WorkoutStep } from "@kaiord/core";
 
+import { GARMIN_STEP_NOTES_MAX } from "../constants";
 import { mapDurationToCondition } from "../mappers/condition.mapper";
 import { mapKrdEquipmentToGarmin } from "../mappers/equipment.mapper";
 import {
@@ -80,6 +81,20 @@ export const mapWorkoutStep = (
     secondaryZoneNumber: null,
     strokeType,
     equipmentType,
-    ...(step.notes ? { description: step.notes } : {}),
+    ...descriptionOf(step.notes, stepOrder, logger),
   };
+};
+
+const descriptionOf = (
+  notes: string | undefined,
+  stepOrder: number,
+  logger?: Logger
+): { description?: string } => {
+  if (!notes) return {};
+  if (notes.length <= GARMIN_STEP_NOTES_MAX) return { description: notes };
+  logger?.warn(
+    `Lossy conversion: step description truncated to ${GARMIN_STEP_NOTES_MAX} characters`,
+    { stepOrder, originalLength: notes.length }
+  );
+  return { description: notes.slice(0, GARMIN_STEP_NOTES_MAX) };
 };

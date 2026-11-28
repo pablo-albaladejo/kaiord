@@ -9,7 +9,7 @@ Train2Go-specific adapter code: scrape the Train2Go coaching plan via the extens
 
 ## Key Files
 
-- `connector/` — the Train2Go Connector's reading (ADR 0004): `train2go-paths.ts` (what it asks for, each path on the extension's closed list), `train2go-extension-transport.ts`, `train2go-read-zones.ts` and `train2go-read-profile.ts` (each read through `adapters/bridge/connector-call.ts`: `request` answered raw, or the protocol-1 legacy action), `read-train2go-answers.ts` and the `parse-*` / `extract-comments` parsers (weekly, daily, comments, profile page kept to zones and weight), loaded on the first read through `load-train2go-answers.ts` so they stay out of the initial JS. Fixtures are Train2Go's bytes and are prettier-ignored. Contract test: `connector/train2go-connector-contract.test.ts`.
+- `connector/` — the Train2Go Connector's reading (ADR 0004): `train2go-paths.ts` (what it asks for, each path on the extension's closed list), `train2go-extension-transport.ts`, `train2go-read-zones.ts` and `train2go-read-profile.ts` (each read through `adapters/bridge/connector-call.ts`: `request` answered raw, or the protocol-1 legacy action), `read-train2go-answers.ts` and the `parse-*` / `extract-comments` parsers (weekly, daily, comments, profile page kept to zones and weight; `parse-activity-steps.ts` with `steps-grid-*` / `steps-cell-values.ts` reads a Coaching Activity's steps grid out of the daily block, whole or not at all), loaded on the first read through `load-train2go-answers.ts` so they stay out of the initial JS. Fixtures are Train2Go's bytes and are prettier-ignored. Contract test: `connector/train2go-connector-contract.test.ts`.
 - `train2go-record.converter.ts` / `.converter.test.ts` — raw Train2Go record → intermediate shape.
 - `coaching-record-to-activity.converter.ts` / `.converter.test.ts` — intermediate → `CoachingActivityRecord` (uses `buildCoachingActivityId` for the composite id).
 - `train2go-coaching-transport.ts` / `.test.ts` — request/response over the bridge transport for coaching scrape calls.
@@ -23,7 +23,7 @@ Train2Go-specific adapter code: scrape the Train2Go coaching plan via the extens
 - `use-train2go-data.ts` — `useLiveQuery` wrapper over coaching data.
 - `use-expand-callback.ts` — day-expand callback wiring.
 - `use-connect-callback.ts` — link callback wiring (re-exported by `use-train2go-actions.ts`).
-- `zones-sync-failure.ts` — the toast a failed zones sync shows, by reason.
+- `zones-sync-failure.ts` — the toast a failed zones sync shows, by reason; the not-loaded notice is handed in by the provider.
 - `use-zones-sync-orchestrator.ts` / `.test.ts` — coordinates the zones-sync write flow with the application layer.
 
 ## For AI Agents

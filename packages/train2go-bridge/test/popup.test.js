@@ -336,43 +336,8 @@ describe("Train2Go popup", () => {
     expect(region.children.length).toBe(0);
   });
 
-  it("uses cached rollup when fresh and skips read-week", async () => {
-    const mock = buildChromeMock({
-      pingResponse: {
-        ok: true,
-        data: { sessionActive: true, userName: "P", userId: 1 },
-      },
-      readWeekResponse: { ok: false, error: "should not be called" },
-      storage: {
-        lastWeeklyRollup: {
-          planned: 3,
-          done: 1,
-          workload: 200,
-          // 30 seconds in the FUTURE so cache is fresh regardless
-          // of the JSDOM-side clock vs the Node-side clock.
-          cachedAt: Number.MAX_SAFE_INTEGER,
-        },
-      },
-    });
-    const dom = setupDom(mock);
-
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-
-    const calls = mock.runtime.sendMessage.mock.calls.map((c) => c[0].action);
-    expect(calls).toContain("read-profile");
-    expect(calls).not.toContain("ping");
-    expect(calls).not.toContain("read-week");
-    expect(readFigures(dom)).toEqual([
-      ["3", "planned"],
-      ["1", "done"],
-      ["200", "workload"],
-    ]);
-  });
-
-  it("falls back to read-week when cache is stale", async () => {
+  it("should read the week each time it opens, whatever an older version left in storage", async () => {
+    // Arrange
     const mock = buildChromeMock({
       pingResponse: {
         ok: true,
@@ -387,24 +352,48 @@ describe("Train2Go popup", () => {
           planned: 99,
           done: 99,
           workload: 9999,
-          cachedAt: 0, // epoch start — guaranteed stale regardless of clock
+          cachedAt: Number.MAX_SAFE_INTEGER,
         },
       },
     });
+
+    // Act
     const dom = setupDom(mock);
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
+    for (let i = 0; i < 8; i += 1) await flushAsync();
 
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-
+    // Assert
     const calls = mock.runtime.sendMessage.mock.calls.map((c) => c[0].action);
     expect(calls).toContain("read-week");
-    expect(readFigures(dom)[0]).toEqual(["1", "planned"]);
+    expect(readFigures(dom)).toEqual([
+      ["1", "planned"],
+      ["0", "done"],
+      ["50", "workload"],
+    ]);
+  });
+
+  it("should store nothing it read, only its own Connection health", async () => {
+    // Arrange
+    const mock = buildChromeMock({
+      pingResponse: {
+        ok: true,
+        data: { sessionActive: true, userName: "P", userId: 1, notes: "n" },
+      },
+      readWeekResponse: {
+        ok: true,
+        data: { activities: [{ status: 1, workload: 80 }] },
+      },
+    });
+
+    // Act
+    setupDom(mock);
+    for (let i = 0; i < 8; i += 1) await flushAsync();
+
+    // Assert
+    const written = mock.storage.local.set.mock.calls.flatMap((c) =>
+      Object.keys(c[0])
+    );
+    expect(written.every((key) => key === "bridgeHealth")).toBe(true);
+    expect(mock.__store.lastWeeklyRollup).toBeUndefined();
   });
 
   it("rollup-only failure preserves connected state", async () => {
@@ -546,5 +535,29 @@ describe("Train2Go popup", () => {
     expect(POPUP_HTML).not.toContain("--accent");
     expect(POPUP_HTML).not.toMatch(/#[0-9a-fA-F]{6}/);
     expect(POPUP_HTML).toContain(">T2</span");
+  });
+
+  it("should leave the 5-minute limit to opening and force a read on Refresh", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      pingResponse: {
+        ok: true,
+        data: { sessionActive: true, userName: "Pablo", userId: 28035 },
+      },
+      readWeekResponse: { ok: true, data: { activities: [] } },
+    });
+    const dom = setupDom(chromeMock);
+    for (let i = 0; i < 4; i++) await flushAsync();
+
+    // Act
+    dom.window.document.getElementById("refresh-btn").click();
+    for (let i = 0; i < 4; i++) await flushAsync();
+
+    // Assert
+    const weekReads = chromeMock.runtime.sendMessage.mock.calls
+      .map(([message]) => message)
+      .filter((message) => message.action === "read-week")
+      .map((message) => message.force);
+    expect(weekReads).toEqual([false, true]);
   });
 });

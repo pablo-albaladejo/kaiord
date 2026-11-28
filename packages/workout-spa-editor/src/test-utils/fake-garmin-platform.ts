@@ -14,8 +14,19 @@
  * N reads (Garmin's read lagging or flickering). The athlete can put a
  * library workout Kaiord created on another date (`placeLibraryWorkout`):
  * the same library workout id, an entry Kaiord did not create.
+ *
+ * `protocol: 2` puts the current extension in front of it
+ * (`fake-garmin-requests`): only `request` on the real closed list, raw
+ * answers, and the one action protocol 1 never had, deleting a library
+ * workout (which takes its calendar entries with it, the cautious reading
+ * of Garmin). That action is the extension as it will be once the owner
+ * turns `GARMIN_LIBRARY_DELETES` on; `libraryDelete: false` is today's
+ * extension, whose closed list refuses it. `failNext` answers the next message of an action with a
+ * status and writes nothing.
  */
 import { vi } from "vitest";
+
+import { notAllowed, raw, toFakeAction } from "./fake-garmin-requests";
 
 export type FakeLibraryWorkout = { workoutId: number; workoutName: string };
 export type FakeCalendarItem = {
@@ -31,11 +42,15 @@ type Envelope = {
   data?: unknown;
   error?: string;
   status?: number;
+  retryable?: boolean;
 };
 
 const month = (date: string) => date.slice(0, 7);
 
-export const createFakeGarminPlatform = () => {
+export const createFakeGarminPlatform = ({
+  protocol = 1,
+  libraryDelete = true,
+} = {}) => {
   const library: FakeLibraryWorkout[] = [];
   const calendar: FakeCalendarItem[] = [];
   const log: Message[] = [];
@@ -51,6 +66,8 @@ export const createFakeGarminPlatform = () => {
     downMonths: new Set<string>(),
     /** Entry id → how many more month reads leave it out. */
     omitFromReads: new Map<number, number>(),
+    /** Action → the status its next message is refused with, unwritten. */
+    failNext: new Map<string, number>(),
   };
   const visible = (id: number) => {
     const left = state.omitFromReads.get(id) ?? 0;
@@ -119,22 +136,72 @@ export const createFakeGarminPlatform = () => {
     }
   };
 
+  const removeWorkout = (workoutId: number) => {
+    library.splice(
+      library.findIndex((w) => w.workoutId === workoutId),
+      1
+    );
+    for (let i = calendar.length - 1; i >= 0; i--)
+      if (calendar[i].workoutId === workoutId) calendar.splice(i, 1);
+  };
+
+  /** Protocol 2: Garmin's raw answer to a listed request. */
+  const answerRaw = (m: Message): Envelope => {
+    if (m.action === "calendar-month") {
+      if (state.calendarDown || state.downMonths.has(String(m.month)))
+        return fail(503, "Request failed");
+      const items = calendar.filter(
+        (i) =>
+          month(i.date) === m.month &&
+          (i.itemType !== "workout" || visible(i.id))
+      );
+      return raw({ calendarItems: items.map((i) => ({ ...i })) });
+    }
+    if (m.action === "delete-workout") {
+      const workoutId = Number(m.workoutId);
+      if (!hasWorkout(workoutId)) return fail(404, "Request failed");
+      removeWorkout(workoutId);
+      return raw(undefined, 204);
+    }
+    const legacy = answer(m);
+    if (!legacy.ok)
+      return legacy.status
+        ? fail(legacy.status, "Request failed")
+        : notAllowed();
+    if (m.action === "unschedule") return raw(undefined, 204);
+    if (m.action === "schedule") {
+      const id = (legacy.data as { workoutScheduleId: string })
+        .workoutScheduleId;
+      return raw({ workoutScheduleId: Number(id) });
+    }
+    return raw(legacy.data);
+  };
+
   const sendMessage = (
     _extensionId: string,
     message: Message,
     callback: (raw: unknown) => void
   ) => {
-    log.push(message);
-    if (state.loseOn === message.action) {
+    const own = protocol === 2 ? toFakeAction(message, libraryDelete) : message;
+    log.push(own ?? message);
+    if (own && state.loseOn === own.action) {
       state.loseOn = undefined;
       return;
     }
-    const envelope = answer(message);
-    if (state.crashOn === message.action) {
+    const refused = own ? state.failNext.get(own.action) : undefined;
+    if (own && refused !== undefined) state.failNext.delete(own.action);
+    const envelope = !own
+      ? notAllowed()
+      : refused !== undefined
+        ? fail(refused, "Request failed")
+        : protocol === 2
+          ? answerRaw(own)
+          : answer(own);
+    if (own && state.crashOn === own.action) {
       state.crashOn = undefined;
       return; // Garmin committed; the App never hears back.
     }
-    queueMicrotask(() => callback({ protocolVersion: 1, ...envelope }));
+    queueMicrotask(() => callback({ protocolVersion: protocol, ...envelope }));
   };
 
   const install = () =>
@@ -175,14 +242,7 @@ export const createFakeGarminPlatform = () => {
         1
       ),
     /** Deleting a library workout takes its calendar entries with it. */
-    deleteWorkout: (workoutId: number) => {
-      library.splice(
-        library.findIndex((w) => w.workoutId === workoutId),
-        1
-      );
-      for (let i = calendar.length - 1; i >= 0; i--)
-        if (calendar[i].workoutId === workoutId) calendar.splice(i, 1);
-    },
+    deleteWorkout: (workoutId: number) => removeWorkout(workoutId),
   };
 
   const entriesOf = (workoutName: string) => {

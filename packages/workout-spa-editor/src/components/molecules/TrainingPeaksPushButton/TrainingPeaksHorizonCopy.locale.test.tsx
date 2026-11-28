@@ -65,7 +65,11 @@ describe.each(["en", "es"] as const)(
 
       // Act
       render(
-        <TrainingPeaksPushFeedback failure={failure} onSendCopy={vi.fn()} />
+        <TrainingPeaksPushFeedback
+          failure={failure}
+          onSendCopy={vi.fn()}
+          onSendAnyway={vi.fn()}
+        />
       );
 
       // Assert

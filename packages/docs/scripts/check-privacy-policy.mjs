@@ -76,7 +76,6 @@ export const BRIDGE_REGISTRY = {
   "garmin-bridge": {
     section: GARMIN_SECTION,
     hosts: new Set([
-      "https://connect.garmin.com/*",
       "https://connectapi.garmin.com/*",
       "https://sso.garmin.com/*",
     ]),
@@ -109,11 +108,11 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 15,
-  [TRAIN2GO_SECTION]: 12,
-  [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 18,
-  [WHOOP_SECTION]: 9,
+  [GARMIN_SECTION]: 17,
+  [TRAIN2GO_SECTION]: 14,
+  [TANITA_SECTION]: 14,
+  [TRAININGPEAKS_SECTION]: 20,
+  [WHOOP_SECTION]: 10,
 };
 
 // A section with no recorded floor is a bridge being onboarded. It has to
@@ -241,7 +240,13 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar delete limited to superseded Kaiord-placed entries",
     section: GARMIN_SECTION,
-    re: /deletes the old entry that Kaiord itself placed and has since superseded[\s\S]*?never deletes library workouts/i,
+    re: /deletes the old entry that Kaiord itself placed and has since superseded[\s\S]*?never deletes entries of other workouts/i,
+  },
+  {
+    label:
+      "Garmin library workouts never deleted; an edit keeps the earlier version",
+    section: GARMIN_SECTION,
+    re: /never deletes a workout from your Garmin Connect workout library\. When you change a workout and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library/i,
   },
   {
     label: "Garmin calendar read filtered on the device",
@@ -272,6 +277,11 @@ export const REQUIRED_RULES = [
     label: "Garmin no-telemetry stated",
     section: GARMIN_SECTION,
     re: NO_TELEMETRY,
+  },
+  {
+    label: "Garmin personal fields removed from answers",
+    section: GARMIN_SECTION,
+    re: /a workout's author \(your name and profile pictures\) and the people it is shared with, an activity's owner names and pictures and the places it started and ended/i,
   },
 
   // --------------------------- Train2Go ---------------------------
@@ -336,6 +346,16 @@ export const REQUIRED_RULES = [
     section: TRAIN2GO_SECTION,
     re: NO_TELEMETRY,
   },
+  {
+    label: "Train2Go popup reads kept in memory, at most once every 5 minutes",
+    section: TRAIN2GO_SECTION,
+    re: /at most once every 5 minutes unless you press Refresh; it keeps what it read only in the extension's memory, never on disk, and never hands it to the Kaiord App/i,
+  },
+  {
+    label: "Train2Go personal fields removed from answers",
+    section: TRAIN2GO_SECTION,
+    re: /the extension removes from it your gender, birthday, body fat, BMI, height and smoking/i,
+  },
 
   // ---------------------------- Tanita ----------------------------
   {
@@ -394,6 +414,11 @@ export const REQUIRED_RULES = [
     re: NO_TELEMETRY,
   },
   {
+    label: "Tanita personal fields removed from answers",
+    section: TANITA_SECTION,
+    re: /also removes each form field named as a first, last or full name, birth date, gender, email, phone or address/i,
+  },
+  {
     label: "Tanita session check by HEAD, downloading nothing, disclosed",
     section: TANITA_SECTION,
     re: /Checking the Connection Downloads Nothing\*\*: .*it sends a `HEAD` request for the export, which returns no measurement/,
@@ -443,7 +468,7 @@ export const REQUIRED_RULES = [
   {
     label: "TrainingPeaks body and workout scopes disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /`read:body`, `write:body` and `write:workouts` capabilities/,
+    re: /`read:body` and `write:workouts` capabilities/,
   },
   {
     label: "TrainingPeaks workout write disclosed (calendar)",
@@ -456,9 +481,9 @@ export const REQUIRED_RULES = [
     re: /cannot delete anything in TrainingPeaks or change a workout already there/i,
   },
   {
-    label: "TrainingPeaks unused weight write disclosed",
+    label: "TrainingPeaks metric write refused",
     section: TRAININGPEAKS_SECTION,
-    re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
+    re: /writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent/i,
   },
   {
     label: "TrainingPeaks connection check minting no token disclosed",
@@ -474,6 +499,12 @@ export const REQUIRED_RULES = [
     label: "TrainingPeaks workout read kept by the App to its id and day",
     section: TRAININGPEAKS_SECTION,
     re: /to the Kaiord App, which keeps only that workout's id and day/i,
+  },
+  {
+    label:
+      "TrainingPeaks day read only after an unanswered send, kept to titles",
+    section: TRAININGPEAKS_SECTION,
+    re: /If a send gets no answer, then before that workout is sent again the extension reads the workouts of that day[\s\S]*?which keeps only their titles; if one has the same title, the Kaiord App sends nothing and asks you first/i,
   },
   {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",
@@ -495,6 +526,11 @@ export const REQUIRED_RULES = [
     section: TRAININGPEAKS_SECTION,
     re: NO_TELEMETRY,
   },
+  {
+    label: "TrainingPeaks personal fields removed from answers",
+    section: TRAININGPEAKS_SECTION,
+    re: /the personal details the Kaiord App does not read: a workout's comments \(your coach's and yours\)/i,
+  },
 
   // ----------------------------- WHOOP ----------------------------
   {
@@ -506,6 +542,11 @@ export const REQUIRED_RULES = [
     label: "WHOOP answers handed to the Kaiord App unread (thin Bridge)",
     section: WHOOP_SECTION,
     re: /WHOOP's answer is handed to the Kaiord App as it came, without being read/i,
+  },
+  {
+    label: "WHOOP personal fields removed from answers",
+    section: WHOOP_SECTION,
+    re: /the personal details the Kaiord App does not read: a lab test's patient name, height and weight/i,
   },
   {
     label: "WHOOP no-OAuth session-bearer nature disclosed",

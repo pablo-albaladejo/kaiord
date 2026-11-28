@@ -17,11 +17,16 @@ import { shouldFanOutZones } from "./should-fan-out-zones";
 export { useConnectCallback } from "./use-connect-callback";
 export { useExpandCallback } from "./use-expand-callback";
 
+const NOT_LOADED = { ok: false, reason: "app-part-not-loaded" } as const;
+
+/** `onNotLoaded` tells the athlete part of the App did not load, so nothing
+    was asked of Train2Go: the use case's code, or the transport's. */
 export const useSyncCallback = (
   p: PersistencePort,
   t: CoachingTransport,
   a: Analytics,
-  runZonesSync?: (profileId: string) => Promise<void>
+  runZonesSync?: (profileId: string) => Promise<void>,
+  onNotLoaded?: () => void
 ) => {
   const { report } = useCoachMoveNoticeActions();
   return useCallback(
@@ -30,20 +35,16 @@ export const useSyncCallback = (
         source: t.source,
         trigger: "manual",
       });
-      const { syncWeek } = await lazyImport(
+      const loaded = await lazyImport(
         () => import("../../application/coaching/sync-week")
-      ).catch((error: unknown) => {
-        // Close the invoked event before the error reaches the caller.
-        emitSyncResult(
-          a,
-          t.source,
-          { ok: false, reason: "transport-error" },
-          0
-        );
-        throw error;
-      });
+      ).catch(() => null);
+      if (!loaded) {
+        emitSyncResult(a, t.source, NOT_LOADED, 0);
+        onNotLoaded?.();
+        return;
+      }
       const startedAt = Date.now();
-      const result = await syncWeek(
+      const result = await loaded.syncWeek(
         {
           profiles: p.profiles,
           coaching: p.coaching,
@@ -58,6 +59,7 @@ export const useSyncCallback = (
         weekStart
       );
       emitSyncResult(a, t.source, result, Date.now() - startedAt);
+      if (!result.ok && result.reason === NOT_LOADED.reason) onNotLoaded?.();
       if (result.ok) report(profileId, weekStart, result);
       if (
         result.ok &&
@@ -67,6 +69,6 @@ export const useSyncCallback = (
         await runZonesSync(profileId).catch(() => undefined);
       }
     },
-    [p, t, a, runZonesSync, report]
+    [p, t, a, runZonesSync, report, onNotLoaded]
   );
 };

@@ -203,3 +203,42 @@
       what the code does: deletes only entries Kaiord's record holds as
       placed by Kaiord, and reads the calendar before every placement and
       on every unchanged re-send.
+
+## 11. Library workouts Kaiord created (owner decision 2026-11-23, #1633)
+
+- [x] 11.1 Closed list: `DELETE /workout-service/workout/<id>`, no body, only
+      through the exact App origin; extension tests, privacy-surface golden.
+- [x] 11.2 Connector: `GarminLibraryPort.remove`, request only (no legacy
+      action); contract tests against the real closed list.
+- [x] 11.3 Record: `libraryVersions` (`created`, `superseded` < `deleted`)
+      written by the commit, joined by the merge (older row's library id
+      added), parsed by the normalizer.
+- [x] 11.4 `cleanLibrary` after the drain: delete only a superseded version
+      Kaiord created that the row no longer uses and two settled reads of
+      each known month prove unused; a failed delete is retried next send.
+- [x] 11.5 Message-contract tests (`hooks/garmin-library-cleanup.test.ts`)
+      with the fake Garmin speaking protocol 2.
+- [x] 11.6 Store listing (en, es), justification, privacy policy, its
+      checker rules and solo cases, and `claims/garmin.json`.
+- [ ] 11.7 The interrupted library create: needs the owner's live capture of
+      how Garmin lists its library (design "Library workouts settled
+      2026-11-23").
+
+## 12. Library deletes off until the owner's capture (owner decision 2026-11-24, #1633)
+
+- [x] 12.1 `GARMIN_LIBRARY_DELETES` (`src/hooks/garmin-library-deletes-switch.ts`),
+      off: the production deps carry no library port, and
+      `hooks/garmin-placement-deps.test.ts` fails if the switch or the port
+      is turned on. `cleanLibrary`, the port and their tests are unchanged.
+- [x] 12.2 Closed list: `DELETE /workout-service/workout/<id>` removed with
+      the privacy-surface golden; the extension tests prove it is refused.
+      It comes back with the switch (design "Library deletes off until the
+      owner's capture, 2026-11-24").
+- [x] 12.3 Store listing (en, es), justification, privacy policy, its check
+      rule and solo case, and `claims/garmin.json`: Kaiord deletes nothing
+      from the Garmin library; an edit leaves the earlier version there.
+- [ ] 12.4 The owner's live capture: how Garmin answers a delete of a
+      library workout that has calendar entries (cascade or refuse), and how
+      it lists its library (order, page size, `createdDate` time zone,
+      identifying fields). Then turn the switch on with the closed-list
+      entry, its tests, the golden and the texts.

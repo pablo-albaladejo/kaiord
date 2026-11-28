@@ -14,6 +14,8 @@ Every **data** call SHALL be checked against an allowlist of (method, path-patte
 - `DELETE` `/workout-service/schedule/<digits>` — remove one calendar entry by its schedule id
 - `GET` `/calendar-service/year/<4 digits>/month/<1–2 digits>` — read one month of the calendar (see Requirement: Calendar read filtered in the service worker)
 
+No entry SHALL delete a library workout: `DELETE /workout-service/workout/<digits>` stays off the list until the owner turns the App's `GARMIN_LIBRARY_DELETES` switch on (design "Library deletes off until the owner's capture, 2026-11-24").
+
 Each schedule pattern SHALL match digits only, with no query string and no further sub-path; each entry SHALL sit on a single physical line so the privacy-surface guard reads it whole.
 
 A data call outside the allowlist SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }` and SHALL make no network request. The allowlist SHALL be locked against drift by `scripts/check-bridge-privacy-surface.mjs`.
@@ -32,8 +34,13 @@ The token mint is OUTSIDE this allowlist and reaches three further endpoints acr
 
 #### Scenario: Disallowed method is rejected without a network call
 
-- **WHEN** a `DELETE` is issued for `/workout-service/workout/123`
+- **WHEN** a `PUT` is issued for `/workout-service/workout/123`
 - **THEN** the extension returns `{ ok: false, error: "Blocked: disallowed path or method" }` and makes no network request
+
+#### Scenario: A library delete is refused whatever its id
+
+- **WHEN** a `DELETE` is issued for `/workout-service/workout/1711500235`, with or without a body, from the exact App origin and with the athlete signed in
+- **THEN** the extension SHALL refuse it with no token minted and no network request
 
 #### Scenario: Calendar schedule paths accept digits only
 

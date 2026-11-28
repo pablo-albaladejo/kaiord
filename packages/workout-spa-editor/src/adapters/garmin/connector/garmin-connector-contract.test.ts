@@ -8,7 +8,11 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 
-import { closedListOf, isListed } from "../../../test-utils/bridge-closed-list";
+import {
+  closedListOf,
+  GARMIN_LIBRARY_DELETE_ENTRY,
+  isListed,
+} from "../../../test-utils/bridge-closed-list";
 import {
   currentExtension,
   json,
@@ -17,11 +21,13 @@ import {
 } from "../../../test-utils/fake-bridge-extension";
 import { pushGarminBodyComposition } from "./garmin-body-composition-transport";
 import { createGarminCalendarPort } from "./garmin-calendar-operations";
+import { createGarminLibraryPort } from "./garmin-library-operations";
 import {
   GARMIN_ACTIVITIES_PATH,
   GARMIN_UPLOAD_PATH,
   GARMIN_WORKOUT_PATH,
   GARMIN_WORKOUTS_PATH,
+  garminLibraryWorkoutPath,
   garminMonthPath,
   garminSchedulePath,
 } from "./garmin-paths";
@@ -34,6 +40,7 @@ const LISTED_ENTRIES = 7;
 // eslint-disable-next-line no-magic-numbers -- fixed FIT header bytes
 const FIT_HEADER = [14, 16, 0, 0, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0];
 const calendar = createGarminCalendarPort(() => EXT);
+const library = createGarminLibraryPort(() => EXT);
 const GCN = { workoutName: "Tempo", workoutSegments: [] };
 
 // Shaped on the live capture: numeric ids, `itemType`, a `YYYY-MM-DD` date,
@@ -220,6 +227,52 @@ describe("Garmin Connector, current extension (protocol 2)", () => {
     // Assert
     expect(sent[0]).toEqual({ action: "request", method: "DELETE", path });
     expect(res).toEqual({ ok: true });
+  });
+
+  it("should delete one library workout by its id with no body and map a 204 to success", async () => {
+    // Arrange
+    const path = garminLibraryWorkoutPath("1711500235");
+    const sent = currentExtension({
+      [`DELETE ${path}`]: { status: 204, contentType: "", body: "" },
+    });
+
+    // Act
+    const res = await library.remove("1711500235" as never);
+
+    // Assert
+    expect(sent).toEqual([{ action: "request", method: "DELETE", path }]);
+    expect(res).toEqual({ ok: true });
+  });
+
+  it("should keep the status of a library delete Garmin refused", async () => {
+    // Arrange
+    currentExtension({
+      [`DELETE ${garminLibraryWorkoutPath("1711500235")}`]: {
+        refuse: { error: "Request failed: 500", status: 500 },
+      },
+    });
+
+    // Act
+    const res = await library.remove("1711500235" as never);
+
+    // Assert
+    expect(res).toEqual({
+      ok: false,
+      error: "Request failed: 500",
+      status: 500,
+    });
+  });
+
+  it("should refuse a library id that is not Garmin's before sending anything", async () => {
+    // Arrange
+    const sent = currentExtension({});
+
+    // Act
+    const res = await library.remove("0123" as never);
+
+    // Assert
+    expect(sent).toEqual([]);
+    expect(res).toMatchObject({ ok: false, retryable: false });
   });
 
   it("should keep the 404 status of a failed unschedule", async () => {
@@ -416,6 +469,18 @@ describe("Garmin Connector, extension one protocol behind (protocol 1)", () => {
     ]);
   });
 
+  it("should delete no library workout through an extension that has no such request", async () => {
+    // Arrange
+    const sent = previousExtension({ unschedule: null });
+
+    // Act
+    const res = await library.remove("1711500235" as never);
+
+    // Assert
+    expect(sent.map((m) => m.action)).toEqual(["request"]);
+    expect(res).toMatchObject({ ok: false });
+  });
+
   it("should list and upload through the legacy actions", async () => {
     // Arrange
     const sent = previousExtension({
@@ -457,5 +522,22 @@ describe("Garmin Connector asks only for what the extension's closed list admits
     // Assert
     expect(list.length).toBe(LISTED_ENTRIES);
     expect(refused).toEqual([]);
+  });
+
+  it("should find the library delete refused today and admitted by the entry it regains", () => {
+    // Arrange
+    const path = garminLibraryWorkoutPath("1711500235");
+
+    // Act
+    const today = isListed(list, "DELETE", path);
+    const regained = isListed(
+      [...list, GARMIN_LIBRARY_DELETE_ENTRY],
+      "DELETE",
+      path
+    );
+
+    // Assert
+    expect(today).toBe(false);
+    expect(regained).toBe(true);
   });
 });

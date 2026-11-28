@@ -38,6 +38,8 @@ export function DataTypeRoutingRow({
 
   return (
     <div
+      id={`routing-row-${row.dataType}`}
+      tabIndex={-1}
       data-testid={`routing-row-${row.dataType}`}
       data-origin={row.origin.kind}
       className={`flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border px-4 py-3 ${stalled ? STALLED : SETTLED}`}

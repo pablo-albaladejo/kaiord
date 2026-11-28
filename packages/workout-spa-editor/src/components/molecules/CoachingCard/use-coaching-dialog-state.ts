@@ -12,9 +12,13 @@
  *
  * This is a thin live-query layer; mutations live in the use cases
  * (convertCoachingActivityWithAi, convertCoachingActivityManual,
- * matchSession, unmatchSession).
+ * matchSession, splitCoachingWorkout).
+ *
+ * In "matched", one confirmation may be open over the action bar:
+ * Regenerate or Delete workout (`useMatchedConfirm`).
  */
 import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
 
 import { usePersistence } from "../../../contexts/persistence-context";
 import type { PersistencePort } from "../../../ports/persistence-port";
@@ -100,4 +104,12 @@ export const useCoachingDialogState = (
     if (!profileId || !activity) return { kind: "no-workout" };
     return resolveState(persistence, profileId, activity);
   }, [persistence, profileId, activity?.id]);
+};
+
+/** The confirmation open over the matched dialog's action bar. */
+export type MatchedConfirm = "regenerate" | "delete";
+
+export const useMatchedConfirm = () => {
+  const [open, setOpen] = useState<MatchedConfirm | null>(null);
+  return { open, ask: setOpen, close: () => setOpen(null) };
 };

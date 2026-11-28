@@ -187,7 +187,33 @@ describe("Garmin workout: only the GCN the App's writer builds", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("should send a workout that carries the coach's text as its description", async () => {
+    // Arrange
+    const body = gcn("workout-repeat-steps.gcn.json");
+    body.description = "Easy spin, then three hard efforts. Stay seated.";
+
+    // Act
+    const res = await post(WORKOUT_PATH, body);
+
+    // Assert
+    expect(res.ok).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   const firstStep = (w) => w.workoutSegments[0].workoutSteps[0];
+
+  it("should send a workout whose step description is 200 characters", async () => {
+    // Arrange
+    const body = gcn("workout-repeat-steps.gcn.json");
+    firstStep(body).description = "x".repeat(200);
+
+    // Act
+    const res = await post(WORKOUT_PATH, body);
+
+    // Assert
+    expect(res.ok).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
   const repeat = (w) =>
     w.workoutSegments[0].workoutSteps.find((s) => s.type === "RepeatGroupDTO");
 
@@ -205,8 +231,12 @@ describe("Garmin workout: only the GCN the App's writer builds", () => {
     ],
     ["a name over 255 characters", (w) => (w.workoutName = "x".repeat(256))],
     [
-      "a step description over 256 characters",
-      (w) => (firstStep(w).description = "x".repeat(257)),
+      "a step description over 200 characters",
+      (w) => (firstStep(w).description = "x".repeat(201)),
+    ],
+    [
+      "a description over 1024 characters",
+      (w) => (w.description = "x".repeat(1025)),
     ],
     ["a second segment", (w) => w.workoutSegments.push(w.workoutSegments[0])],
     [

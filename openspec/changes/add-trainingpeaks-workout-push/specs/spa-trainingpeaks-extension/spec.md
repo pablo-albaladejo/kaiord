@@ -64,6 +64,27 @@ a re-send never adds a second copy silently.
 - **WHEN** the athlete sends it again unchanged
 - **THEN** the SPA SHALL add nothing to TrainingPeaks
 
+### Requirement: A send that got no answer is checked before it is sent again
+
+When a send's answer never arrived after the extension received it, the ledger row SHALL record that send's day and title. The next send of that Workout SHALL first read that day and keep only the titles of its workouts. When one has the same title it SHALL send nothing and tell the athlete the workout may already be on TrainingPeaks; when the read fails it SHALL send nothing and say Kaiord could not check. Each offers one choice, "Send anyway", which sends without reading. It SHALL never change or delete the workout it found. When the day holds none, the send SHALL go through and the record SHALL forget the unanswered send.
+
+#### Scenario: The day holds a workout of the same title
+
+- **GIVEN** a send of "Easy run" to 2026-11-24 that landed but got no answer
+- **WHEN** the athlete sends it again
+- **THEN** nothing SHALL be sent, the athlete SHALL read that it may already be on TrainingPeaks on that day, and TrainingPeaks SHALL hold the one workout unchanged
+
+#### Scenario: The day cannot be read
+
+- **GIVEN** a send that got no answer and a day read that fails
+- **WHEN** the athlete sends it again
+- **THEN** nothing SHALL be sent and the athlete SHALL read that Kaiord could not check
+
+#### Scenario: Send anyway
+
+- **WHEN** the athlete chooses "Send anyway"
+- **THEN** the workout SHALL be sent once, without reading the day
+
 ### Requirement: The planning horizon is stated before sending
 
 The SPA cannot know the athlete's TrainingPeaks account type: the token

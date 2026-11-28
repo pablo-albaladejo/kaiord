@@ -20,8 +20,9 @@ import {
 // every surface registered in claims/*.json, English and Spanish, and the
 // FILES of retired-terms.vocab.mjs whole.
 //
-// It also holds "bridge" and "the Kaiord extension" off every athlete-facing
-// text (ATHLETE_TERMS): the registered surfaces, the App's dictionaries and UI
+// It also holds "bridge", "the Kaiord extension" and "Capability" /
+// "Capacidad" (the athlete reads "Feature" / "Función") off every
+// athlete-facing text (ATHLETE_TERMS): the registered surfaces, the App's dictionaries and UI
 // copy, the extensions' _locales and popups, and ATHLETE_FILES. The rest of
 // the glossary's _Avoid_ lists (user, push, session...) is not enforced here:
 // the App's verbs and states change in #1661, which adds its words when the

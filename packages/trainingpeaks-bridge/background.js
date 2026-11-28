@@ -26,7 +26,7 @@ const BRIDGE_MANIFEST = {
   name: "TrainingPeaks",
   version: "10.4.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:body", "write:body", "write:workouts"],
+  capabilities: ["read:body", "write:workouts"],
 };
 
 // ── Shared envelope/dispatch (vendored bridge-core) ──
@@ -83,6 +83,17 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+// When they do not load, `request` fails before anything is asked.
+let personalFields;
+try {
+  importScripts("personal-identity.js", "personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : null;
+}
+
 // ── Dual-transport auth (bridge-specific; cookie→token→Bearer) ──
 let tpAuth;
 try {
@@ -104,21 +115,20 @@ const ALLOWED = [
   // prettier-ignore
   { method: "GET", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetrics\/\d{4}-\d{2}-\d{2}\/\d{4}-\d{2}-\d{2}$/ },
   // prettier-ignore
-  { method: "POST", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetric$/, body: "weight" },
-  // prettier-ignore
   { method: "POST", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts$/, body: "workout" },
   // prettier-ignore
   { method: "GET", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts\/\d+$/ },
+  // One day of the athlete's workouts (start and end the same date): read
+  // only after a send got no answer, to ask before sending it again.
+  // prettier-ignore
+  { method: "GET", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts\/(\d{4}-\d{2}-\d{2})\/\1$/ },
 ];
 
 // ── Declared body schemas ──
 //
 // The shapes @kaiord/trainingpeaks builds, so the extension forwards a new
-// planned workout or one weight and never an arbitrary payload. A workout's
-// `structure` is the JSON string TrainingPeaks requires, bounded in size.
-const WEIGHT_TYPE = 9;
-const DATE_TIME = { type: "string", min: 1, max: 40 };
-
+// planned workout and never an arbitrary payload. A workout's `structure` is
+// the JSON string TrainingPeaks requires, bounded in size.
 const BODY_SCHEMAS = {
   workout: {
     type: "object",
@@ -132,30 +142,6 @@ const BODY_SCHEMAS = {
       totalTimePlanned: { type: "number", min: 0 },
       publicSettingValue: { type: "literal", value: 0 },
       structure: { type: "string", max: 262144 },
-    },
-  },
-  weight: {
-    type: "object",
-    fields: {
-      athleteId: { type: "integer", min: 1 },
-      timeStamp: DATE_TIME,
-      id: { type: "literal", value: null },
-      details: {
-        type: "array",
-        min: 1,
-        max: 1,
-        items: {
-          type: "object",
-          fields: {
-            type: { type: "literal", value: WEIGHT_TYPE },
-            label: { type: "string", max: 32 },
-            value: { type: "number", min: 0 },
-            time: DATE_TIME,
-            units: { type: "string", max: 8 },
-            formatedUnits: { type: "string", max: 8 },
-          },
-        },
-      },
     },
   },
 };
@@ -191,13 +177,14 @@ const readAthleteId = async () => {
 
 // ── The App's one call: a request from the closed list, answered raw ──
 const request = async (message) => {
+  answerCore.requirePersonalFields(personalFields);
   const { method, path, body } = requestGate.createRequestGate({
     allowed: ALLOWED,
     bodySchemas: BODY_SCHEMAS,
   })(message);
   const res = await tpAuth.tpapiFetch(path, method, body, fetch, { raw: true });
   if (!res?.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const openTrainingPeaks = async () => {
@@ -240,6 +227,13 @@ const EXTERNAL_ACTIONS = new Set([
 // only the Session check the popup sends.
 const INTERNAL_ACTIONS = new Set(["checkSession"]);
 
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
+
 const dispatch = bridgeEnvelope.createDispatch({
   handleAction,
   protocolVersion: PROTOCOL_VERSION,
@@ -267,6 +261,8 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     ALLOWED,

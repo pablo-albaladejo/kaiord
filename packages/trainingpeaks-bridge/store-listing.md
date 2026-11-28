@@ -22,6 +22,7 @@ What it does:
 
 • Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.
 • Each send adds a new workout in TrainingPeaks. Before sending a workout again, the Kaiord App checks whether TrainingPeaks still has the copy it sent: if it does, an unchanged workout adds nothing, and for one you changed the Kaiord App asks you first, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.
+• If a send gets no answer, the workout may still have reached TrainingPeaks: before that workout is sent again, the Kaiord App reads the workouts of that day and, if one has the same title, sends nothing and asks you first.
 • On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.
 • Reads the metrics you logged in TrainingPeaks over the last 30 days, from which the Kaiord App keeps only your weight.
 • Shows in its popup whether your TrainingPeaks sign-in can be used.
@@ -39,6 +40,7 @@ Your token and your data:
 • The extension gives the Kaiord App your TrainingPeaks athlete number just before it places a workout or imports your weight, because TrainingPeaks needs it for both, and never the token.
 • The extension sends requests only to TrainingPeaks, and answers only the Kaiord App at https://kaiord.com.
 • Before it hands the Kaiord App an answer, the extension removes anything in it tied to your TrainingPeaks sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.
+• It also removes a workout's comments, your coach's and yours, which the Kaiord App does not read, and any field named as your name, birth date, gender, email, phone or address.
 • No analytics and no tracking.
 • Removing the extension from Chrome deletes everything it stored.
 • Access through your own TrainingPeaks sign-in is unofficial: it is not a TrainingPeaks partner API, and it can stop working without notice.
@@ -56,6 +58,7 @@ Qué hace:
 
 • Envía los entrenamientos que creas en Kaiord App a tu calendario de TrainingPeaks, cada uno en su día.
 • Cada envío añade un entrenamiento nuevo en TrainingPeaks. Antes de volver a enviar un entrenamiento, Kaiord App comprueba si TrainingPeaks todavía tiene la copia que envió: si la tiene, un entrenamiento sin cambios no añade nada, y para uno que cambiaste Kaiord App te pregunta primero, porque TrainingPeaks tendría entonces dos copias. La extensión no puede borrar nada en TrainingPeaks ni cambiar un entrenamiento que ya esté allí.
+• Si un envío no recibe respuesta, el entrenamiento puede haber llegado igualmente a TrainingPeaks: antes de volver a enviar ese entrenamiento, Kaiord App lee los entrenamientos de ese día y, si uno tiene el mismo título, no envía nada y te pregunta primero.
 • En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.
 • Lee las métricas que registraste en TrainingPeaks en los últimos 30 días, de las que Kaiord App guarda solo tu peso.
 • Muestra en su ventana emergente si se puede usar tu inicio de sesión de TrainingPeaks.
@@ -73,6 +76,7 @@ Tu token y tus datos:
 • La extensión le da a Kaiord App tu número de atleta de TrainingPeaks justo antes de colocar un entrenamiento o importar tu peso, porque TrainingPeaks lo necesita para ambos, y nunca el token.
 • La extensión solo envía peticiones a TrainingPeaks, y solo responde a Kaiord App en https://kaiord.com.
 • Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de TrainingPeaks: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de TrainingPeaks no traen ninguno.
+• También quita los comentarios de un entrenamiento, los de tu entrenador y los tuyos, que Kaiord App no lee, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.
 • Sin analítica y sin rastreo.
 • Quitar la extensión de Chrome borra todo lo que guardó.
 • El acceso a través de tu propio inicio de sesión de TrainingPeaks no es oficial: no es una API de socio de TrainingPeaks, y puede dejar de funcionar sin aviso.

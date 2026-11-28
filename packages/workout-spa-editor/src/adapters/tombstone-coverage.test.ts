@@ -117,6 +117,9 @@ const OFF_PORT_TABLES: Record<string, string> = {
   labValues: "hand-tombstoned by deleteLabReport; cascade otherwise",
   chatMessages: "hand-tombstoned by deleteConversation; cascade otherwise",
   coachingDayNotes: "cascade-only delete; plain `id` PK, so tombstonable",
+  // A cleared note keeps its row with empty text (a newer row wins the
+  // merge); the profile cascade removes them with the profile.
+  athleteNotes: "never deleted (cleared as empty text), cascade-only delete",
   // Composite PK, but its user deletes ARE tombstoned: `withTombstones`
   // decorates `delete(profileId, purpose)` ("Same as main model", removing a
   // provider) under the id `<profileId>:<purpose>` (`tombstoneIdOf`). The

@@ -3,12 +3,18 @@
  * lazy `read-day` fetch fails, so the dialog no longer hangs indefinitely on
  * "Loading description…". A failure of the Train2Go Connection is its own
  * notice with its one fix (sign in, or try again, which re-fires the fetch);
- * an unlinked coach keeps its sentence and the retry.
+ * an unlinked coach keeps its sentence and the retry. A part of the App that
+ * did not load is the App's own failure: Train2Go was never asked, and a
+ * reload fetches that part again.
  */
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ExpandFailureReason } from "../../../types/coaching-expand-result";
 import { PlatformConnectionNotice } from "../ConnectionNotice/PlatformConnectionNotice";
+import {
+  train2GoNotLoadedMessage,
+  Train2GoNotLoadedNotice,
+} from "../Train2GoNotLoaded/train2go-not-loaded";
 
 const TEST_ID = "coaching-dialog-description-error";
 
@@ -20,6 +26,9 @@ export const DialogDescriptionError = ({
   onRetry: () => void;
 }) => {
   const t = useTranslate("coaching");
+  const notLoaded = train2GoNotLoadedMessage(reason, t);
+  if (notLoaded)
+    return <Train2GoNotLoadedNotice message={notLoaded} testId={TEST_ID} />;
   if (reason !== "not-linked") {
     return (
       <PlatformConnectionNotice

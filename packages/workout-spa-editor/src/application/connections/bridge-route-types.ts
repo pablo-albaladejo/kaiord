@@ -3,8 +3,8 @@
  *
  * Both filters are required. The announced capability token alone over-claims
  * (`read:body` spans five types) and the manifest alone lies outright —
- * `trainingpeaks-bridge` announces `write:body` while the SPA cables no
- * export for it, so a manifest-derived "pushes back" chip would be false.
+ * `trainingpeaks-bridge` on protocol 1 announces `write:body` while the SPA
+ * cables no export for it, so a manifest-derived "pushes back" chip would be false.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";

@@ -7,7 +7,9 @@
  * (the previous one, still accepted): the extension does not know `request`
  * and refuses it in a version-1 envelope before sending anything, so the
  * same call is sent again as the legacy action, which the extension reads
- * itself. Every envelope carries `protocolVersion`; that is the only signal.
+ * itself. A call with no legacy action (a request the previous protocol
+ * never had) ends with that refusal. Every envelope carries
+ * `protocolVersion`; that is the only signal.
  */
 import { z } from "zod";
 
@@ -30,7 +32,7 @@ export type BridgeCall<T> = {
   method: "GET" | "POST" | "DELETE";
   path: string;
   body?: unknown;
-  legacy: Record<string, unknown>;
+  legacy?: Record<string, unknown>;
   read: (answer: RawAnswer) => T;
 };
 
@@ -96,7 +98,7 @@ export const callThroughBridge = async <T>(
   call: BridgeCall<T>
 ): Promise<ExtensionResponse> => {
   const res = await send(requestMessage(call));
-  if (speaksPreviousProtocol(res)) return send(call.legacy);
+  if (speaksPreviousProtocol(res)) return call.legacy ? send(call.legacy) : res;
   if (!res.ok) return res;
   return readRaw(res, call.read);
 };

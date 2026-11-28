@@ -12,7 +12,7 @@
   },
   "tabs": {
     "general": "General",
-    "capabilities": "Capacidades",
+    "capabilities": "Funciones",
     "authority": "Qué Plataforma decide",
     "ai": "IA",
     "sync": "Sincronización",
@@ -58,6 +58,7 @@
     "custom": "Personalizado…",
     "inherit": "Igual que el principal",
     "inheritRuns": "Usa {{model}}",
+    "notEvaluated": "{{model}} (no evaluado)",
     "retired": "El proveedor retiró {{model}}: se usa {{successor}} en su lugar.",
     "deprecated": "{{model}} está obsoleto y se retirará: considera {{successor}}.",
     "deprecatedOn": "{{model}} está obsoleto y se retirará el {{date}}: considera {{successor}}.",

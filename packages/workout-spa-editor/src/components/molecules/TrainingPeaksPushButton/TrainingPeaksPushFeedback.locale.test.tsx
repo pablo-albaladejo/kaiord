@@ -18,7 +18,11 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
     // Act
     render(
-      <TrainingPeaksPushFeedback failure={failure} onSendCopy={vi.fn()} />
+      <TrainingPeaksPushFeedback
+        failure={failure}
+        onSendCopy={vi.fn()}
+        onSendAnyway={vi.fn()}
+      />
     );
 
     // Assert
@@ -37,13 +41,17 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
     // Act
     render(
-      <TrainingPeaksPushFeedback failure={failure} onSendCopy={vi.fn()} />
+      <TrainingPeaksPushFeedback
+        failure={failure}
+        onSendCopy={vi.fn()}
+        onSendAnyway={vi.fn()}
+      />
     );
 
     // Assert
     const text = screen.getByTestId("trainingpeaks-push-error").textContent;
     expect(text).toBe(
-      "TrainingPeaks no responde, así que ahora mismo no puedes usarlo en Kaiord."
+      "TrainingPeaks no responde, así que ahora mismo no puedes usar TrainingPeaks en Kaiord."
     );
   });
 });

@@ -7,6 +7,7 @@ export {
 } from "./registry";
 export { WORKOUT_PARSER_SYSTEM } from "./parse-workout-prompt";
 export { LAB_EXTRACTOR_SYSTEM } from "./lab-extractor-prompt";
+export { STEP_NOTES_SYSTEM } from "./step-notes-prompt";
 export {
   buildChatSystemPrompt,
   CHAT_ACTION_TOOL_NAMES,

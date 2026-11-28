@@ -40,14 +40,15 @@ Announces itself to the SPA via the vendored bridge-core announce script.
 
 ## Key Files
 
-| File                                    | Description                                                                                                                |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `background.js`                         | Service worker: session state, closed list, `request` relayed to the WHOOP tab, popup gate, token capture listener.        |
-| `inject-main.js`                        | MAIN-world interceptor on app.whoop.com; captures the session bearer.                                                      |
-| `content.js`                            | Isolated-world relay; runs a read on its own copy of the closed list (equal to `background.js`) and hands the answer back. |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                |
-| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, "Feeds Kaiord" chips, "What Kaiord is missing" box when signed out, fix-first CTA pair. |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifests (`tabs`, `webRequest`, `scripting`, `storage`; WHOOP hosts). Prod strips localhost.                          |
+| File                                    | Description                                                                                                                                                                                                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`                         | Service worker: session state, closed list, `request` relayed to the WHOOP tab, popup gate, token capture listener.                                                                                                                                               |
+| `personal-fields.js`                    | The one declaration of the personal fields of the Platform's answers that no Connector reads, starting from the vendored `personal-identity.js`; `bridge-answer.js` removes them by name from every answer (ADR 0004, `openspec/changes/bridges-owner-decisions`) |
+| `inject-main.js`                        | MAIN-world interceptor on app.whoop.com; captures the session bearer.                                                                                                                                                                                             |
+| `content.js`                            | Isolated-world relay; runs a read on its own copy of the closed list (equal to `background.js`) and hands the answer back.                                                                                                                                        |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                                                                                                                                                       |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, "Feeds Kaiord" chips, "What Kaiord is missing" box when signed out, fix-first CTA pair.                                                                                                                                        |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifests (`tabs`, `webRequest`, `scripting`, `storage`; WHOOP hosts). Prod strips localhost.                                                                                                                                                                 |
 
 ## Vendored bridge-core files
 

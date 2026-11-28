@@ -39,6 +39,7 @@ Privacy:
 • No OAuth, no developer API key, no password stored — the extension captures the session bearer your own signed-in WHOOP tab already uses, and holds it only in memory (`chrome.storage.session`), never on disk
 • Read-only: the extension exposes no path to write to WHOOP
 • Before it hands the Kaiord App an answer, the extension removes anything in it tied to your WHOOP sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. WHOOP's answers carry none today
+• It also removes the personal details the Kaiord App does not read, such as a lab test's patient name, and any field named as your name, birth date, gender, email, phone or address.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
 ## Short Description, Spanish (132 chars max)
@@ -66,6 +67,7 @@ Privacidad:
 • Sin OAuth, sin clave de API de desarrollador y sin contraseña guardada: la extensión captura el token de sesión que ya usa tu propia pestaña de WHOOP con la sesión iniciada, y lo guarda solo en memoria (`chrome.storage.session`), nunca en disco
 • Solo lectura: la extensión no ofrece ninguna forma de escribir en WHOOP
 • Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de WHOOP: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de WHOOP no traen ninguno
+• También quita los datos personales que Kaiord App no lee, como el nombre del paciente de un análisis, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.
 • Código abierto: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata

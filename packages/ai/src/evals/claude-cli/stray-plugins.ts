@@ -11,6 +11,7 @@ import { printable } from "./printable-name";
 export const BUILTIN_PLUGINS: ReadonlySet<string> = new Set([
   "cc-plugin-agents-md",
   "cc-plugin-plugin-authoring",
+  "cc-plugin-privacy",
   "cc-plugin-telemetry",
 ]);
 

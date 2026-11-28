@@ -18,6 +18,7 @@ import type { IntegrationPolicyRepository } from "../integration-policy/integrat
 import { addDaysIso } from "../shared/date-utils";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { hasEnabledPlannedSessionImportRoute } from "./planned-session-import-route";
+import { readFailure, type SyncWeekFailure } from "./sync-week-failure";
 import { type PersistedWeek, persistSyncedWeek } from "./sync-week-persist";
 
 export type SyncWeekDeps = {
@@ -33,13 +34,7 @@ export type SyncWeekDeps = {
 };
 
 export type SyncWeekResult =
-  | ({ ok: true; activityCount: number } & PersistedWeek)
-  | {
-      ok: false;
-      reason:
-        "route-inactive" | "not-linked" | "session-expired" | "transport-error";
-      error?: string;
-    };
+  ({ ok: true; activityCount: number } & PersistedWeek) | SyncWeekFailure;
 
 export const syncWeek = async (
   deps: SyncWeekDeps,
@@ -80,10 +75,7 @@ export const syncWeek = async (
       link.externalUserId
     );
   } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
-    if (error === "Session expired")
-      return { ok: false, reason: "session-expired" };
-    return { ok: false, reason: "transport-error", error };
+    return readFailure(err);
   }
 
   const persisted = await persistSyncedWeek(deps, {
@@ -92,6 +84,5 @@ export const syncWeek = async (
     fetched,
     localSameSource,
   });
-
   return { ok: true, activityCount: fetched.length, ...persisted };
 };

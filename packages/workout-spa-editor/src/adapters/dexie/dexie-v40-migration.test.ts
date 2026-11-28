@@ -17,7 +17,7 @@ import { V37_STORES } from "./dexie-v37-migration";
 import { V38_STORES } from "./register-kaiord-v38";
 
 const SEED_VERSION = 39;
-const SCHEMA_HEAD = 40;
+const SCHEMA_HEAD = 41;
 const AT = "2026-11-23T10:00:00.000Z";
 
 const PREFS = { calendarView: "list", setupChecklistDismissed: true };

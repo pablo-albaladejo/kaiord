@@ -22,7 +22,14 @@ Coaching-plan use cases: link/unlink a Train2Go account, convert a coaching acti
 - `convert-coaching-activity-with-ai-idempotency.ts` — same-input dedup.
 - `convert-coaching-activity-error-mapper.ts` — translates AI errors into domain errors.
 - `coaching-workout-builder.ts` — builds the KRD payload from the converted activity.
+- `read-steps-table.ts` — implements `readStepsTable`: the activity's steps table as text for the AI and, when the KRD can hold it, as a KRD (`structured-steps-krd.ts`, power as target, heart rate in the step note); `null` when the activity has no table.
 - `coaching-template.ts` / `.test.ts` — converts an activity into a library template instead of a workout.
+- `choose-coaching-builder.ts` — the one place that chooses how a Workout is built: the steps table when there is one and no Athlete note (`readStepsTable`), its step notes added by a notes-only AI call when a provider is configured (`table-step-notes.ts`), else the AI with the coach's text and the note (`coaching-prompt-text.ts`).
+- `table-step-notes.ts` — the notes-only call's port and merge: it writes only each step's note (the cue, then the HR range, the cue cut to fit) and the AI-origin mark, so it cannot change a duration, target or repeat; a failed call keeps the table Workout and sets `stepNotesFailed`.
+- `regenerate-coaching-workout.ts` — Regenerate: rebuild an existing Workout in place (same Match, same Day; back to Ready); `regenerate-warnings.ts` says what the athlete confirms first.
+- `set-athlete-note.ts` — add, edit or clear the Athlete note.
+- `delete-coaching-workout.ts` — delete a Workout with its Match, and the Undo of both; `drop-dangling-match.ts` clears a Match left pointing at a deleted Workout.
+- `split-coaching-workout.ts` — Split that stays split: the Match goes and the Workout built from the Activity is detached.
 - `ensure-session-match.ts` — idempotently creates the `sessionMatch` row tying the activity to its produced workout.
 - `attempt-link.ts` + `attempt-link-helpers.ts` / `.test.ts` — opportunistic linking flow.
 

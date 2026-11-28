@@ -16,6 +16,7 @@ describe("strayPlugins", () => {
       builtin("cc-plugin-agents-md"),
       builtin("cc-plugin-telemetry"),
       builtin("cc-plugin-plugin-authoring"),
+      builtin("cc-plugin-privacy"),
     ];
 
     // Act

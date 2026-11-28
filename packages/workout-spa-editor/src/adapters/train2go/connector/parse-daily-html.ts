@@ -1,5 +1,6 @@
 import { extractCompletion, extractDescription } from "./daily-activity-block";
 import { decodeEntities } from "./decode-entities";
+import { parseActivitySteps } from "./parse-activity-steps";
 import type { Train2GoActivity } from "./train2go-wire-types";
 
 const collectMatches = (html: string) => ({
@@ -22,6 +23,7 @@ export const parseDailyHtml = (html: unknown): Train2GoActivity[] => {
 
   return m.titles.map((titleMatch, i) => {
     const block = activityBlocks[i + 1] ?? "";
+    const steps = parseActivitySteps(block);
     return {
       id: Number(m.ids[i]?.[1] ?? 0),
       date: "",
@@ -32,6 +34,7 @@ export const parseDailyHtml = (html: unknown): Train2GoActivity[] => {
       status: Number(m.statuses[i]?.[1] ?? 0),
       description: extractDescription(block),
       completion: extractCompletion(block),
+      ...(steps ? { steps } : {}),
     };
   });
 };

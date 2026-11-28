@@ -94,12 +94,9 @@ describe("TrainingPeaks popup", () => {
     expect(
       [...chips.querySelectorAll(".chip")].map((c) => c.textContent)
     ).toEqual(["Weight"]);
-    // The `push-weight` action exists in the bridge but no Kaiord export route
-    // drives it, so it must NOT read as something that flows today.
-    const future = doc.getElementById("future-region");
-    expect(future.textContent).toContain("Will feed Kaiord");
-    expect(future.querySelectorAll(".chip--dashed").length).toBe(1);
-    expect(future.textContent).toContain("Weight ↑ back to TrainingPeaks");
+    // The bridge writes no weight to TrainingPeaks, so nothing offers one.
+    expect(doc.getElementById("future-region")).toBeNull();
+    expect(doc.body.textContent).not.toMatch(/back to TrainingPeaks/);
     expect(doc.querySelectorAll(".chip--out").length).toBe(0);
     expect(chips.querySelectorAll(".chip--dashed").length).toBe(0);
     expect(doc.querySelector(".cta-primary").textContent).toBe(
@@ -130,6 +127,7 @@ describe("TrainingPeaks popup", () => {
       "mints no token"
     );
     expect(doc.body.textContent).not.toContain("Not signed in");
+    expect(doc.body.textContent).not.toMatch(/back to TrainingPeaks/);
     expect(chromeMock.__store.bridgeHealth).toBeUndefined();
   });
 
@@ -152,7 +150,6 @@ describe("TrainingPeaks popup", () => {
     expect(doc.getElementById("status-sub").hidden).toBe(true);
     // One notice, one fix: no chips, no consequence line, no second link.
     expect(doc.getElementById("chips-region").children.length).toBe(0);
-    expect(doc.getElementById("future-region").children.length).toBe(0);
     expect(doc.getElementById("consequence-region").children.length).toBe(0);
     const footer = doc.getElementById("footer-region");
     expect(footer.children.length).toBe(1);
@@ -237,11 +234,8 @@ describe("TrainingPeaks popup", () => {
     expect(doc.getElementById("status-text").textContent).toBe(
       "Checking your session…"
     );
-    // The future row is the one this bridge used to leave empty during the
-    // check and then fill on resolve — the jump this covers.
     for (const region of [
       "chips-region",
-      "future-region",
       "consequence-region",
       "footer-region",
     ]) {

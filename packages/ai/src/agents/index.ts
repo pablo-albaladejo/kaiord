@@ -15,6 +15,12 @@ export type {
 export { AiAgentError, createAiAgentError } from "./errors";
 export { createWorkoutParserAgent } from "./workout-parser-agent";
 export { labExtractorAgent } from "./lab-extractor-agent";
+export {
+  buildStepNotesText,
+  createStepNotesAgent,
+  type StepNote,
+  type StepNotesInput,
+} from "./step-notes-agent";
 export type {
   LabExtraction,
   LabExtractionValue,

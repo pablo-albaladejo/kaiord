@@ -86,4 +86,30 @@ describe("toCoachingActivity (record → view-model)", () => {
     // Assert
     expect(result.duration).toBeUndefined();
   });
+
+  it("should carry the coach's steps table to the view", () => {
+    // Arrange
+    const structuredSteps = [
+      {
+        repeat: 2,
+        steps: [
+          {
+            durationSeconds: 60,
+            zone: "R1",
+            powerWatts: { min: 100, max: 140 },
+            heartRateBpm: { min: 110, max: 125 },
+          },
+        ],
+      },
+    ];
+
+    // Act
+    const result = toCoachingActivity({ ...baseRecord, structuredSteps });
+
+    // Assert
+    expect(result.structuredSteps).toStrictEqual(structuredSteps);
+    expect(toCoachingActivity(baseRecord)).not.toHaveProperty(
+      "structuredSteps"
+    );
+  });
 });

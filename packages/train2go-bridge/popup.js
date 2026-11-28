@@ -3,8 +3,11 @@
  *
  * Shell layout: status block (verdict + coach line), capability chips,
  * athlete card from cached profile-snapshot, weekly figures
- * (planned / done / workload) over a completion bar with a 5-minute
- * `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
+ * (planned / done / workload) over a completion bar, collapsible coach
+ * notes, CTA pair. What the popup reads from Train2Go (the profile and the
+ * week) is never stored on disk (ADR 0004's bounded exception): the profile
+ * is read on every open, the week at most once every 5 minutes, kept only in
+ * the background worker's memory, and Refresh reads both again.
  * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s,
  * profile read 3 s, rollup 8 s). The profile read is an explicit read the
  * athlete asks for by opening the popup, not the Session check the Kaiord
@@ -31,7 +34,6 @@
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
 const ROLLUP_TIMEOUT_MS = 8_000;
-const ROLLUP_TTL_MS = 5 * 60 * 1_000;
 
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 const OPEN_TRAIN2GO_URL = "https://app.train2go.com/user/index";
@@ -102,17 +104,7 @@ const sendMessage = (message) =>
 
 const readStorage = () =>
   new Promise((resolve) => {
-    chrome.storage.local.get(["profileSnapshot", "lastWeeklyRollup"], (rs) =>
-      resolve(rs ?? {})
-    );
-  });
-
-const writeRollup = (rollup) =>
-  new Promise((resolve) => {
-    chrome.storage.local.set(
-      { lastWeeklyRollup: { ...rollup, cachedAt: Date.now() } },
-      resolve
-    );
+    chrome.storage.local.get(["profileSnapshot"], (rs) => resolve(rs ?? {}));
   });
 
 const todayISO = () => {
@@ -123,9 +115,6 @@ const todayISO = () => {
     String(d.getDate()).padStart(2, "0"),
   ].join("-");
 };
-
-const isFreshRollup = (rollup) =>
-  Boolean(rollup?.cachedAt && Date.now() - rollup.cachedAt < ROLLUP_TTL_MS);
 
 const summariseRollup = (activities) => {
   let planned = 0;
@@ -271,20 +260,17 @@ const renderBroken = (state, since = null) => {
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
 };
 
-const fetchRollup = async (userId, bypassTtl) => {
-  const storage = await readStorage();
-  if (!bypassTtl && isFreshRollup(storage.lastWeeklyRollup)) {
-    return storage.lastWeeklyRollup;
-  }
+// `force` (Refresh) reads the week again; otherwise the worker answers from
+// the week it read in the last 5 minutes, if any.
+const fetchRollup = async (userId, force) => {
   const res = await sendMessage({
     action: "read-week",
     date: todayISO(),
     userId,
+    force,
   });
   if (!res?.ok) throw new Error(res?.error ?? "read-week failed");
-  const summary = summariseRollup(res.data?.activities);
-  await writeRollup(summary);
-  return summary;
+  return summariseRollup(res.data?.activities);
 };
 
 const renderConnected = ({ userName, coachName }) => {
@@ -305,7 +291,7 @@ const renderConnected = ({ userName, coachName }) => {
   });
 };
 
-const loadPopupData = async ({ bypassTtl = false } = {}) => {
+const loadPopupData = async ({ force = false } = {}) => {
   showRefresh(false);
   setMarkEstablished(false);
   renderStatusBlock($, msg, {
@@ -354,7 +340,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
   if (typeof userId === "number") {
     try {
       const rollup = await withTimeout(
-        fetchRollup(userId, bypassTtl),
+        fetchRollup(userId, force),
         ROLLUP_TIMEOUT_MS,
         "rollup"
       );
@@ -368,7 +354,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
 };
 
 $("refresh-btn").addEventListener("click", () =>
-  loadPopupData({ bypassTtl: true })
+  loadPopupData({ force: true })
 );
 
 window.addEventListener("DOMContentLoaded", () => {

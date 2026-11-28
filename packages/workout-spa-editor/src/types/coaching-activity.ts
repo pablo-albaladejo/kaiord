@@ -6,6 +6,8 @@
  * Each platform adapter maps its raw data to CoachingActivity at the boundary.
  */
 
+import type { CoachingStepGroup } from "./coaching-structured-steps";
+
 export type ActivityStatus = "pending" | "completed" | "skipped";
 
 /** A sport by its neutral id; the athlete reads `coaching:sport.<id>`. */
@@ -27,4 +29,6 @@ export type CoachingActivity = {
   effort?: 1 | 2 | 3 | 4 | 5;
   status: ActivityStatus;
   description?: string;
+  /** The coach's steps table, present only when it was read whole. */
+  structuredSteps?: CoachingStepGroup[];
 };

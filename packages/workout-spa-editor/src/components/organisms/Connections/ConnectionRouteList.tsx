@@ -34,7 +34,7 @@ type Props = { source: ConnectionSource };
 /**
  * What this source moves, named rather than counted. Both lists come from the
  * announced-and-cabled intersection, so "Nothing" here is a fact about the
- * SPA's wiring — `trainingpeaks-bridge` announces `write:body` and Kaiord
+ * SPA's wiring — `trainingpeaks-bridge` on protocol 1 announces `write:body` and Kaiord
  * cables no export for it, and the honest answer is that nothing goes back.
  */
 export function ConnectionRouteList({ source }: Props) {

@@ -166,6 +166,32 @@ Commit message format:
 - `test`: Test additions or changes
 - `chore`: Maintenance tasks
 
+### Sign off your commits
+
+Kaiord uses the [Developer Certificate of Origin](https://developercertificate.org/)
+(DCO) 1.1. By signing off a commit you state that you wrote the change, or
+otherwise have the right to submit it, under the project's MIT license, and
+that you understand the contribution and your sign-off are kept in the
+public history.
+
+To sign off, add a `Signed-off-by` line with your name and the email of the
+commit's author. Git does it for you with `-s`:
+
+```bash
+git commit -s -m "fix: resolve power target conversion issue"
+# adds: Signed-off-by: Your Name <you@example.com>
+```
+
+Forgot? Sign off every commit on your branch with
+`git rebase --signoff origin/main` and push again.
+
+The [DCO](https://developercertificate.org/) applies to outside contributors
+only: the "DCO sign-off" check (`.github/workflows/dco.yml`,
+`scripts/check-dco.mjs`) fails their pull request when a commit has no
+sign-off matching its author's email. Pull requests from the repository's
+owner, members, collaborators and bots are not checked, as their commits carry
+an agent co-author trailer or come from automation.
+
 ### 6. Push and Create Pull Request
 
 ```bash

@@ -1,3 +1,5 @@
+import { clearNoteOrigin } from "@kaiord/core";
+
 import type {
   Duration,
   Intensity,
@@ -5,6 +7,7 @@ import type {
   WorkoutStep,
 } from "../../../types/krd";
 
+/** An edited note is the athlete's: it loses any AI origin it had. */
 export function createUpdatedStep(
   step: WorkoutStep,
   duration: Duration,
@@ -12,7 +15,7 @@ export function createUpdatedStep(
   notes: string,
   intensity: Intensity
 ): WorkoutStep {
-  return {
+  const updated: WorkoutStep = {
     ...step,
     intensity,
     duration,
@@ -21,6 +24,7 @@ export function createUpdatedStep(
     targetType: target.type,
     notes: notes || undefined,
   };
+  return notes === (step.notes ?? "") ? updated : clearNoteOrigin(updated);
 }
 
 export function resetEditorState(

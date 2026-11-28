@@ -7,6 +7,7 @@ import { weekdayDate } from "../../../utils/calendar-day-labels";
 import { Button } from "../../atoms/Button";
 import { ConfirmationModal } from "../ConfirmationModal";
 import { TrainingPeaksRefusal } from "./TrainingPeaksRefusal";
+import { TrainingPeaksUnansweredNotice } from "./TrainingPeaksUnansweredNotice";
 
 export type TrainingPeaksPushFailure = Exclude<
   TrainingPeaksPushOutcome,
@@ -16,14 +17,17 @@ export type TrainingPeaksPushFailure = Exclude<
 export type TrainingPeaksPushFeedbackProps = {
   failure: TrainingPeaksPushFailure;
   onSendCopy: () => void;
+  onSendAnyway: () => void;
 };
 
 const ERROR_CLASS = "text-xs text-[var(--danger-text)]";
 
-/** The refusal message, or the re-push block and its "send a copy" override. */
+/** The refusal message, the re-push block and its "send a copy" override,
+    or, after a send that got no answer, its "send anyway". */
 export const TrainingPeaksPushFeedback = ({
   failure,
   onSendCopy,
+  onSendAnyway,
 }: TrainingPeaksPushFeedbackProps) => {
   const t = useTranslate("workout-detail");
   const locale = useActiveLocale();
@@ -31,6 +35,13 @@ export const TrainingPeaksPushFeedback = ({
   if (!("block" in failure))
     return <TrainingPeaksRefusal reason={failure.reason} />;
   const { block } = failure;
+  if (block.reason === "may-be-there" || block.reason === "unchecked")
+    return (
+      <TrainingPeaksUnansweredNotice
+        block={block}
+        onSendAnyway={onSendAnyway}
+      />
+    );
   const message =
     block.reason === "moved"
       ? t("footer.trainingPeaksRepush.moved", {

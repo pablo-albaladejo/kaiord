@@ -34,20 +34,25 @@ export type AiRunSlot = {
 };
 
 /**
- * Claims the slot for a new run and returns its controller plus the listener
- * for its updates. An update from a run that is no longer current (cancelled,
- * superseded) is dropped.
+ * Claims the slot for a new run and returns its controller, `onAiStart` that
+ * shows the progress once the AI is asked (a build from the steps table never
+ * shows it), and the listener for its updates. A start or an update from a
+ * run that is no longer current (cancelled, superseded) is dropped.
  */
-export const beginAiRun = (slot: AiRunSlot, modelName: string) => {
+export const beginAiRun = (slot: AiRunSlot) => {
   const controller = new AbortController();
   slot.abortRef.current = controller;
-  const now = Date.now();
-  slot.setProgress({ modelName, startedAt: now, phaseStartedAt: now });
+  const current = () => slot.abortRef.current === controller;
+  const onAiStart = (modelName: string) => {
+    if (!current()) return;
+    const now = Date.now();
+    slot.setProgress({ modelName, startedAt: now, phaseStartedAt: now });
+  };
   const onProgress = (update: GenerateProgress) => {
-    if (slot.abortRef.current !== controller) return;
+    if (!current()) return;
     slot.setProgress((run) => run && withUpdate(run, update));
   };
-  return { controller, onProgress };
+  return { controller, onAiStart, onProgress };
 };
 
 /** Releases the slot, unless a newer run (or a cancel) already took it. */

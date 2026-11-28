@@ -23,7 +23,7 @@ import type { ConflictItem } from "../../types/coaching-zones";
 import { takeTrain2GoZones } from "./take-train2go-zones";
 import { TAKEN_COPY } from "./zones-offer-copy";
 import { type ZonesOfferKind, zonesOfferKind } from "./zones-offer-kind";
-import { handleFailure } from "./zones-sync-failure";
+import { handleFailure, type ShowNotLoaded } from "./zones-sync-failure";
 
 export type OfferTheirs = (
   kind: ZonesOfferKind,
@@ -50,18 +50,20 @@ export const useZonesSyncOrchestrator = (
   persistence: PersistencePort,
   transport: CoachingTransport,
   toasts: ReturnType<typeof useToast>,
-  offerTheirs: OfferTheirs
+  offerTheirs: OfferTheirs,
+  showNotLoaded: ShowNotLoaded
 ): ZonesSyncOrchestrator => {
   const t = useTranslate("coaching");
   const locale = useActiveLocale();
 
   const runSync = useCallback(
     async (profileId: string) => {
-      const fail = (reason: string) => handleFailure(reason, toasts, t, locale);
+      const fail = (reason: string) =>
+        handleFailure(reason, toasts, t, locale, showNotLoaded);
       const loaded = await lazyImport(
         () => import("../../application/coaching/sync-zones")
       ).catch(() => null);
-      if (!loaded) return fail("transport-error");
+      if (!loaded) return fail("app-part-not-loaded");
       const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) return fail(r.reason);
       if (!(await isNewOffer(profileId, r.conflicts))) return;
@@ -72,11 +74,11 @@ export const useZonesSyncOrchestrator = (
           r.conflicts,
           persistence
         );
-        if (!taken) return fail("transport-error");
+        if (!taken) return fail("app-part-not-loaded");
         toasts.success(t(TAKEN_COPY[kind]));
       });
     },
-    [transport, persistence, toasts, t, locale, offerTheirs]
+    [transport, persistence, toasts, t, locale, offerTheirs, showNotLoaded]
   );
 
   return { runSync };

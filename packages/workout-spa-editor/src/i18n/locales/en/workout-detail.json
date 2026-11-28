@@ -42,6 +42,11 @@
       "confirmSend": "Send a copy",
       "cancel": "Cancel"
     },
+    "trainingPeaksUnanswered": {
+      "mayBeThere": "This workout may already be on TrainingPeaks on {{date}}: your last send got no answer, and that day holds a workout with this title. Sending it again can add a second copy.",
+      "unchecked": "Kaiord could not check whether this workout is already on TrainingPeaks on {{date}}, where your last send got no answer. Sending it again can add a second copy.",
+      "sendAnyway": "Send anyway"
+    },
     "trainingPeaksPushError": {
       "noSteps": "This workout has no steps to send yet."
     },

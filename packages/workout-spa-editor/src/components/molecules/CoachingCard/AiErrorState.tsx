@@ -10,7 +10,7 @@ import type { AiFailureReason } from "../../../application/coaching/convert-coac
 import { useTranslate } from "../../../i18n/use-translate";
 
 export type AiErrorStateProps = {
-  reason: AiFailureReason | "not-found" | "no-provider";
+  reason: AiFailureReason | "not-found";
   onRetry: () => void;
   onEditManually: () => void;
   onMatchExisting: () => void;

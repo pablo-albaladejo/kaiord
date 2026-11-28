@@ -68,10 +68,6 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
       "src/application/coaching/convert-coaching-activity-with-ai-helpers.ts",
       REASON.T2G_SPORT,
     ],
-    [
-      "src/application/coaching/convert-coaching-activity-with-ai-idempotency.ts",
-      REASON.T2G_SPORT,
-    ],
 
     // --- B: colocated page hooks using the Dexie `db` singleton ---
     [
@@ -135,7 +131,7 @@ export const ALLOWLIST_PACKAGE_ROOT = "packages/workout-spa-editor";
  * High-water mark. The allowlist may shrink below this, never grow past it.
  * Lower this number whenever entries are removed so the ratchet keeps tightening.
  */
-export const BOUNDARIES_ALLOWLIST_MAX = 20;
+export const BOUNDARIES_ALLOWLIST_MAX = 19;
 
 /** Repo-root-relative globs, for `ignores` in eslint.config.js. */
 export const boundariesAllowlistPaths = () =>

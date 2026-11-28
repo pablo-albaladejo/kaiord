@@ -21,6 +21,10 @@ export type ExtensionResponse = {
   delivered?: boolean;
 };
 
+/** The SPA gave up waiting: the extension had the message and never
+    answered, so a write it carried may have landed. */
+export const NO_ANSWER_ERROR = "Extension did not respond";
+
 /** Exported so callers can derive how long an announcement's verification
     ping may take before it can be treated as never arriving. */
 export const PING_TIMEOUT_MS = 3_000;
@@ -44,7 +48,7 @@ export const sendBridgeMessage = (
       resolve({
         ok: false,
         delivered: false,
-        error: "Extension did not respond",
+        error: NO_ANSWER_ERROR,
       });
     }, timeoutMs);
 

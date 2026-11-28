@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyAiFailure } from "./convert-coaching-activity-error-mapper";
+import {
+  classifyAiFailure,
+  NoAiProviderError,
+} from "./convert-coaching-activity-error-mapper";
 
 describe("classifyAiFailure", () => {
   it("should classify a retired-model 404 as model-unavailable", () => {
@@ -29,5 +32,16 @@ describe("classifyAiFailure", () => {
 
     // Assert
     expect(reason).toBe("ai-error");
+  });
+
+  it("should classify a build that needed the AI with none configured as no-provider", () => {
+    // Arrange
+    const error = new NoAiProviderError();
+
+    // Act
+    const reason = classifyAiFailure(error);
+
+    // Assert
+    expect(reason).toBe("no-provider");
   });
 });

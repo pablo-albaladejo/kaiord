@@ -14,6 +14,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `CoachingActivityCard.tsx` / `.test.tsx` — calendar card surface for a coaching activity.
 - `CoachingActivityDialog.tsx` / `.test.tsx` (+ `.bootstrap.test.tsx`, `.states.test.tsx`) — top-level dialog component.
 - `CoachingActivityDialogContent.tsx` — content slot used by the dialog.
+- `CoachingStepsTable.tsx` — the coach's steps table as written (duration, zone, W, bpm, "N ×" repeat groups), under the coach's text; nothing when the table is missing or not whole.
 - `coaching-dialog-shell.tsx` / `.test.tsx` — Radix Dialog shell.
 - `coaching-dialog-body.tsx`, `coaching-dialog-body-props.ts`, `coaching-dialog-matched-body.tsx` — body variants (unmatched flow vs matched-with-executed flow).
 - `coaching-dialog-parts.tsx` — sub-parts (header / footer / sections).
@@ -26,7 +27,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `use-coaching-dialog-state.ts` / `.test.tsx` — explicit state machine for the dialog flow.
 - `use-coaching-dialog-actions.ts` / `.test.tsx` + `use-coaching-dialog-helpers.ts` — action surface (match, unmatch, convert, manual, AI).
 - `use-coaching-state-observed.ts` — observable wrapper used by tests.
-- `use-coaching-ai-handler.ts` / `.test.tsx` + `use-coaching-ai-helpers.ts` / `.test.ts` — AI-conversion handler.
+- `use-coaching-ai-handler.ts` / `.test.tsx` + `use-coaching-ai-helpers.ts` — AI-conversion handler; `coaching-generate-krd-port.ts` / `.test.ts` — the `GenerateKrdPort`, which picks the provider only when the AI is asked.
 - `use-coaching-manual-handler.ts` / `.test.tsx` — manual-conversion handler.
 - `use-coaching-convert.ts` / `.test.tsx` — entry point composing AI + manual handlers.
 - `use-coaching-auto-heal.ts` — opportunistic SHORT-form → COMPOSITE id healing (R-SessionMatchIdShape).
@@ -40,7 +41,10 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `ai-run-progress.ts` / `.test.ts` — in-flight run state (`AiRunProgress`, with `phaseStartedAt`) and begin/end/cancel bookkeeping on the abort-controller lock.
 - `AiErrorState.tsx` / `.test.tsx` — error pane for AI failures.
 - `MatchToPicker.tsx` / `.test.tsx` + `MatchToPickerItem.tsx` — pickable-workout picker used to link a workout to the activity.
-- `MatchedActions.tsx` / `.test.tsx` — action buttons in the matched body.
+- `MatchedActions.tsx` / `.test.tsx` + `matched-workout-buttons.tsx` + `matched-action-button.tsx` — action buttons in the matched body (Split, Delete workout, Regenerate, Send, Open editor).
+- `MatchedWorkoutActions.tsx` + `MatchedWorkoutConfirms.tsx` — the bar with its Regenerate and Delete workout confirmations (hand edits, on the watch, the Garmin notice).
+- `AthleteNoteField.tsx` / `.test.tsx` + `use-athlete-note.ts` — "Your note", the Athlete note under the coach's text.
+- `use-start-ai-run.ts` + `start-ai-ctx.ts` — one AI run (build or Regenerate) of the dialog.
 - `NoWorkoutActions.tsx` + `no-workout-buttons.tsx` — action buttons in the no-workout body.
 - `LinkedWorkoutSection.tsx` / `.test.tsx` + `linked-workout-utils.ts` — section showing the linked workout.
 - `ExecutedWorkoutsSection.tsx` / `.test.tsx` — Train2Go three-slot executed-activity section (1-N, from #597 / #599).
@@ -69,7 +73,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 
 ### Internal
 
-- `../../hooks/{use-match-session,use-unmatch-session,use-matched-sessions,use-pickable-workouts}`.
+- `../../hooks/{use-match-session,use-split-coaching-workout,use-matched-sessions,use-pickable-workouts}`.
 - `../../application/coaching/{convert-coaching-activity*,heal-session-match-id-shape,attempt-link}`.
 - `../../store/ai-runtime-store`.
 - `../../types/{coaching-activity-record,session-match,errors}`.

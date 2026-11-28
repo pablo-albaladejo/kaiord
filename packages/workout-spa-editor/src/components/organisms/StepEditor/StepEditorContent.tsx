@@ -11,6 +11,7 @@ type StepEditorContentProps = {
   duration: Duration;
   target: Target;
   notes: string;
+  aiWrittenNote: boolean;
   intensity: Intensity;
   onIntensityChange: (intensity: Intensity) => void;
   durationError: string;
@@ -28,6 +29,7 @@ export const StepEditorContent = ({
   duration,
   target,
   notes,
+  aiWrittenNote,
   intensity,
   onIntensityChange,
   durationError,
@@ -57,7 +59,11 @@ export const StepEditorContent = ({
           onChange={onTargetChange}
           error={targetError}
         />
-        <StepNotesEditor value={notes} onChange={onNotesChange} />
+        <StepNotesEditor
+          value={notes}
+          onChange={onNotesChange}
+          aiWritten={aiWrittenNote}
+        />
         <StepEditorActions
           hasErrors={hasErrors}
           onSave={onSave}

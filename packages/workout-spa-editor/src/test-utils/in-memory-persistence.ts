@@ -11,6 +11,7 @@
 import type { PersistencePort } from "../ports/persistence-port";
 import { createInMemoryActivityRepository } from "./in-memory-activity-repository";
 import { createInMemoryAiModelBindingRepository } from "./in-memory-ai-model-binding-repository";
+import { createInMemoryAthleteNoteRepository } from "./in-memory-athlete-note-repository";
 import {
   createInMemoryAiProviderRepository,
   type CustomPromptRef,
@@ -100,6 +101,7 @@ export function createInMemoryPersistence(): PersistencePort {
     coachingDayNotes: createInMemoryCoachingDayNotesRepository(
       stores.coachingDayNotes
     ),
+    athleteNotes: createInMemoryAthleteNoteRepository(),
     connections: createInMemoryConnectionRepository(),
     integrationPolicy: createInMemoryIntegrationPolicyRepository(
       stores.integrationPolicies

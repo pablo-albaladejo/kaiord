@@ -1,4 +1,5 @@
 {
+  "appPartNotLoaded": "Part of the Kaiord App did not load, so nothing was asked of Train2Go. Reload the App to load it again.",
   "banner": {
     "title": "Auto-match suggestions ({{total}})",
     "ariaLabel": "Auto-match suggestions",
@@ -124,7 +125,9 @@
     "openEditor": "Open editor",
     "pushToGarmin": "Send to Garmin",
     "split": "Split",
-    "splitting": "Splitting…"
+    "splitting": "Splitting…",
+    "regenerate": "Regenerate",
+    "deleteWorkout": "Delete workout"
   },
   "linked": {
     "heading": "Linked workout",
@@ -193,6 +196,7 @@
   },
   "hooks": {
     "aiProcessFailed": "Failed to process activity with AI",
+    "stepNotesFailed": "The step notes could not be added. Regenerate to try again.",
     "workoutMatched": "Workout matched",
     "migratedOne": "1 workout matched to a coaching activity",
     "migratedMany": "Workouts matched to coaching activities",
@@ -222,5 +226,37 @@
     "executedChip": "Executed",
     "planPrefix": "Plan ·",
     "actualPrefix": "Actual ·"
+  },
+  "steps": {
+    "title": "Coach's steps",
+    "duration": "Duration",
+    "zone": "Zone",
+    "power": "Power",
+    "heartRate": "Heart rate",
+    "repeat": "{{value}} ×",
+    "minutes": "{{value}} min",
+    "seconds": "{{value}} s",
+    "watts": "{{min}}–{{max}} W",
+    "bpm": "{{min}}–{{max}} bpm"
+  },
+  "regenerate": {
+    "title": "Regenerate this workout?",
+    "edited": "You edited this workout by hand: regenerating replaces your changes.",
+    "onWatch": "It goes back to “Ready”. The earlier version stays in Garmin's library until you remove it there.",
+    "confirm": "Regenerate",
+    "cancel": "Cancel"
+  },
+  "deleteWorkout": {
+    "title": "Delete this workout?",
+    "message": "The workout leaves your calendar and your coach's activity goes back to “To prepare”. You can undo it for a few seconds.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "athleteNote": {
+    "label": "Your note",
+    "hint": "The assistant reads it with your coach's text, which stays as your coach wrote it. It is never sent to Train2Go.",
+    "placeholder": "For example: on the trainer, skip the single-leg part",
+    "save": "Save note",
+    "clear": "Clear note"
   }
 }

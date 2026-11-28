@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { coachingActivityRecordSchema } from "../../types/coaching-activity-record";
 import type { Train2GoActivity } from "./connector/train2go-extension-transport";
 import { toCoachingActivityRecord } from "./train2go-record.converter";
 
@@ -127,5 +128,39 @@ describe("toCoachingActivityRecord", () => {
 
     // Assert
     expect(result.completionPercent).toBe(COMPLETION_PERCENT);
+  });
+
+  it("should keep the activity's structured steps on the record", () => {
+    // Arrange
+    const steps = [
+      {
+        repeat: 3,
+        steps: [
+          {
+            durationSeconds: 60,
+            zone: "R1",
+            powerWatts: { min: 121, max: 150 },
+            heartRateBpm: { min: 121, max: 130 },
+          },
+        ],
+      },
+    ];
+
+    // Act
+    const result = toCoachingActivityRecord("p1", { ...base, steps }, NOW);
+
+    // Assert
+    expect(result.structuredSteps).toStrictEqual(steps);
+    expect(coachingActivityRecordSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("should leave the record without steps when the activity has none", () => {
+    // Arrange
+
+    // Act
+    const result = toCoachingActivityRecord("p1", base, NOW);
+
+    // Assert
+    expect(result).not.toHaveProperty("structuredSteps");
   });
 });

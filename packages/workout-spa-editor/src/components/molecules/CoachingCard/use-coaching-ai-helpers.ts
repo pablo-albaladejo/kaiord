@@ -1,83 +1,60 @@
 /**
  * Pure helpers for `useCoachingAi`. Lives in a separate file so the
- * hook stays under the line caps. No React: this module composes a
- * `GenerateKrdPort` adapter from a concrete `LlmProviderConfig` and
- * runs the use case end-to-end behind a single async function.
+ * hook stays under the line caps. No React: runs the use case end-to-end
+ * behind a single async function.
  */
-import type { OnGenerateProgress } from "@kaiord/ai";
-import { PROMPT_VERSION } from "@kaiord/ai/prompts";
 import type { Analytics } from "@kaiord/core";
 
-import type { GenerateKrdPort } from "../../../application/coaching/convert-coaching-activity-with-ai";
 import { convertCoachingActivityWithAi } from "../../../application/coaching/convert-coaching-activity-with-ai";
+import { createReadStepsTable } from "../../../application/coaching/read-steps-table";
+import type { GenerationDeps } from "../../../lib/generate-workout";
 import {
-  generateWorkoutKrd,
-  type GenerationDeps,
-} from "../../../lib/generate-workout";
-import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import type { Sport } from "../../../types/schemas";
-import { sportSchema } from "../../../types/schemas";
+  type AiRunHooks,
+  buildGenerateKrdPort,
+  buildGenerateStepNotesPort,
+  type ChooseAiModel,
+} from "./coaching-generate-krd-port";
 
-const isKnownSport = (s: string): s is Sport =>
-  sportSchema.safeParse(s).success;
+const isoNow = (): string => new Date().toISOString();
 
-export const buildGenerateKrdPort = (
-  deps: GenerationDeps,
-  provider: LlmProviderConfig,
-  modelId: string,
-  now: () => string,
-  onProgress?: OnGenerateProgress
-): GenerateKrdPort => {
-  return async ({ text, sport, abortSignal }) => {
-    const krd = await generateWorkoutKrd({
-      deps,
-      text,
-      provider,
-      modelId,
-      sport: isKnownSport(sport) ? sport : undefined,
-      abortSignal,
-      onProgress,
-    });
-    return {
-      krd,
-      aiMeta: {
-        provider: provider.type,
-        model: modelId,
-        promptVersion: PROMPT_VERSION,
-        processedAt: now(),
-      },
-    };
-  };
-};
-
-export type RunAiInput = {
+export type RunAiInput = AiRunHooks & {
   activityId: string;
-  provider: LlmProviderConfig;
-  modelId: string;
+  chooseModel: ChooseAiModel;
   abortSignal: AbortSignal;
-  onProgress?: OnGenerateProgress;
+  /** Rebuild the existing Workout in place (explicit). */
+  regenerate?: boolean;
   deps: GenerationDeps;
   analytics: Analytics;
 };
 
 export const runConvertWithAi = (input: RunAiInput) =>
   convertCoachingActivityWithAi(
-    { activityId: input.activityId, abortSignal: input.abortSignal },
+    {
+      activityId: input.activityId,
+      abortSignal: input.abortSignal,
+      regenerate: input.regenerate,
+    },
     {
       coaching: input.deps.persistence.coaching,
       workouts: input.deps.persistence.workouts,
       sessionMatches: input.deps.persistence.sessionMatch,
+      athleteNotes: input.deps.persistence.athleteNotes,
       transaction: input.deps.persistence.transaction,
       analytics: input.analytics,
       generateKrd: buildGenerateKrdPort(
         input.deps,
-        input.provider,
-        input.modelId,
-        () => new Date().toISOString(),
-        input.onProgress
+        input.chooseModel,
+        isoNow,
+        input
       ),
+      generateStepNotes: buildGenerateStepNotesPort(
+        input.deps,
+        input.chooseModel,
+        input
+      ),
+      readStepsTable: createReadStepsTable(isoNow),
       newWorkoutId: () => crypto.randomUUID(),
       newMatchId: () => crypto.randomUUID(),
-      clock: () => new Date().toISOString(),
+      clock: isoNow,
     }
   );

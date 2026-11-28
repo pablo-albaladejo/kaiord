@@ -30,6 +30,7 @@ import { SCHEMAS } from "./dexie-schemas";
 import { registerV39 } from "./dexie-v39-migration";
 import { registerV40 } from "./dexie-v40-migration";
 import { registerV38 } from "./register-kaiord-v38";
+import { registerV41 } from "./register-kaiord-v41";
 import {
   registerV10ToV12,
   registerV13ToV15,
@@ -108,4 +109,5 @@ export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV38(db);
   registerV39(db);
   registerV40(db);
+  registerV41(db);
 };

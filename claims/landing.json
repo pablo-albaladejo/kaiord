@@ -1056,7 +1056,7 @@
     },
     {
       "id": "landing.en.connections.h2",
-      "text": "Kaiord picks which platform decides, unless you already chose.",
+      "text": "Kaiord picks which platform decides your health data, unless you already chose.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -1073,12 +1073,20 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },
     {
       "id": "landing.en.connections.lead",
-      "text": "Each platform you connect brings its own kinds of data. When two report the same kind, Kaiord picks the one that decides, unless you already chose, and the App shows when each one last brought data.",
+      "text": "Each platform you connect brings its own kinds of data. When two report the same kind of health data, Kaiord picks the one that decides, unless you already chose; activities, planned sessions and workouts are kept from every source. The App shows when each one last brought data.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -1099,6 +1107,14 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
           "title": "should mark an enabled route active and surface its freshness"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },
@@ -1310,7 +1326,7 @@
     },
     {
       "id": "landing.en.connections.authority-text",
-      "text": "When two platforms report the same day, Kaiord picks one; an advanced setting lets you choose, and a choice you already made keeps applying.",
+      "text": "When two platforms report the same health data for a day, Kaiord picks one; an advanced setting lets you choose, and a choice you already made keeps applying. Activities, planned sessions and workouts are kept from every source.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -1331,6 +1347,14 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },
@@ -1997,7 +2021,12 @@
       "proof": [
         {
           "file": "packages/docs/project/how-kaiord-is-built.md",
-          "contains": "## What the history supports"
+          "contains": "## The owner's statement"
+        },
+        {
+          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
         },
         {
           "test": "scripts/check-method-figures.test.mjs",
@@ -3298,7 +3327,7 @@
     },
     {
       "id": "landing.es.connections.lead",
-      "text": "Cada plataforma que conectas aporta sus propios tipos de datos. Cuando dos informan del mismo tipo, Kaiord elige la que decide, salvo que ya lo hayas elegido tú, y la App muestra cuándo aportó datos cada una por última vez.",
+      "text": "Cada plataforma que conectas aporta sus propios tipos de datos. Cuando dos informan del mismo tipo de dato de salud, Kaiord elige la que decide, salvo que ya lo hayas elegido tú; las actividades, las sesiones planificadas y los entrenamientos se guardan de todas las fuentes. La App muestra cuándo aportó datos cada una por última vez.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -3319,6 +3348,14 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
           "title": "should mark an enabled route active and surface its freshness"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },
@@ -3368,7 +3405,12 @@
       "proof": [
         {
           "file": "packages/docs/project/how-kaiord-is-built.md",
-          "contains": "## What the history supports"
+          "contains": "## The owner's statement"
+        },
+        {
+          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
         },
         {
           "test": "scripts/check-method-figures.test.mjs",
@@ -4701,7 +4743,7 @@
     },
     {
       "id": "landing.es.connections.authority-text",
-      "text": "Cuando dos plataformas informan del mismo día, Kaiord elige una; un ajuste avanzado te deja elegir, y una elección que ya hiciste se sigue aplicando.",
+      "text": "Cuando dos plataformas informan del mismo dato de salud de un día, Kaiord elige una; un ajuste avanzado te deja elegir, y una elección que ya hiciste se sigue aplicando. Las actividades, las sesiones planificadas y los entrenamientos se guardan de todas las fuentes.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -4722,6 +4764,14 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },
@@ -4991,7 +5041,7 @@
     },
     {
       "id": "landing.es.connections.h2",
-      "text": "Kaiord elige qué plataforma decide, salvo que ya lo hayas elegido tú.",
+      "text": "Kaiord elige qué plataforma decide tus datos de salud, salvo que ya lo hayas elegido tú.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -5008,6 +5058,14 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should pick one Platform for every kind of health data when nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep Activities, planned sessions and Workouts from every source when nobody chose"
         }
       ]
     },

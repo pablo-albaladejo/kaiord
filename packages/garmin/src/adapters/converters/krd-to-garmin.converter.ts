@@ -5,7 +5,7 @@ import {
   workoutSchema,
 } from "@kaiord/core";
 
-import { GARMIN_NAME_MAX } from "../constants";
+import { GARMIN_DESCRIPTION_MAX, GARMIN_NAME_MAX } from "../constants";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
@@ -34,7 +34,9 @@ export const convertKRDToGarmin = (
   const input: PoolInput & Record<string, unknown> = {
     sportType,
     workoutName: truncateName(workout.name ?? "Kaiord Workout", options.logger),
-    ...(workout.notes ? { description: workout.notes } : {}),
+    ...(workout.notes
+      ? { description: truncateDescription(workout.notes, options.logger) }
+      : {}),
     workoutSegments: [
       {
         segmentOrder: 1,
@@ -86,6 +88,15 @@ const truncateName = (name: string, logger: Logger): string => {
     { originalLength: name.length }
   );
   return name.substring(0, GARMIN_NAME_MAX);
+};
+
+const truncateDescription = (notes: string, logger: Logger): string => {
+  if (notes.length <= GARMIN_DESCRIPTION_MAX) return notes;
+  logger.warn(
+    `Lossy conversion: workout description truncated to ${GARMIN_DESCRIPTION_MAX} characters`,
+    { originalLength: notes.length }
+  );
+  return notes.substring(0, GARMIN_DESCRIPTION_MAX);
 };
 
 const extractWorkout = (krd: KRD): Workout | undefined => {

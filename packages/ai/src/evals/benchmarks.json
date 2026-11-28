@@ -176,7 +176,7 @@
   },
   {
     "id": "edge-short",
-    "text": "5 minute sprint",
+    "text": "5 minute bike sprint",
     "expectedSport": "cycling",
     "minSteps": 1,
     "maxSteps": 3,

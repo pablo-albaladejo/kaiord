@@ -21,7 +21,7 @@ Kaiord for Garmin connects the Kaiord App (https://kaiord.com/app) to your Garmi
 What it does:
 
 • Sends the workouts you create in the Kaiord App to your Garmin Connect workout library.
-• Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added, and never deletes a library workout.
+• Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added. It never deletes anything from your Garmin Connect workout library: when you change a workout and send it again, Kaiord adds the new version and the earlier one stays in your library.
 • Reads your 20 most recent Garmin Connect activities for the Kaiord App.
 • Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.
 • Shows in its popup whether it can currently read from Garmin Connect.
@@ -37,6 +37,7 @@ Your tokens and your data:
 • The Garmin tokens are kept in your browser (chrome.storage.local) and are sent only to Garmin. They never travel to Kaiord.
 • The extension sends requests only to Garmin, and answers only the Kaiord App at https://kaiord.com.
 • Before it hands the Kaiord App an answer, the extension removes anything in it tied to your Garmin sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. Garmin's answers carry none today.
+• It also removes the personal details the Kaiord App does not read: a workout's author (your name and profile pictures), an activity's owner names and pictures and the places it started and ended, and any field named as your name, birth date, gender, email, phone or address.
 • No analytics and no tracking. The extension keeps a short log of its own errors in your browser and sends it nowhere.
 • Removing the extension from Chrome deletes everything it stored.
 • Access through your own Garmin sign-in is unofficial: it is not a Garmin partner API, and it can stop working without notice.
@@ -53,7 +54,7 @@ Kaiord for Garmin conecta Kaiord App (https://kaiord.com/app) con tu cuenta de G
 Qué hace:
 
 • Envía los entrenamientos que creas en Kaiord App a tu biblioteca de entrenamientos de Garmin Connect.
-• Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú, y nunca borra un entrenamiento de la biblioteca.
+• Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú. Nunca borra nada de tu biblioteca de entrenamientos de Garmin Connect: cuando cambias un entrenamiento y lo envías de nuevo, Kaiord añade la versión nueva y la anterior se queda en tu biblioteca.
 • Lee tus 20 actividades más recientes de Garmin Connect para Kaiord App.
 • Sube una medición de composición corporal (tu peso y los valores relacionados) a Garmin Connect cuando envías una desde Kaiord App.
 • Muestra en su ventana emergente si ahora mismo puede leer de Garmin Connect.
@@ -69,6 +70,7 @@ Tus tokens y tus datos:
 • Los tokens de Garmin se guardan en tu navegador (chrome.storage.local) y solo se envían a Garmin. Nunca viajan a Kaiord.
 • La extensión solo envía peticiones a Garmin, y solo responde a Kaiord App en https://kaiord.com.
 • Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de Garmin: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de Garmin no traen ninguno.
+• También quita los datos personales que Kaiord App no lee: el autor de un entrenamiento (tu nombre y tus fotos de perfil), los nombres y fotos del propietario de una actividad y los lugares donde empezó y terminó, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.
 • Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.
 • Quitar la extensión de Chrome borra todo lo que guardó.
 • El acceso a través de tu propio inicio de sesión de Garmin no es oficial: no es una API de socio de Garmin, y puede dejar de funcionar sin aviso.
@@ -119,7 +121,7 @@ longer exists. Replace it with captures of the current popup. Its states, from `
 
 1. **Connected**: after the Kaiord App has read from or sent to Garmin Connect once, the extension holds access that has not expired; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
 2. **Not checked yet**: with no access held yet (a fresh install), the popup shows "Not checked yet" ["Todavía sin comprobar"] and "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access." ["Kaiord pregunta a Garmin Connect la primera vez que lee o envía, así que mirar aquí no genera ningún acceso."]. The check asks Garmin nothing, so the popup never shows "Sign in to Garmin".
-3. **Not answering**: only when the extension's own worker does not answer; the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." ["Garmin no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. It is hard to stage and not needed for the listing.
+3. **Not answering**: only when the extension's own worker does not answer; the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." ["Garmin no responde, así que ahora mismo no puedes usar Garmin en Kaiord."] and "Try again" ["Reintentar"]. It is hard to stage and not needed for the listing.
 
 Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
 

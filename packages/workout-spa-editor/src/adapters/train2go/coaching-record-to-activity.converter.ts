@@ -28,4 +28,7 @@ export const toCoachingActivity = (
   effort: record.intensity,
   status: record.status,
   description: record.description,
+  ...(record.structuredSteps
+    ? { structuredSteps: record.structuredSteps }
+    : {}),
 });

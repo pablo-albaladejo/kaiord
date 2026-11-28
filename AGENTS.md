@@ -162,6 +162,14 @@ Before any non-trivial change:
   or pattern (R-BridgeExactOrigin); every bridge answers its internal channel
   only through `createInternalDispatch`, so a content script gets no answer,
   and any other `onMessage` listener cannot answer (R-BridgeInternalDispatch).
+- `check-bridge-popup-reads.mjs` — ADR 0004's bounded exception: each
+  bridge declares its popup's reads (`POPUP_READS`, `POPUP_READ_SCRIPTS`);
+  a popup read is an internal action only, no other action reaches its code
+  (R-PopupReadsUnreachable), it asks only for paths on `ALLOWED` through
+  `isAllowed` (R-PopupReadsClosedList), and nothing it reads is stored: every
+  `chrome.storage` write uses a key listed with its reason in
+  `scripts/bridge-popup-reads.vocab.mjs` and popup.js writes none
+  (R-PopupReadsNotStored, `pnpm lint:bridge-popup-reads`).
 - `check-security-audit-required.mjs` — the required `Dependency Security
 Audit` job keeps its exact name, reports on every pull request and on push
   to `main`, and fails on a high/critical finding or a missing report
@@ -174,7 +182,8 @@ Audit` job keeps its exact name, reports on every pull request and on push
   READMEs, the method note, the platform-access register) equals a register
   entry, as many times as it appears; every entry is still on its surface; a
   label carries no proof, an external claim is read again within 180 days,
-  and any other claim is proven by a running test or pinned code
+  and any other claim is proven by a running test or pinned code, or declared
+  by the owner's author statement, counted apart and never as proven
   (`pnpm lint:claims`, which prints a proof summary; how to add a surface:
   `claims/README.md`).
 - `check-method-figures.mjs` — every figure on the method note
@@ -190,8 +199,9 @@ Audit` job keeps its exact name, reports on every pull request and on push
   loss, round-trip safe, open standard, interchange format, platform for
   Kaiord itself; and no athlete-facing text (the App's dictionaries and copy,
   the extensions' `_locales` and popups, the store listings, the privacy
-  policy, the docs pages that address the athlete) says "bridge" or "the
-  Kaiord extension" (`pnpm lint:retired-terms`).
+  policy, the docs pages that address the athlete) says "bridge", "the
+  Kaiord extension" or "Capability"/"Capacidad" (the athlete reads "Feature",
+  "Función") (`pnpm lint:retired-terms`).
 - `check-bridge-locales-en-es.test.mjs` — every extension ships `_locales/en`
   and `_locales/es` at parity (same keys and placeholders, none empty), is
   named "Kaiord for <Platform>" in both, and takes every popup string from

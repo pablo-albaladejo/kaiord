@@ -36,12 +36,15 @@ const depsOf = (persistence: Persistence, duringLlm: () => Promise<void>) => ({
   coaching: persistence.coaching,
   workouts: persistence.workouts,
   sessionMatches: persistence.sessionMatch,
+  athleteNotes: persistence.athleteNotes,
   transaction: persistence.transaction,
   analytics: buildStubAnalytics(),
   generateKrd: async () => {
     await duringLlm();
     return { krd: fakeKrd(), aiMeta: fakeAiMeta() };
   },
+  readStepsTable: () => null,
+  generateStepNotes: async () => null,
   newWorkoutId: () => "w-new",
   newMatchId: () => "m-new",
   clock: () => NOW,

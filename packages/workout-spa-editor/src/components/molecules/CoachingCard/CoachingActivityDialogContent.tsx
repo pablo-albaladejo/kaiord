@@ -8,11 +8,14 @@
  *                    The next live-query tick flips to "matched".
  *   - "matched"    → LinkedWorkoutSection + workout-state-conditional
  *                    contextual buttons.
+ *
+ * The Athlete note ("Your note") sits under the coach's text in every state.
  */
 
 import { formatHms } from "../../../lib/workout-review/format-duration";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { cardDurationSeconds } from "../WorkoutCard/workout-card-labels";
+import { AthleteNoteField } from "./AthleteNoteField";
 import {
   type CoachingDialogBodyProps,
   renderMatchedBody,
@@ -22,6 +25,7 @@ import { DialogMeta } from "./coaching-dialog-meta";
 import { DialogDescription, DialogHeader } from "./coaching-dialog-parts";
 import { CoachingDialogZoneProfile } from "./coaching-dialog-zone-profile";
 import { CoachingDayComments } from "./CoachingDayComments";
+import { CoachingStepsTable } from "./CoachingStepsTable";
 import { useCoachingDayComments } from "./use-coaching-day-comments";
 import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
@@ -63,6 +67,12 @@ export function CoachingActivityDialogContent(
         description={activity.description}
       />
       <DialogDescription activity={activity} load={descriptionLoad} />
+      <CoachingStepsTable steps={activity.structuredSteps} />
+      <AthleteNoteField
+        key={activity.id}
+        profileId={profileId}
+        activityId={activity.id}
+      />
       {matched ? renderMatchedBody(props, matched) : renderNoWorkoutBody(props)}
       <CoachingDayComments comments={comments} />
     </div>

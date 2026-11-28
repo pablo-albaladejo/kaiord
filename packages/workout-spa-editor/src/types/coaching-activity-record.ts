@@ -17,6 +17,8 @@
 
 import { z } from "zod";
 
+import { coachingStructuredStepsSchema } from "./coaching-structured-steps";
+
 export const coachingActivityStatusSchema = z.enum([
   "pending",
   "completed",
@@ -51,6 +53,12 @@ export const coachingActivityRecordSchema = z
     status: coachingActivityStatusSchema,
     completionPercent: z.number().min(0).max(100).optional(),
     description: z.string().optional(),
+    /**
+     * The activity's steps table, read whole from the Platform (only then
+     * present). Fetched with the description, so it is absent where the
+     * description is.
+     */
+    structuredSteps: coachingStructuredStepsSchema.optional(),
     fetchedAt: z.iso.datetime(),
     /**
      * Provenance stamped on every synced row (F1.3): the bridge that produced
@@ -109,3 +117,17 @@ export const namespaceSourceId = (
   profileId: string,
   rawSourceId: string
 ): string => `${profileId}:${rawSourceId}`;
+
+/**
+ * Inverse of `namespaceSourceId`: the Platform's own id, or `undefined` when
+ * `sourceId` is not namespaced under `profileId`.
+ */
+export const platformSourceId = (
+  profileId: string,
+  sourceId: string | null | undefined
+): string | undefined => {
+  const prefix = namespaceSourceId(profileId, "");
+  return sourceId?.startsWith(prefix)
+    ? sourceId.slice(prefix.length)
+    : undefined;
+};

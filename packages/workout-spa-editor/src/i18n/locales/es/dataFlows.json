@@ -14,6 +14,7 @@
     "messages": "tus mensajes",
     "workouts": "entrenamientos",
     "coachingPlan": "el plan y los comentarios de tu entrenador",
+    "athleteNote": "tus notas a las actividades de tu entrenador",
     "dataSources": "de qué fuente llega cada tipo de dato",
     "workoutDescription": "el entrenamiento que describes",
     "aiInstructions": "tus instrucciones para la IA",
@@ -28,6 +29,7 @@
   "flows": {
     "assistant": "Mientras hablas con el asistente, lo que lee para responderte",
     "generation": "Cuando generas un entrenamiento con IA",
+    "coachingStepNotes": "Cuando creas un entrenamiento desde la tabla de pasos de tu entrenador, para sus notas de paso",
     "assistantWorkout": "Cuando el asistente crea un entrenamiento después de leer tus datos de salud",
     "labImport": "Cuando lees un documento de analíticas con IA",
     "providerKeyCheck": "Cuando guardas una clave, para comprobarla",

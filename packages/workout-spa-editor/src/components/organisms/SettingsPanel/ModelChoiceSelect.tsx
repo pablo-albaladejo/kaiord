@@ -4,12 +4,12 @@ import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 import { CustomModelInput } from "./CustomModelInput";
 import type { EffectiveModel } from "./effective-models";
 import {
-  choiceName,
   INHERIT_VALUE,
   type ModelChoice,
   modelChoiceGroups,
 } from "./model-choice";
 import { ModelChoiceOptions } from "./ModelChoiceOptions";
+import { useChoiceName } from "./use-choice-name";
 import { useModelChoice } from "./use-model-choice";
 
 export type ModelChoiceSelectProps = {
@@ -27,6 +27,7 @@ export type ModelChoiceSelectProps = {
 export function ModelChoiceSelect(props: ModelChoiceSelectProps) {
   const { id, label, providers, effective, principal } = props;
   const t = useTranslate("settings");
+  const nameChoice = useChoiceName();
   const canInherit = props.onInherit !== undefined && principal !== undefined;
   const choice = useModelChoice({ ...props, canInherit });
   const { running } = effective;
@@ -35,7 +36,7 @@ export function ModelChoiceSelect(props: ModelChoiceSelectProps) {
   const followsId = `${id}-follows`;
   // What a followed main model runs, named under the select.
   const followed =
-    follows && principal ? choiceName(principal, providers) : null;
+    follows && principal ? nameChoice(principal, providers) : null;
 
   return (
     <div className="w-full">

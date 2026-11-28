@@ -208,3 +208,34 @@ describe("useSyncCallback fan-out", () => {
     expect(runZonesSync).not.toHaveBeenCalled();
   });
 });
+
+describe("useSyncCallback when the transport's code does not load", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("should tell the athlete part of the App did not load", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    mockSyncWeek.mockResolvedValueOnce({
+      ok: false,
+      reason: "app-part-not-loaded",
+    } as never);
+    const onNotLoaded = vi.fn();
+    const { result } = renderHook(
+      () =>
+        useSyncCallback(
+          persistence,
+          transport,
+          analytics,
+          undefined,
+          onNotLoaded
+        ),
+      wrapPersistence(persistence)
+    );
+
+    // Act
+    await result.current("p1", "2026-04-13");
+
+    // Assert
+    expect(onNotLoaded).toHaveBeenCalledTimes(1);
+  });
+});

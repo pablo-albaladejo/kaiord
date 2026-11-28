@@ -5,11 +5,18 @@
  * the ledger total order (clock, then `id`, then serialisation) names the
  * newer row, which supplies every scalar field — `library` and `forceRepush`
  * included, never mixed with the older row's — while the placement and the
- * removal queue merge by supersession (`mergeGarminPlacement`). `updatedAt`
+ * removal queue merge by supersession (`mergeGarminPlacement`). The library
+ * versions Kaiord created are joined, and the older row's own confirmed
+ * library workout, when the newer row holds another, joins them as
+ * superseded (an edit on each of two devices made two). `updatedAt`
  * is the later of the two. Symmetric: `merge(a, b)` equals `merge(b, a)`.
  * Pure, no I/O.
  */
 import type { ExportLedgerEntry } from "../../types/export-ledger";
+import {
+  joinLibraryVersions,
+  supersededBy,
+} from "../../types/garmin-library-version";
 import {
   isCommittedLedgerRow,
   mergeExportLedgerRows,
@@ -31,6 +38,20 @@ const laterStamp = (x: unknown, y: unknown): unknown => {
   return x ?? y;
 };
 
+const mergeLibraryVersions = (
+  merged: Row,
+  newer: ExportLedgerEntry,
+  older: ExportLedgerEntry
+) => {
+  delete merged.libraryVersions;
+  const versions = joinLibraryVersions(
+    newer.libraryVersions,
+    older.libraryVersions,
+    supersededBy(older.library, newer.library)
+  );
+  if (versions.length > 0) merged.libraryVersions = versions;
+};
+
 export function mergeGarminLedgerRows(a: Row, b: Row): Row {
   // A pending row is an in-flight library POST: Phase 1 never writes
   // `placement` or `removalQueue` on it (placement starts after the commit),
@@ -49,6 +70,11 @@ export function mergeGarminLedgerRows(a: Row, b: Row): Row {
   if (placement) merged.placement = placement;
   const hadQueue = a.removalQueue !== undefined || b.removalQueue !== undefined;
   if (queue.length > 0 || hadQueue) merged.removalQueue = queue;
+  mergeLibraryVersions(
+    merged,
+    newer as ExportLedgerEntry,
+    older as ExportLedgerEntry
+  );
   const updatedAt = laterStamp(a.updatedAt, b.updatedAt);
   if (updatedAt !== undefined) merged.updatedAt = updatedAt;
   return merged;

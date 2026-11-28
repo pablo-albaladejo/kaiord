@@ -15,8 +15,14 @@ import {
   previousExtension,
   uninstallFakeExtension,
 } from "../../../test-utils/fake-bridge-extension";
+import { readTrainingPeaksDayTitles } from "./trainingpeaks-day-transport";
 import { readTrainingPeaksMetrics } from "./trainingpeaks-metrics-transport";
-import { metricsPath, workoutPath, workoutsPath } from "./trainingpeaks-paths";
+import {
+  metricsPath,
+  workoutPath,
+  workoutsOnDayPath,
+  workoutsPath,
+} from "./trainingpeaks-paths";
 import type { TrainingPeaksBridgeError } from "./trainingpeaks-transport";
 import {
   pushTrainingPeaksWorkout,
@@ -170,6 +176,66 @@ describe("TrainingPeaks Connector, current extension (protocol 2)", () => {
     expect(state).toBe(expected);
   });
 
+  it("should read one day and keep only the titles of the workouts on it", async () => {
+    // Arrange
+    const day = "2026-11-24";
+    const sent = current({
+      [`GET ${workoutsOnDayPath(ATHLETE, day)}`]: json([
+        {
+          workoutId: 1,
+          workoutDay: "2026-11-24T00:00:00",
+          title: "Easy run",
+          description: "felt good",
+          heartRateAverage: 151,
+        },
+        { workoutId: 2, workoutDay: "2026-11-24T00:00:00", title: "Tempo" },
+        { workoutId: 3, workoutDay: "2026-11-25T00:00:00", title: "Long" },
+        { workoutId: 4, workoutDay: "2026-11-24T00:00:00", title: null },
+      ]),
+    });
+
+    // Act
+    const read = await readTrainingPeaksDayTitles(EXT, day);
+
+    // Assert
+    expect(read).toEqual({ ok: true, titles: ["Easy run", "Tempo"] });
+    expect(sent.at(-1)).toEqual({
+      action: "request",
+      method: "GET",
+      path: workoutsOnDayPath(ATHLETE, day),
+    });
+  });
+
+  it.each([
+    [
+      "a refused read",
+      { refuse: { error: "Request failed: 500", status: 500 } },
+    ],
+    ["an answer that is not a list", json({ workouts: [] })],
+    ["an entry with no day", json([{ title: "Tempo" }])],
+  ])("should treat %s of the day as not read", async (_label, reply) => {
+    // Arrange
+    current({ [`GET ${workoutsOnDayPath(ATHLETE, "2026-11-24")}`]: reply });
+
+    // Act
+    const read = await readTrainingPeaksDayTitles(EXT, "2026-11-24");
+
+    // Assert
+    expect(read).toEqual({ ok: false });
+  });
+
+  it("should not ask for a day that is not a date", async () => {
+    // Arrange
+    const sent = current({});
+
+    // Act
+    const read = await readTrainingPeaksDayTitles(EXT, "2026-02-30");
+
+    // Assert
+    expect(read).toEqual({ ok: false });
+    expect(sent).toEqual([]);
+  });
+
   it("should not ask for a workout whose id is not a number", async () => {
     // Arrange
     const sent = current({});
@@ -225,6 +291,22 @@ describe("TrainingPeaks Connector, extension one protocol behind (protocol 1)", 
   });
 });
 
+describe("TrainingPeaks Connector, the day read on the previous extension", () => {
+  it("should not read the day through an extension that has no such request", async () => {
+    // Arrange
+    const sent = previousExtension({ "read-athlete-id": athleteId() });
+
+    // Act
+    const read = await readTrainingPeaksDayTitles(EXT, "2026-11-24");
+
+    // Assert
+    expect(read).toEqual({ ok: false });
+    expect(sent.filter((m) => m.action !== "request")).toEqual([
+      ATHLETE_ID_READ,
+    ]);
+  });
+});
+
 describe("TrainingPeaks Connector asks only for what the extension's closed list admits", () => {
   it("should build every request so that the extension's list admits it", () => {
     // Arrange
@@ -233,6 +315,7 @@ describe("TrainingPeaks Connector asks only for what the extension's closed list
       ["GET", metricsPath(ATHLETE, "2026-07-01", "2026-07-07")],
       ["POST", workoutsPath(ATHLETE)],
       ["GET", workoutPath(ATHLETE, String(WORKOUT_ID))],
+      ["GET", workoutsOnDayPath(ATHLETE, "2026-11-24")],
     ] as const;
 
     // Act

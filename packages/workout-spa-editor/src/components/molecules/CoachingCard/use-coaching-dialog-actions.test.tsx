@@ -1,6 +1,6 @@
 /**
  * useCoachingDialogActions tests — exercises every match/split branch
- * by injecting fake `useMatchSession` / `useUnmatchSession` modules.
+ * by injecting fake `useMatchSession` / `useSplitCoachingWorkout` modules.
  */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -8,14 +8,14 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockMatch = vi.fn();
-const mockUnmatch = vi.fn();
+const mockSplit = vi.fn();
 const mockShowSuccess = vi.fn();
 
 vi.mock("../../../hooks/use-match-session", () => ({
   useMatchSession: () => mockMatch,
 }));
-vi.mock("../../../hooks/use-unmatch-session", () => ({
-  useUnmatchSession: () => mockUnmatch,
+vi.mock("../../../hooks/use-split-coaching-workout", () => ({
+  useSplitCoachingWorkout: () => mockSplit,
 }));
 vi.mock("../../../contexts/ToastContext", () => ({
   useToastContext: () => ({
@@ -182,10 +182,10 @@ describe("useCoachingDialogActions — handleSplit", () => {
     workout: { id: "w-1" } as never,
   };
 
-  it("should invoke useUnmatchSession with profileId + matchId from matchState", async () => {
+  it("should invoke useSplitCoachingWorkout with profileId + matchId from matchState", async () => {
     // Arrange
 
-    mockUnmatch.mockResolvedValue(undefined);
+    mockSplit.mockResolvedValue(undefined);
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", matchedState),
       { wrapper: wrap }
@@ -199,7 +199,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
 
     // Assert
 
-    expect(mockUnmatch).toHaveBeenCalledWith({
+    expect(mockSplit).toHaveBeenCalledWith({
       profileId: "p1",
       matchId: "m-1",
     });
@@ -221,7 +221,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
 
     // Assert
 
-    expect(mockUnmatch).not.toHaveBeenCalled();
+    expect(mockSplit).not.toHaveBeenCalled();
   });
 
   it("should be a no-op when targetProfileId is null", async () => {
@@ -240,14 +240,14 @@ describe("useCoachingDialogActions — handleSplit", () => {
 
     // Assert
 
-    expect(mockUnmatch).not.toHaveBeenCalled();
+    expect(mockSplit).not.toHaveBeenCalled();
   });
 
   it("should toggle `splitting` true while in flight and reset on completion", async () => {
     // Arrange
 
     let resolve!: () => void;
-    mockUnmatch.mockReturnValue(
+    mockSplit.mockReturnValue(
       new Promise<void>((r) => {
         resolve = r;
       })

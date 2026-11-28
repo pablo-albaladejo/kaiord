@@ -1,18 +1,22 @@
-// What a claim's proof may be, and whether it still holds. Three kinds:
+// What a claim's proof may be, and whether it still holds. Four kinds:
 //   { file, contains? }    a repo file, optionally still holding that text
 //   { test, title }        a test file with a test that really runs under
 //                          that title (see claims-test-runs.mjs)
 //   { endpoint, servedBy } an https URL; a kaiord.com URL names the repo
 //                          file that serves it. Not fetched: hermetic.
+//   { "author-statement", by, on }  what the owner declares, by role, on a
+//                          date (claims-statement.mjs): declared, not proven
 // How strong a proof is, and whether a claim has one strong enough, is
 // claims-strength.mjs.
 
+import { STATEMENT_FIELDS, statementProblems } from "./claims-statement.mjs";
 import { testRunProblem } from "./claims-test-runs.mjs";
 
 const KINDS = {
   file: ["file", "contains"],
   test: ["test", "title"],
   endpoint: ["endpoint", "servedBy"],
+  "author-statement": STATEMENT_FIELDS,
 };
 
 export const kindOf = (proof) =>
@@ -64,12 +68,13 @@ const CHECK = {
   file: fileProblems,
   test: testProblems,
   endpoint: endpointProblems,
+  "author-statement": statementProblems,
 };
 
 export const proofProblems = (proof, read) => {
   const kind = kindOf(proof);
   if (!kind)
-    return [`proof ${JSON.stringify(proof)} is none of file, test, endpoint`];
+    return [`proof ${JSON.stringify(proof)} is none of file, test, endpoint, author-statement`];
   const unknown = Object.keys(proof).filter((k) => !KINDS[kind].includes(k));
   if (unknown.length > 0)
     return [

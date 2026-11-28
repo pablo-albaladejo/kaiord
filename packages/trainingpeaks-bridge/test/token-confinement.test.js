@@ -66,26 +66,6 @@ const EXTERNAL_MESSAGES = [
   {
     action: "request",
     method: "POST",
-    path: `/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`,
-    body: {
-      athleteId: ATHLETE_ID,
-      timeStamp: "2026-11-23T07:00:00Z",
-      id: null,
-      details: [
-        {
-          type: 9,
-          label: "Weight",
-          value: 70,
-          time: "2026-11-23T07:00:00Z",
-          units: "kg",
-          formatedUnits: "kg",
-        },
-      ],
-    },
-  },
-  {
-    action: "request",
-    method: "POST",
     path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts`,
     body: {
       athleteId: ATHLETE_ID,
@@ -103,6 +83,11 @@ const EXTERNAL_MESSAGES = [
     action: "request",
     method: "GET",
     path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts/4242`,
+  },
+  {
+    action: "request",
+    method: "GET",
+    path: `/fitness/v6/athletes/${ATHLETE_ID}/workouts/2026-11-23/2026-11-23`,
   },
   { action: "read-athlete-id" },
   { action: "set-theme", theme: "dark" },

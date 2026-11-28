@@ -8,6 +8,9 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { coachWorkout } from "../../../application/session-move.test-fixtures";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import {
   CoachingActivityDialogContent,
@@ -58,6 +61,7 @@ const renderContent = (
     manualCreating: false,
     onClose: noop,
     onAiProcess: noop,
+    onRegenerate: noop,
     onAiCancel: noop,
     onEditManually: noop,
     onOpenPicker: noop,
@@ -70,11 +74,15 @@ const renderContent = (
     onMoveTo,
   } satisfies CoachingActivityDialogContentProps;
   return render(
-    <Dialog.Root open>
-      <Dialog.Content aria-describedby={undefined}>
-        <CoachingActivityDialogContent {...props} />
-      </Dialog.Content>
-    </Dialog.Root>
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      <ToastContextProvider>
+        <Dialog.Root open>
+          <Dialog.Content aria-describedby={undefined}>
+            <CoachingActivityDialogContent {...props} />
+          </Dialog.Content>
+        </Dialog.Root>
+      </ToastContextProvider>
+    </PersistenceProvider>
   );
 };
 

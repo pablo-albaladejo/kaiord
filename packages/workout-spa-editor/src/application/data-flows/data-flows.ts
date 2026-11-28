@@ -7,7 +7,7 @@
  * dictionary. `withheld` marks a health flow to a Provider: what it does
  * when the athlete says no (goes without its health data, or does not go).
  */
-import { LLM_PROVIDER_TYPES } from "@kaiord/ai/providers";
+import { LLM_PROVIDER_TYPES as PROVIDERS } from "@kaiord/ai/provider-types";
 
 import {
   ASSISTANT_HEALTH_KINDS,
@@ -17,7 +17,6 @@ import {
 } from "./data-kinds";
 import { type DestinationId, DESTINATIONS } from "./destinations";
 
-const PROVIDERS = LLM_PROVIDER_TYPES;
 const READ_PLATFORMS = [
   "garmin",
   "trainingpeaks",
@@ -48,12 +47,15 @@ export const DATA_FLOWS = {
     to: PROVIDERS,
     kinds: [
       "workoutDescription",
+      "coachingPlan",
+      "athleteNote",
       "aiInstructions",
       "powerPaceZones",
       "heartRateZones",
     ],
     withheld: "goesWithout",
   },
+  coachingStepNotes: { to: PROVIDERS, kinds: ["coachingPlan"] },
   assistantWorkout: {
     to: PROVIDERS,
     kinds: ["workoutDescription", ...ASSISTANT_HEALTH_KINDS],
@@ -95,8 +97,3 @@ export const providerHealthKinds = (): HealthDataKind[] => [
     ).flatMap(healthKindsOf)
   ),
 ];
-
-export const flowsTo = (destination: DestinationId): DataFlowId[] =>
-  DATA_FLOW_IDS.filter((id) =>
-    (DATA_FLOWS[id].to as readonly DestinationId[]).includes(destination)
-  );

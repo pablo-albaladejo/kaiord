@@ -3,7 +3,7 @@ import type { PushState } from "../../../contexts";
 import type { GarminPushFailure } from "../../../contexts/garmin-bridge-types";
 import { useTranslate } from "../../../i18n/use-translate";
 import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
-import { ReloadAppButton } from "./ReloadAppButton";
+import { ReloadAppButton } from "../ReloadAppButton";
 
 type PushFeedbackProps = {
   push: PushState;

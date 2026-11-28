@@ -72,6 +72,8 @@ import { gzipSync } from "node:zlib";
 // - `src/components/organisms/UpdatePrompt/UpdatePrompt.tsx` and
 //   `src/lib/service-worker/{watch-registration,apply-update}.ts` (behind
 //   `UpdatePromptGate` and the service worker's registration, after load)
+// - `ai/dist/providers.js` (the AI model catalog and price table: boot code
+//   that only needs the Provider list imports `@kaiord/ai/provider-types`)
 // - `src/adapters/garmin/connector/garmin-workout-operations.ts` (Garmin's
 //   send and list, behind `loadGarminWorkoutOperations`: the Garmin provider
 //   mounts at boot; a send whose code cannot load says so and asks Garmin
@@ -105,6 +107,7 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/components/organisms/UpdatePrompt/UpdatePrompt.tsx",
   "src/lib/service-worker/watch-registration.ts",
   "src/lib/service-worker/apply-update.ts",
+  "ai/dist/providers.js",
   "src/adapters/garmin/connector/garmin-workout-operations.ts",
 ];
 

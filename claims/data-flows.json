@@ -87,6 +87,11 @@
       "kind": "label"
     },
     {
+      "id": "app.dataflows.en.kinds.athleteNote",
+      "text": "your notes on your coach's activities",
+      "kind": "label"
+    },
+    {
       "id": "app.dataflows.en.kinds.dataSources",
       "text": "which source feeds each kind of data",
       "kind": "label"
@@ -176,6 +181,20 @@
         {
           "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
           "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.coachingStepNotes",
+      "text": "When you build a workout from your coach's steps table, for its step notes",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-step-notes.test.ts",
+          "title": "should send only the coach's text and the step lines, and record the coaching plan in its Trace"
         },
         {
           "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
@@ -609,6 +628,11 @@
       "kind": "label"
     },
     {
+      "id": "app.dataflows.es.kinds.athleteNote",
+      "text": "tus notas a las actividades de tu entrenador",
+      "kind": "label"
+    },
+    {
       "id": "app.dataflows.es.kinds.dataSources",
       "text": "de qué fuente llega cada tipo de dato",
       "kind": "label"
@@ -698,6 +722,20 @@
         {
           "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
           "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.coachingStepNotes",
+      "text": "Cuando creas un entrenamiento desde la tabla de pasos de tu entrenador, para sus notas de paso",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-step-notes.test.ts",
+          "title": "should send only the coach's text and the step lines, and record the coaching plan in its Trace"
         },
         {
           "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",

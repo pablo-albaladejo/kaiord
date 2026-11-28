@@ -83,7 +83,7 @@ const KAIORD_CONNECTION_NOTICES = (() => {
       }),
       "try-again": Object.freeze({
         message:
-          "{platform} no responde, así que ahora mismo no puedes usarlo en Kaiord.",
+          "{platform} no responde, así que ahora mismo no puedes usar {platform} en Kaiord.",
         action: "Reintentar",
       }),
     }),

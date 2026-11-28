@@ -100,18 +100,28 @@ restates a third party (a Platform's terms, Chrome's documented behaviour)
 that no test here can check. A claim proven only by its own surface, a file
 existing or an endpoint fails: prove it, declare it, or remove the sentence.
 `pnpm lint:claims` prints one line with how many claims, labels and external
-claims there are and how many are proven by test and by pinned code. Counts
-("4 formats", "5 extensions") are proven by a test that counts.
+claims there are, how many are proven by test and by pinned code, and how
+many are declared by an author statement. Counts ("4 formats", "5
+extensions") are proven by a test that counts.
 
 ## Proofs
 
 Unknown fields are refused, so a typo cannot pass.
 
-| Kind     | Shape                                     | Holds while                                                                                                                                                                                                |
-| -------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| File     | `{ "file": "path", "contains": "text" }`  | the file exists and, if `contains` is given, still holds that exact text (prefer pinning the code).                                                                                                        |
-| Test     | `{ "test": "path", "title": "should …" }` | the file has an `it("…")` / `test("…")` call with that exact title in code (not a comment or a string), and neither it nor a `describe` around it is skipped, todo, conditional or left out by an `.only`. |
-| Endpoint | `{ "endpoint": "https://…" }`             | it is an https URL. A `kaiord.com` URL also names `servedBy`, the repo file that serves it.                                                                                                                |
+| Kind             | Shape                                                                                       | Holds while                                                                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File             | `{ "file": "path", "contains": "text" }`                                                    | the file exists and, if `contains` is given, still holds that exact text (prefer pinning the code).                                                                                                        |
+| Test             | `{ "test": "path", "title": "should …" }`                                                   | the file has an `it("…")` / `test("…")` call with that exact title in code (not a comment or a string), and neither it nor a `describe` around it is skipped, todo, conditional or left out by an `.only`. |
+| Endpoint         | `{ "endpoint": "https://…" }`                                                               | it is an https URL. A `kaiord.com` URL also names `servedBy`, the repo file that serves it.                                                                                                                |
+| Author statement | `{ "author-statement": "exact words", "by": "the repository's owner", "on": "YYYY-MM-DD" }` | it states something, `by` names a role (only "the repository's owner"), never a person, `on` is a date, and no field holds an email address.                                                               |
+
+An author statement is a declaration, not evidence: what the repository's
+owner states, in exact words, on a date, about something no test or code
+here can check (who wrote the commits, what the project is). A claim that
+cites one is counted as "declared by author statement" in the summary,
+never as proven by test or by pinned code, even when it cites a test too;
+it says so on the page it backs, where the statement is labelled as the
+owner's declaration.
 
 Endpoints are not fetched: the guard stays hermetic. Paths are repo-relative.
 A proof that holds is the floor, not the bar: the reviewer still checks that
@@ -137,24 +147,27 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File                   | Surfaces                                                                                                                                                                                                                                                                                                              |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app.json`             | The Kaiord App page `packages/workout-spa-editor/index.html`: title, metas, JSON-LD and the `<noscript>` text                                                                                                                                                                                                         |
-| `docs.json`            | The docs home and getting-started intros, the converters page's "Three ways to convert" and "What survives a conversion?", the install guide for the extensions (English and Spanish), and `packages/landing/public/llms.txt`                                                                                         |
-| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                                                                                                   |
-| `landing.json`         | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630)                                                                          |
-| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                                                                                                                                                                                        |
-| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                                                                                                                                                                               |
-| `readme.json`          | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai) with the per-format features section of fit, tcx, zwo and garmin (#1654), of the five extensions, of the App and of the landing (#1630) |
-| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                                                                                                   |
-| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                                                                                                 |
-| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628)                                                                                                                                                            |
+| File                   | Surfaces                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.json`             | The Kaiord App page `packages/workout-spa-editor/index.html`: title, metas, JSON-LD and the `<noscript>` text                                                                                                                                                                                                                                               |
+| `docs.json`            | The docs home and getting-started intros, the converters page's "Three ways to convert" and "What survives a conversion?", the install guide for the extensions (English and Spanish), and `packages/landing/public/llms.txt`                                                                                                                               |
+| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                                                                                                                                         |
+| `landing.json`         | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630)                                                                                                                |
+| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                                                                                                                                                                                                                              |
+| `packages.json`        | The npm metadata a package listing shows: the `description` of `packages/fit/package.json`, which states the package's own license and Garmin's (#937)                                                                                                                                                                                                      |
+| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                                                                                                                                                                                                                     |
+| `readme.json`          | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai) with the per-format features section of fit, tcx, zwo and garmin (#1654) and the License section of fit (#937), of the five extensions, of the App and of the landing (#1630) |
+| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                                                                                                                                         |
+| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                                                                                                                                       |
+| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628)                                                                                                                                                                                                  |
 
-The landing headline "Every line — … written by AI agents." is proven by the
-method note: the landing's entries for that sentence, `landing.en.ai.headline`
-and `landing.es.ai.headline`, point to the note and to
-`scripts/check-method-figures.test.mjs`. The note's figures are rerun by
-`pnpm lint:method-figures`.
+The landing headline "Every line — … written by AI agents." rests on the
+owner's statement of 2026-11-23, quoted in the method note's section "The
+owner's statement": its entries, `method.headline`, `landing.en.ai.headline`
+and `landing.es.ai.headline`, cite that author statement and point to the
+section and to `scripts/check-method-figures.test.mjs`, so they count as
+declared, not proven. The note's figures, the `.kiro/` and bot counts beside
+the statement among them, are rerun by `pnpm lint:method-figures`.
 
 Scoped out of `readme.json`, as reference rather than pitch: install
 commands, usage and API sections, configuration and the root README's FIT

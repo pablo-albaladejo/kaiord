@@ -71,13 +71,13 @@ test.describe("AI settings truth", () => {
     ).toHaveCount(0);
 
     // One select picks account and model together; nothing stores a blank model.
-    await main.selectOption({ label: "GPT-5 mini · Mi GPT" });
+    await main.selectOption({ label: "GPT-5 mini (not evaluated) · Mi GPT" });
     await expect(settings.getByTestId("model-chat-follows")).toHaveText(
-      "Runs GPT-5 mini · Mi GPT"
+      "Runs GPT-5 mini (not evaluated) · Mi GPT"
     );
     await settings.getByText(/^Advanced: model per task/).click();
-    await chat.selectOption({ label: "o3 · Mi GPT" });
-    await expect.poll(() => shown(chat)).toBe("o3 · Mi GPT");
+    await chat.selectOption({ label: "o3 (not evaluated) · Mi GPT" });
+    await expect.poll(() => shown(chat)).toBe("o3 (not evaluated) · Mi GPT");
     const bindings = await storedBindings(page);
     expect(bindings.map((b) => [b.purpose, b.modelId]).sort()).toEqual([
       ["chat", "o3"],

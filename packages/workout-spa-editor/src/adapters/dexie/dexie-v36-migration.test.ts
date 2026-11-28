@@ -15,7 +15,7 @@ import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
 
 const SEED_VERSION = 35;
-const SCHEMA_HEAD = 40;
+const SCHEMA_HEAD = 41;
 
 const row = (
   id: string,

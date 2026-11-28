@@ -9,7 +9,7 @@
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { AiRunProgress } from "./ai-run-progress";
-import type { AiFailureState } from "./use-coaching-ai-handler";
+import type { AiFailureState } from "./use-coaching-ai-types";
 
 export type CoachingDialogBodyProps = {
   activity: CoachingActivity;
@@ -22,6 +22,8 @@ export type CoachingDialogBodyProps = {
   manualCreating: boolean;
   onClose: () => void;
   onAiProcess: () => void;
+  /** Rebuild the matched Workout in place (explicit, billed). */
+  onRegenerate: () => void;
   onAiCancel: () => void;
   onEditManually: () => void;
   onOpenPicker: () => void;

@@ -24,7 +24,7 @@ _Avoid_: Today page, daily view, dashboard
 
 **Capability**:
 A part of the Kaiord App beyond the core path from Coaching Activity to Workout on the watch, which stays off and out of sight until the athlete activates it.
-The athlete reads "Capability" in English and "Capacidad" in Spanish; each one is turned on or off in Settings, Capabilities.
+The athlete reads "Feature" in English and "Función" in Spanish, never "Capability" or "Capacidad"; each one is turned on or off in Settings, Features (Ajustes, Funciones). Code identifiers and internal docs keep "Capability".
 _Avoid_: Feature flag, module, plugin, add-on
 
 ### Training
@@ -33,9 +33,19 @@ _Avoid_: Feature flag, module, plugin, add-on
 What a coach prescribes for a given day, as the coach wrote it, before it has any structure.
 _Avoid_: Session, training, plan, raw workout
 
+**Athlete note**:
+What the athlete adds to a Coaching Activity for the assistant to read alongside the coach's text; the coach's text itself is never changed.
+The athlete reads "Your note" ("Tu nota").
+_Avoid_: Prompt, edit, override
+
 **Workout**:
 A training prescription structured into steps with durations and targets, ready to be executed on a device.
 _Avoid_: Session, training, structured workout, plan
+
+**Step note**:
+The coach's cue for one stretch of a Workout, shown on the device when that step starts and on the step in the editor. It is taken from the coach's text, in the coach's language; when the coach wrote nothing for that stretch, the AI may write its own, which the editor labels "AI" until the athlete edits it.
+The athlete reads "Notes & Coaching Cues" ("Notas e indicaciones").
+_Avoid_: Description, comment, step name
 
 **Activity**:
 The record of what the athlete actually did.
@@ -124,3 +134,7 @@ _Avoid_: Skill, plugin, function
 The record the Kaiord App keeps, on the athlete's device, of what a run of the assistant did: what, when, with what result and at what cost.
 The athlete reads "Trace" in English and "Traza" in Spanish.
 _Avoid_: Log, usage event, telemetry, "registro"
+
+**Evaluated model**:
+A model whose stored eval results on the Kaiord App's tasks passed. Any other model is offered, marked "not evaluated" ("no evaluado").
+_Avoid_: Certified, supported, recommended

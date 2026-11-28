@@ -76,7 +76,7 @@ describe("method-pipeline", () => {
     const parsed = commands.map(parsePipeline);
 
     // Assert
-    assert.equal(commands.length, 15);
+    assert.equal(commands.length, 18);
     assert.deepEqual(
       parsed.filter((p) => p.error),
       []

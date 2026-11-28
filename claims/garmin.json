@@ -92,7 +92,7 @@
     },
     {
       "id": "garmin.listing.calendar",
-      "text": "Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added, and never deletes a library workout.",
+      "text": "Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries Kaiord itself placed, never one you added. It never deletes anything from your Garmin Connect workout library: when you change a workout and send it again, Kaiord adds the new version and the earlier one stays in your library.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -117,6 +117,22 @@
         {
           "test": "packages/workout-spa-editor/src/hooks/garmin-safe-writes-ownership.test.ts",
           "title": "should never be moved or deleted when the Workout moves on"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
+        },
+        {
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },
@@ -513,6 +529,28 @@
       ]
     },
     {
+      "id": "garmin.pj.no-library-delete",
+      "text": "**No library delete**: The extension never deletes a workout from your Garmin Connect workout library: no path on its allowlist can, and it refuses `DELETE /workout-service/workout/{workoutId}` before sending anything. When you change a workout in the Kaiord App and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
+        },
+        {
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should send nothing to Garmin for a library delete while signed in"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
+        }
+      ]
+    },
+    {
       "id": "garmin.pj.calendar-read",
       "text": "**Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension hands that answer to the Kaiord App unread, and the Kaiord App keeps only the entries of that one workout, each entry's id and date. Every other calendar item is dropped in the Kaiord App, in your browser, and is never stored or sent.",
       "proof": [
@@ -531,34 +569,6 @@
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/placement-verify-placed.test.ts",
           "title": "should read the Placed again before every unschedule"
-        }
-      ]
-    },
-    {
-      "id": "garmin.pj.connect",
-      "text": "`https://connect.garmin.com/*`",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"https://connect.garmin.com/*\""
-        }
-      ]
-    },
-    {
-      "id": "garmin.pj.connect-why",
-      "text": "**Why**: The Garmin Connect site, where you sign in. No request the extension makes is addressed to this host; the popup and the `open-garmin` action only open it in a new tab.",
-      "proof": [
-        {
-          "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
-        },
-        {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles open-garmin action"
-        },
-        {
-          "file": "packages/garmin-bridge/popup.js",
-          "contains": "const OPEN_GARMIN_URL = \"https://connect.garmin.com/modern/\";"
         }
       ]
     },
@@ -840,7 +850,7 @@
     },
     {
       "id": "garmin.pp.workouts",
-      "text": "**Workouts and Activities**: The extension uploads the workouts you send from the Kaiord App to your Garmin Connect workout library, lists up to 20 of your library workouts, and reads your 20 most recent activities, which it passes to the Kaiord App as Garmin returns them.",
+      "text": "**Workouts and Activities**: The extension uploads the workouts you send from the Kaiord App to your Garmin Connect workout library, lists up to 20 of your library workouts, and reads your 20 most recent activities, which it passes to the Kaiord App as Garmin returns them, without the personal fields below.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/thin-bridge.test.js",
@@ -865,6 +875,10 @@
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
           "title": "should return the raw feed on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
         }
       ]
     },
@@ -894,7 +908,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -946,7 +960,7 @@
     },
     {
       "id": "garmin.pp.calendar-placement",
-      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries that Kaiord's record holds as placed by Kaiord. An entry of that same workout that you added yourself is recognized, so no second one is added on its date, but it is never moved or deleted: when the workout moves on, Kaiord leaves it where it is and tells you once. It never deletes entries of other workouts, and never deletes library workouts.",
+      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries that Kaiord's record holds as placed by Kaiord. An entry of that same workout that you added yourself is recognized, so no second one is added on its date, but it is never moved or deleted: when the workout moves on, Kaiord leaves it where it is and tells you once. It never deletes entries of other workouts.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -995,6 +1009,28 @@
         {
           "test": "packages/workout-spa-editor/src/components/molecules/GarminPushButton/PlacementFeedback.test.tsx",
           "title": "should say, with no fix asked, that an entry Kaiord has no record of creating stays"
+        }
+      ]
+    },
+    {
+      "id": "garmin.pp.library-never-deleted",
+      "text": "**Library Workouts Never Deleted**: The extension never deletes a workout from your Garmin Connect workout library. When you change a workout and send it again, Kaiord creates a new library workout for it, and the earlier version stays in your library.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
+        },
+        {
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },
@@ -1152,7 +1188,7 @@
     },
     {
       "id": "garmin.es.listing.calendar",
-      "text": "Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú, y nunca borra un entrenamiento de la biblioteca.",
+      "text": "Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú. Nunca borra nada de tu biblioteca de entrenamientos de Garmin Connect: cuando cambias un entrenamiento y lo envías de nuevo, Kaiord añade la versión nueva y la anterior se queda en tu biblioteca.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -1177,6 +1213,22 @@
         {
           "test": "packages/workout-spa-editor/src/hooks/garmin-safe-writes-ownership.test.ts",
           "title": "should never be moved or deleted when the Workout moves on"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-placement-deps.test.ts",
+          "title": "should hand the placement pipeline no library port while the switch is off"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should leave the earlier version in the library as production wires the App"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-library-kept.test.ts",
+          "title": "should delete nothing through today's extension even with a library port"
+        },
+        {
+          "test": "packages/garmin-bridge/test/library-delete.test.js",
+          "title": "should refuse a library delete by a canonical id without minting or sending anything"
         }
       ]
     },
@@ -1377,7 +1429,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -1395,7 +1447,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
@@ -1413,11 +1465,83 @@
         },
         {
           "test": "packages/garmin-bridge/test/answer-secrets.test.js",
-          "title": "should hand Garmin's workout list over byte for byte, ids included"
+          "title": "should hand Garmin's workout list over without its author, ids included"
         },
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
           "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "garmin.pp.personal-fields",
+      "text": "**Personal Fields Removed**: The extension also removes from every answer, by name and without reading it, the personal details no part of the Kaiord App reads: a workout's author (your name and profile pictures) and the people it is shared with, an activity's owner names and pictures and the places it started and ended, and any field named as a first, last or full name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.pj.personal-fields",
+      "text": "**Personal details removed from answers**: The extension also removes from every answer, by name, the personal details no part of the Kaiord App reads: a workout's author and the people it is shared with, an activity's owner names and pictures and the places it started and ended, and any field named as a first, last or full name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.listing.personal-fields",
+      "text": "It also removes the personal details the Kaiord App does not read: a workout's author (your name and profile pictures), an activity's owner names and pictures and the places it started and ended, and any field named as your name, birth date, gender, email, phone or address.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
+        }
+      ]
+    },
+    {
+      "id": "garmin.listing.es.personal-fields",
+      "text": "También quita los datos personales que Kaiord App no lee: el autor de un entrenamiento (tu nombre y tus fotos de perfil), los nombres y fotos del propietario de una actividad y los lugares donde empezó y terminó, y cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should remove an activity's owner names, pictures and places, keeping what the Connector reads"
+        },
+        {
+          "test": "packages/garmin-bridge/test/answer-secrets.test.js",
+          "title": "should hand Garmin's workout list over without its author, ids included"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-personal-fields.test.ts",
+          "title": "should read the same activity once its owner and places are removed"
         }
       ]
     }
